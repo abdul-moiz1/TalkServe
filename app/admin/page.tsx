@@ -554,10 +554,6 @@ export default function AdminPage() {
                               <FiUsers className="w-4 h-4" />
                               {owner.customersCount || 0}
                             </span>
-                            <span className="flex items-center gap-1">
-                              <FiMessageCircle className="w-4 h-4" />
-                              {owner.totalMessages || 0}
-                            </span>
                           </div>
 
                           {editingId === owner.id ? (
