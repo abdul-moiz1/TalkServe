@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const phone = searchParams.get("phone");
     const date = searchParams.get("date");
+    const startAfter = searchParams.get("startAfter");
 
     if (!phone) {
       return NextResponse.json(
@@ -22,6 +23,10 @@ export async function GET(request: NextRequest) {
     
     if (date) {
       url.searchParams.set("date", date);
+    }
+    
+    if (startAfter) {
+      url.searchParams.set("startAfter", startAfter);
     }
 
     console.log("Fetching SMS conversations from:", url.toString());

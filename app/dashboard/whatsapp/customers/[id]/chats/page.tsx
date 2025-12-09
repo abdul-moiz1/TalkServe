@@ -205,7 +205,7 @@ export default function CustomerChatsPage() {
             </div>
           </div>
 
-          <div className="flex gap-3 sm:gap-4">
+          <div className="flex gap-3 sm:gap-4 flex-wrap">
             <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 text-center min-w-[80px]">
               <div className="text-2xl font-bold">{chatSessions.length}</div>
               <div className="text-xs text-blue-200">Sessions</div>
@@ -214,6 +214,13 @@ export default function CustomerChatsPage() {
               <div className="text-2xl font-bold">{totalMessages}</div>
               <div className="text-xs text-blue-200">Messages</div>
             </div>
+            <Link
+              href={`/dashboard/conversation/${customer?.waId}`}
+              className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-3 hover:bg-white/30 transition-colors flex items-center gap-2 text-sm font-medium"
+            >
+              <FiMessageCircle className="w-4 h-4" />
+              <span>View All</span>
+            </Link>
           </div>
         </div>
       </div>
