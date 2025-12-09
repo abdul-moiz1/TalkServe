@@ -87,6 +87,24 @@ export default function ConversationDetailPage() {
       
       setSummary(data);
       setShowSummary(true);
+      
+      try {
+        await fetch('/api/save-summary', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customer: phone,
+            date: date,
+            summary: data.summary,
+            sentiment: data.sentiment,
+            customerMood: data.customerMood,
+            keyTopics: data.keyTopics,
+            rating: data.rating
+          })
+        });
+      } catch (saveErr) {
+        console.error('Error saving summary to database:', saveErr);
+      }
     } catch (err) {
       console.error('Error summarizing:', err);
       setSummaryError(err instanceof Error ? err.message : 'Failed to summarize conversation');

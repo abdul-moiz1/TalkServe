@@ -1,33 +1,21 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { FiMessageSquare, FiTrendingUp, FiClock, FiCalendar, FiArrowUp, FiArrowDown } from 'react-icons/fi';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { FiMessageSquare, FiTrendingUp, FiClock, FiCalendar, FiArrowUp, FiArrowDown, FiRefreshCw } from 'react-icons/fi';
 
 type TimePeriod = 'day' | 'week' | 'month';
 
-const dummyData = {
-  day: {
-    totalChats: 127,
-    change: 12.5,
-    peakHour: '2:00 PM - 3:00 PM',
-    peakDay: 'Today',
-    hourlyData: [4, 8, 12, 18, 25, 32, 45, 52, 48, 42, 38, 35, 48, 56, 62, 58, 45, 38, 28, 22, 18, 12, 8, 5],
-  },
-  week: {
-    totalChats: 842,
-    change: 8.3,
-    peakHour: '2:00 PM - 4:00 PM',
-    peakDay: 'Wednesday',
-    dailyData: [98, 112, 145, 156, 132, 108, 91],
-  },
-  month: {
-    totalChats: 3456,
-    change: 15.7,
-    peakHour: '1:00 PM - 3:00 PM',
-    peakDay: 'Wednesday',
-    weeklyData: [756, 823, 892, 985],
-  },
-};
+interface AnalyticsData {
+  totalChats: number;
+  change: number;
+  peakHour: string;
+  peakDay: string;
+  hourlyData: number[];
+  dailyData: number[];
+  weeklyData: number[];
+  hourlyDistribution: { time: string; count: number; percentage: number }[];
+  weeklyPerformance: number[];
+}
 
 const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const weekLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
@@ -40,8 +28,53 @@ const hourLabels = Array.from({ length: 24 }, (_, i) => {
 export default function DashboardPage() {
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('week');
   const [isChartReady, setIsChartReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const chartRef = useRef<HTMLDivElement>(null);
-  const data = dummyData[timePeriod];
+  
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
+    totalChats: 0,
+    change: 0,
+    peakHour: 'N/A',
+    peakDay: 'N/A',
+    hourlyData: [],
+    dailyData: [],
+    weeklyData: [],
+    hourlyDistribution: [
+      { time: '9 AM - 12 PM', count: 0, percentage: 0 },
+      { time: '12 PM - 3 PM', count: 0, percentage: 0 },
+      { time: '3 PM - 6 PM', count: 0, percentage: 0 },
+      { time: '6 PM - 9 PM', count: 0, percentage: 0 },
+    ],
+    weeklyPerformance: [0, 0, 0, 0, 0, 0, 0]
+  });
+
+  const fetchAnalytics = useCallback(async (showRefresh = false) => {
+    if (showRefresh) setIsRefreshing(true);
+    try {
+      const response = await fetch(`/api/dashboard-analytics?period=${timePeriod}`);
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        setAnalyticsData(result.data);
+        setError(null);
+      } else {
+        setError(result.error || 'Failed to load analytics');
+      }
+    } catch (err) {
+      console.error('Error fetching analytics:', err);
+      setError('Failed to load analytics');
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [timePeriod]);
+
+  useEffect(() => {
+    setIsLoading(true);
+    fetchAnalytics();
+  }, [fetchAnalytics]);
 
   useEffect(() => {
     setIsChartReady(false);
@@ -49,21 +82,32 @@ export default function DashboardPage() {
       setIsChartReady(true);
     }, 100);
     return () => clearTimeout(timer);
-  }, [timePeriod]);
+  }, [timePeriod, analyticsData]);
 
   const getChartData = () => {
     switch (timePeriod) {
       case 'day':
-        return { data: dummyData.day.hourlyData, labels: hourLabels };
+        return { data: analyticsData.hourlyData.length > 0 ? analyticsData.hourlyData : Array(24).fill(0), labels: hourLabels };
       case 'week':
-        return { data: dummyData.week.dailyData, labels: dayLabels };
+        return { data: analyticsData.dailyData.length > 0 ? analyticsData.dailyData : Array(7).fill(0), labels: dayLabels };
       case 'month':
-        return { data: dummyData.month.weeklyData, labels: weekLabels };
+        return { data: analyticsData.weeklyData.length > 0 ? analyticsData.weeklyData : Array(4).fill(0), labels: weekLabels };
     }
   };
 
   const chartInfo = getChartData();
-  const maxValue = Math.max(...chartInfo.data);
+  const maxValue = Math.max(...chartInfo.data, 1);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading analytics...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -77,22 +121,39 @@ export default function DashboardPage() {
           </p>
         </div>
         
-        <div className="flex bg-white dark:bg-slate-800 rounded-lg p-1 shadow-sm">
-          {(['day', 'week', 'month'] as TimePeriod[]).map((period) => (
-            <button
-              key={period}
-              onClick={() => setTimePeriod(period)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                timePeriod === period
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              {period.charAt(0).toUpperCase() + period.slice(1)}
-            </button>
-          ))}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => fetchAnalytics(true)}
+            disabled={isRefreshing}
+            className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+            title="Refresh data"
+          >
+            <FiRefreshCw className={`w-5 h-5 text-gray-600 dark:text-gray-400 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </button>
+          
+          <div className="flex bg-white dark:bg-slate-800 rounded-lg p-1 shadow-sm">
+            {(['day', 'week', 'month'] as TimePeriod[]).map((period) => (
+              <button
+                key={period}
+                onClick={() => setTimePeriod(period)}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  timePeriod === period
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                {period.charAt(0).toUpperCase() + period.slice(1)}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
+
+      {error && (
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4">
+          <p className="text-yellow-700 dark:text-yellow-400 text-sm">{error}</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg">
@@ -101,14 +162,14 @@ export default function DashboardPage() {
               <FiMessageSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
             <span className={`flex items-center gap-1 text-sm font-medium ${
-              data.change >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+              analyticsData.change >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
             }`}>
-              {data.change >= 0 ? <FiArrowUp className="w-4 h-4" /> : <FiArrowDown className="w-4 h-4" />}
-              {Math.abs(data.change)}%
+              {analyticsData.change >= 0 ? <FiArrowUp className="w-4 h-4" /> : <FiArrowDown className="w-4 h-4" />}
+              {Math.abs(analyticsData.change)}%
             </span>
           </div>
           <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-4">
-            {data.totalChats.toLocaleString()}
+            {analyticsData.totalChats.toLocaleString()}
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
             Total Chats ({timePeriod === 'day' ? 'Today' : timePeriod === 'week' ? 'This Week' : 'This Month'})
@@ -122,7 +183,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-4">
-            {data.peakHour}
+            {analyticsData.peakHour}
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
             Peak Hours for Messaging
@@ -136,7 +197,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-4">
-            {data.peakDay}
+            {analyticsData.peakDay}
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
             Peak Day of the Week
@@ -150,7 +211,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-4">
-            +{data.change}%
+            {analyticsData.change >= 0 ? '+' : ''}{analyticsData.change}%
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
             Growth Trend ({timePeriod === 'day' ? 'vs Yesterday' : timePeriod === 'week' ? 'Week-over-Week' : 'Month-over-Month'})
@@ -207,12 +268,7 @@ export default function DashboardPage() {
             Hourly Distribution
           </h2>
           <div className="space-y-3">
-            {[
-              { time: '9 AM - 12 PM', percentage: 25, label: 'Morning' },
-              { time: '12 PM - 3 PM', percentage: 35, label: 'Afternoon Peak' },
-              { time: '3 PM - 6 PM', percentage: 28, label: 'Late Afternoon' },
-              { time: '6 PM - 9 PM', percentage: 12, label: 'Evening' },
-            ].map((item, index) => (
+            {analyticsData.hourlyDistribution.map((item, index) => (
               <div key={index}>
                 <div className="flex justify-between text-sm mb-1">
                   <span className="text-gray-600 dark:text-gray-400">{item.time}</span>
@@ -235,20 +291,21 @@ export default function DashboardPage() {
           </h2>
           <div className="space-y-3">
             {dayLabels.map((day, index) => {
-              const values = [78, 85, 92, 88, 82, 65, 58];
+              const value = analyticsData.weeklyPerformance[index] || 0;
+              const isHighest = value === Math.max(...analyticsData.weeklyPerformance);
               return (
                 <div key={day} className="flex items-center gap-3">
                   <span className="w-12 text-sm text-gray-600 dark:text-gray-400">{day}</span>
                   <div className="flex-1 h-2 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
-                        index === 2 ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gradient-to-r from-blue-500 to-blue-600'
+                        isHighest && value > 0 ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gradient-to-r from-blue-500 to-blue-600'
                       }`}
-                      style={{ width: `${values[index]}%` }}
+                      style={{ width: `${value}%` }}
                     />
                   </div>
                   <span className="w-12 text-right text-sm font-medium text-gray-900 dark:text-white">
-                    {values[index]}%
+                    {value}%
                   </span>
                 </div>
               );
