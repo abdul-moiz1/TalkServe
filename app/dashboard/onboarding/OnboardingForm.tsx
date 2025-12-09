@@ -266,7 +266,10 @@ export default function OnboardingForm() {
           }
         </p>
         <button
-          onClick={() => setStatus('idle')}
+          onClick={() => {
+            setIsPreviewOpen(false);
+            setStatus('idle');
+          }}
           className="text-primary font-semibold hover:underline"
         >
           {isEditing ? 'Make more changes' : 'Submit another form'}
