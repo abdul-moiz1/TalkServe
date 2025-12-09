@@ -3,7 +3,7 @@ import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { ReactNode } from "react";
 import "./globals.css";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import ConditionalFooter from "@/components/ConditionalFooter";
 import CookieConsent from "@/components/CookieConsent";
 import { DarkModeProvider } from "@/components/DarkModeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -48,7 +48,7 @@ export default function RootLayout({
               <main className="min-h-screen pt-16">
                 {children}
               </main>
-              <Footer />
+              <ConditionalFooter />
               <CookieConsent />
               <VoiceflowWidget />
             </VoiceAgentProvider>

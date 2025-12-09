@@ -77,6 +77,23 @@ export default function DashboardSidebar({ onSignOut, userEmail, userName, isCol
         />
       )}
 
+      <button
+        onClick={onToggleCollapse}
+        className={`
+          hidden lg:flex fixed top-[100px] w-8 h-8 bg-blue-600 hover:bg-blue-700 
+          border-2 border-white dark:border-slate-700 rounded-full items-center justify-center 
+          shadow-lg transition-all duration-300 z-50
+          ${isCollapsed ? 'left-[64px]' : 'left-[248px]'}
+        `}
+        title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+      >
+        {isCollapsed ? (
+          <FiChevronRight className="w-5 h-5 text-white" />
+        ) : (
+          <FiChevronLeft className="w-5 h-5 text-white" />
+        )}
+      </button>
+
       <aside
         className={`
           fixed top-[60px] left-0 z-40 h-[calc(100vh-60px)]
@@ -89,17 +106,6 @@ export default function DashboardSidebar({ onSignOut, userEmail, userName, isCol
         `}
       >
         <div className="flex flex-col h-full relative min-h-0">
-          <button
-            onClick={onToggleCollapse}
-            className="hidden lg:flex absolute -right-4 top-6 w-8 h-8 bg-blue-600 hover:bg-blue-700 border-2 border-white dark:border-slate-700 rounded-full items-center justify-center shadow-lg transition-colors z-50"
-            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            {isCollapsed ? (
-              <FiChevronRight className="w-5 h-5 text-white" />
-            ) : (
-              <FiChevronLeft className="w-5 h-5 text-white" />
-            )}
-          </button>
 
           <div className={`p-6 border-b border-gray-200 dark:border-slate-700 ${isCollapsed ? 'lg:p-4 lg:text-center' : ''}`}>
             <Link href="/" className="block">
