@@ -83,21 +83,21 @@ export default function DashboardSidebar({ onSignOut, userEmail, userName, isCol
           bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700
           transform transition-all duration-300 ease-in-out
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0 lg:sticky lg:top-[60px] lg:z-auto lg:h-[calc(100vh-60px)]
+          lg:translate-x-0 lg:fixed lg:top-[60px] lg:left-0 lg:z-30
           ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}
-          w-64 overflow-y-auto
+          w-64 overflow-y-auto overflow-x-hidden
         `}
       >
         <div className="flex flex-col h-full relative min-h-0">
           <button
             onClick={onToggleCollapse}
-            className="hidden lg:flex absolute -right-3 top-6 w-6 h-6 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-full items-center justify-center shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors z-10"
+            className="hidden lg:flex absolute -right-4 top-6 w-8 h-8 bg-blue-600 hover:bg-blue-700 border-2 border-white dark:border-slate-700 rounded-full items-center justify-center shadow-lg transition-colors z-50"
             title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {isCollapsed ? (
-              <FiChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+              <FiChevronRight className="w-5 h-5 text-white" />
             ) : (
-              <FiChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+              <FiChevronLeft className="w-5 h-5 text-white" />
             )}
           </button>
 

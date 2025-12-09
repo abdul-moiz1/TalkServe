@@ -58,21 +58,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <div className="flex">
-        <DashboardSidebar
-          onSignOut={handleSignOut}
-          userEmail={user.email}
-          userName={user.displayName}
-          isCollapsed={isSidebarCollapsed}
-          onToggleCollapse={handleToggleCollapse}
-        />
-        <main className="flex-1 min-h-screen w-full overflow-x-hidden">
-          <div className="p-4 sm:p-6 lg:p-8 pt-16 lg:pt-8">
-            {children}
-          </div>
-        </main>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 overflow-x-hidden">
+      <DashboardSidebar
+        onSignOut={handleSignOut}
+        userEmail={user.email}
+        userName={user.displayName}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={handleToggleCollapse}
+      />
+      <main 
+        className={`
+          min-h-screen overflow-x-hidden transition-all duration-300
+          ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}
+        `}
+      >
+        <div className="p-4 sm:p-6 lg:p-8 pt-16 lg:pt-8">
+          {children}
+        </div>
+      </main>
     </div>
   );
 }
