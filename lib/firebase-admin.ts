@@ -1,17 +1,20 @@
 import { initializeApp, getApps, cert, App } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
 import { getAuth, Auth } from 'firebase-admin/auth';
+import { getStorage, Storage } from 'firebase-admin/storage';
 
 let adminApp: App | null = null;
 let db: Firestore | null = null;
 let auth: Auth | null = null;
+let storage: Storage | null = null;
 
 function initializeFirebaseAdmin() {
   if (getApps().length > 0) {
     adminApp = getApps()[0];
     db = getFirestore(adminApp);
     auth = getAuth(adminApp);
-    return { adminApp, db, auth };
+    storage = getStorage(adminApp);
+    return { adminApp, db, auth, storage };
   }
 
   const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
@@ -20,8 +23,10 @@ function initializeFirebaseAdmin() {
 
   if (!projectId || !clientEmail || !privateKey) {
     console.warn('Firebase Admin SDK not configured - missing credentials');
-    return { adminApp: null, db: null, auth: null };
+    return { adminApp: null, db: null, auth: null, storage: null };
   }
+
+  const storageBucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
 
   try {
     adminApp = initializeApp({
@@ -30,15 +35,17 @@ function initializeFirebaseAdmin() {
         clientEmail,
         privateKey,
       }),
+      storageBucket,
     });
     db = getFirestore(adminApp);
     auth = getAuth(adminApp);
+    storage = getStorage(adminApp);
     console.log('Firebase Admin SDK initialized successfully');
   } catch (error) {
     console.error('Firebase Admin initialization error:', error);
   }
 
-  return { adminApp, db, auth };
+  return { adminApp, db, auth, storage };
 }
 
 export function getAdminDb(): Firestore | null {
@@ -55,6 +62,14 @@ export function getAdminAuth(): Auth | null {
     auth = result.auth;
   }
   return auth;
+}
+
+export function getAdminStorage(): Storage | null {
+  if (!storage) {
+    const result = initializeFirebaseAdmin();
+    storage = result.storage;
+  }
+  return storage;
 }
 
 export async function verifyAuthToken(authHeader: string | null): Promise<string | null> {

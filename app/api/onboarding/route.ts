@@ -1,7 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminDb, verifyAuthToken } from "@/lib/firebase-admin";
+import { getAdminDb, verifyAuthToken, getAdminStorage } from "@/lib/firebase-admin";
 
 const FIREBASE_FUNCTION_URL = "https://onboarding-ieskeqprjq-uc.a.run.app";
+
+async function uploadFileToStorage(file: File, userId: string): Promise<{ url: string; fileName: string } | null> {
+  try {
+    const storage = getAdminStorage();
+    if (!storage) {
+      console.error("Storage not available");
+      return null;
+    }
+
+    const bucket = storage.bucket();
+    const fileName = `business-context/${userId}/${Date.now()}_${file.name}`;
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+
+    const fileRef = bucket.file(fileName);
+    await fileRef.save(fileBuffer, {
+      metadata: {
+        contentType: file.type,
+      },
+    });
+
+    await fileRef.makePublic();
+    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+
+    console.log("File uploaded successfully:", publicUrl);
+    return { url: publicUrl, fileName: file.name };
+  } catch (error) {
+    console.error("Error uploading file to storage:", error);
+    return null;
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,8 +66,6 @@ export async function GET(request: NextRequest) {
 
     const doc = snapshot.docs[0];
     const data = doc.data();
-
-    console.log("Fetched onboarding data:", JSON.stringify(data, null, 2));
 
     return NextResponse.json({
       success: true,
@@ -106,48 +134,40 @@ export async function PUT(request: NextRequest) {
         { status: 403 }
       );
     }
-    
-    const headers: HeadersInit = {};
-    if (authHeader) {
-      headers["Authorization"] = authHeader;
-    }
 
-    formData.append("_method", "PUT");
+    let businessContextUrl = docData?.businessContextUrl || null;
+    let businessContextFileName = docData?.businessContextFileName || null;
 
-    const response = await fetch(FIREBASE_FUNCTION_URL, {
-      method: "POST",
-      headers,
-      body: formData,
-    });
-
-    if (!response.ok) {
-      let errorData;
-      const contentType = response.headers.get("content-type");
-
-      if (contentType && contentType.includes("application/json")) {
-        errorData = await response.json();
-      } else {
-        const errorText = await response.text();
-        errorData = { error: errorText };
+    const file = formData.get("businessContext") as File | null;
+    if (file && file.size > 0) {
+      const uploadResult = await uploadFileToStorage(file, authenticatedUserId);
+      if (uploadResult) {
+        businessContextUrl = uploadResult.url;
+        businessContextFileName = uploadResult.fileName;
       }
-
-      console.error("Firebase function error:", errorData);
-
-      return NextResponse.json(
-        {
-          success: false,
-          ...errorData,
-        },
-        { status: response.status }
-      );
     }
 
-    const result = await response.json();
+    const updateData = {
+      ownerName: formData.get("ownerName") as string,
+      ownerEmail: formData.get("ownerEmail") as string,
+      businessName: formData.get("businessName") as string,
+      businessDescription: formData.get("businessDescription") as string,
+      services: formData.get("services") as string,
+      industryType: formData.get("industryType") as string,
+      type: formData.get("type") as string,
+      businessContextUrl,
+      businessContextFileName,
+      updatedAt: new Date(),
+    };
+
+    await docRef.update(updateData);
+
+    console.log("Onboarding updated successfully for document:", documentId);
 
     return NextResponse.json({
       success: true,
       message: "Onboarding updated successfully",
-      data: result,
+      data: { id: documentId, ...updateData },
     });
   } catch (error) {
     console.error("Error updating onboarding:", error);
@@ -163,6 +183,16 @@ export async function PUT(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const authHeader = request.headers.get("Authorization");
+    const authenticatedUserId = await verifyAuthToken(authHeader);
+
+    if (!authenticatedUserId) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const formData = await request.formData();
 
     console.log("Onboarding submission received:", {
@@ -177,47 +207,50 @@ export async function POST(request: NextRequest) {
         : "No file uploaded",
     });
 
-    const authHeader = request.headers.get("Authorization");
-    
-    const headers: HeadersInit = {};
-    if (authHeader) {
-      headers["Authorization"] = authHeader;
-    }
-
-    const response = await fetch(FIREBASE_FUNCTION_URL, {
-      method: "POST",
-      headers,
-      body: formData,
-    });
-
-    if (!response.ok) {
-      let errorData;
-      const contentType = response.headers.get("content-type");
-
-      if (contentType && contentType.includes("application/json")) {
-        errorData = await response.json();
-      } else {
-        const errorText = await response.text();
-        errorData = { error: errorText };
-      }
-
-      console.error("Firebase function error:", errorData);
-
+    const db = getAdminDb();
+    if (!db) {
       return NextResponse.json(
-        {
-          success: false,
-          ...errorData,
-        },
-        { status: response.status },
+        { success: false, error: "Database not available" },
+        { status: 500 }
       );
     }
 
-    const result = await response.json();
+    let businessContextUrl: string | null = null;
+    let businessContextFileName: string | null = null;
+
+    const file = formData.get("businessContext") as File | null;
+    if (file && file.size > 0) {
+      const uploadResult = await uploadFileToStorage(file, authenticatedUserId);
+      if (uploadResult) {
+        businessContextUrl = uploadResult.url;
+        businessContextFileName = uploadResult.fileName;
+      }
+    }
+
+    const onboardingData = {
+      user_id: authenticatedUserId,
+      uuid: authenticatedUserId,
+      ownerName: formData.get("ownerName") as string,
+      ownerEmail: formData.get("ownerEmail") as string,
+      businessName: formData.get("businessName") as string,
+      businessDescription: formData.get("businessDescription") as string,
+      services: formData.get("services") as string,
+      industryType: formData.get("industryType") as string,
+      type: formData.get("type") as string,
+      businessContextUrl,
+      businessContextFileName,
+      status: "pending",
+      submittedAt: new Date(),
+    };
+
+    const docRef = await db.collection("onboarding").add(onboardingData);
+
+    console.log("Onboarding saved with ID:", docRef.id);
 
     return NextResponse.json({
       success: true,
       message: "Onboarding submission received successfully",
-      data: result,
+      data: { id: docRef.id, ...onboardingData },
     });
   } catch (error) {
     console.error("Error processing onboarding:", error);
