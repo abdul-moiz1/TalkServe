@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { HiCheckCircle, HiUpload } from 'react-icons/hi';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -9,6 +9,19 @@ const CHANNEL_OPTIONS = [
   { value: 'SMS agent', label: 'SMS agent' },
   { value: 'Voice agent', label: 'Voice agent' },
 ];
+
+interface OnboardingData {
+  id: string;
+  ownerName?: string;
+  ownerEmail?: string;
+  businessName?: string;
+  businessDescription?: string;
+  services?: string;
+  industryType?: string;
+  type?: string;
+  businessContextFileName?: string;
+  businessContextUrl?: string;
+}
 
 export default function OnboardingForm() {
   const { user } = useAuth();
@@ -23,6 +36,56 @@ export default function OnboardingForm() {
   const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [isEditing, setIsEditing] = useState(false);
+  const [existingDocId, setExistingDocId] = useState<string | null>(null);
+  const [existingFileName, setExistingFileName] = useState<string | null>(null);
+  const [isFetching, setIsFetching] = useState(true);
+
+  useEffect(() => {
+    async function fetchExistingData() {
+      if (!user?.uid) {
+        setIsFetching(false);
+        return;
+      }
+
+      try {
+        const idToken = await user.getIdToken();
+        const response = await fetch('/api/onboarding', {
+          headers: {
+            'Authorization': `Bearer ${idToken}`,
+          },
+        });
+        const result = await response.json();
+
+        if (result.success && result.exists && result.data) {
+          const data: OnboardingData = result.data;
+          setFormData({
+            ownerName: data.ownerName || '',
+            ownerEmail: data.ownerEmail || '',
+            businessName: data.businessName || '',
+            businessDescription: data.businessDescription || '',
+            services: data.services || '',
+            industryType: data.industryType || '',
+          });
+
+          if (data.type) {
+            const channels = data.type.split(', ').filter(c => c.trim());
+            setSelectedChannels(channels);
+          }
+
+          setExistingDocId(data.id);
+          setExistingFileName(data.businessContextFileName || null);
+          setIsEditing(true);
+        }
+      } catch (error) {
+        console.error('Error fetching existing onboarding data:', error);
+      } finally {
+        setIsFetching(false);
+      }
+    }
+
+    fetchExistingData();
+  }, [user?.uid]);
 
   const handleChannelChange = (channel: string, checked: boolean) => {
     setSelectedChannels(prev => 
@@ -55,9 +118,14 @@ export default function OnboardingForm() {
       }
 
       const idToken = await user?.getIdToken();
+      const method = isEditing ? 'PUT' : 'POST';
+
+      if (isEditing && existingDocId) {
+        formDataToSend.append('documentId', existingDocId);
+      }
 
       const response = await fetch('/api/onboarding', {
-        method: 'POST',
+        method,
         headers: {
           'Authorization': `Bearer ${idToken}`,
         },
@@ -66,16 +134,6 @@ export default function OnboardingForm() {
 
       if (response.ok) {
         setStatus('success');
-        setFormData({
-          ownerName: '',
-          ownerEmail: '',
-          businessName: '',
-          businessDescription: '',
-          services: '',
-          industryType: '',
-        });
-        setSelectedChannels([]);
-        setFile(null);
       } else {
         setStatus('error');
       }
@@ -96,21 +154,35 @@ export default function OnboardingForm() {
     }
   };
 
+  if (isFetching) {
+    return (
+      <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-700">
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <span className="ml-3 text-slate-600 dark:text-slate-300">Loading your information...</span>
+        </div>
+      </div>
+    );
+  }
+
   if (status === 'success') {
     return (
       <div className="bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/30 rounded-2xl p-12 text-center">
         <HiCheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
         <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-          Onboarding submitted successfully!
+          {isEditing ? 'Onboarding updated successfully!' : 'Onboarding submitted successfully!'}
         </h3>
         <p className="text-slate-600 dark:text-slate-300 mb-6">
-          Your WhatsApp integration will be fully activated and ready to use within the next 24 hours – we&apos;ll notify you the moment it goes live. Thank you for your patience!
+          {isEditing 
+            ? 'Your changes have been saved. We\'ll process any updates and notify you if anything changes.'
+            : 'Your WhatsApp integration will be fully activated and ready to use within the next 24 hours – we\'ll notify you the moment it goes live. Thank you for your patience!'
+          }
         </p>
         <button
           onClick={() => setStatus('idle')}
           className="text-primary font-semibold hover:underline"
         >
-          Submit another form
+          {isEditing ? 'Make more changes' : 'Submit another form'}
         </button>
       </div>
     );
@@ -118,6 +190,14 @@ export default function OnboardingForm() {
 
   return (
     <form onSubmit={handleSubmit} className="bg-slate-50 dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-700">
+      {isEditing && (
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/30 rounded-lg">
+          <p className="text-blue-700 dark:text-blue-400">
+            You have an existing onboarding submission. Update your information below.
+          </p>
+        </div>
+      )}
+
       <div className="grid md:grid-cols-2 gap-6 mb-6">
         <div>
           <label htmlFor="ownerName" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -251,6 +331,13 @@ export default function OnboardingForm() {
         <label htmlFor="businessContext" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
           Business Context Document
         </label>
+        {existingFileName && !file && (
+          <div className="mb-2 p-3 bg-slate-100 dark:bg-slate-800 rounded-lg">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              Current file: <span className="font-medium text-slate-900 dark:text-white">{existingFileName}</span>
+            </p>
+          </div>
+        )}
         <div className="mt-2">
           <label
             htmlFor="businessContext"
@@ -263,7 +350,9 @@ export default function OnboardingForm() {
                   <span className="font-medium text-primary">{file.name}</span>
                 ) : (
                   <>
-                    <span className="font-medium text-primary">Click to upload</span>
+                    <span className="font-medium text-primary">
+                      {existingFileName ? 'Click to replace file' : 'Click to upload'}
+                    </span>
                     <span> or drag and drop</span>
                   </>
                 )}
@@ -297,7 +386,10 @@ export default function OnboardingForm() {
         disabled={status === 'loading'}
         className="w-full px-8 py-4 text-lg font-medium text-white bg-primary rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30"
       >
-        {status === 'loading' ? 'Submitting...' : 'Submit Onboarding'}
+        {status === 'loading' 
+          ? (isEditing ? 'Updating...' : 'Submitting...') 
+          : (isEditing ? 'Update Onboarding' : 'Submit Onboarding')
+        }
       </button>
     </form>
   );

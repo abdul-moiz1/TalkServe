@@ -1,14 +1,17 @@
 import { initializeApp, getApps, cert, App } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
+import { getAuth, Auth } from 'firebase-admin/auth';
 
 let adminApp: App | null = null;
 let db: Firestore | null = null;
+let auth: Auth | null = null;
 
 function initializeFirebaseAdmin() {
   if (getApps().length > 0) {
     adminApp = getApps()[0];
     db = getFirestore(adminApp);
-    return { adminApp, db };
+    auth = getAuth(adminApp);
+    return { adminApp, db, auth };
   }
 
   const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
@@ -17,7 +20,7 @@ function initializeFirebaseAdmin() {
 
   if (!projectId || !clientEmail || !privateKey) {
     console.warn('Firebase Admin SDK not configured - missing credentials');
-    return { adminApp: null, db: null };
+    return { adminApp: null, db: null, auth: null };
   }
 
   try {
@@ -29,12 +32,13 @@ function initializeFirebaseAdmin() {
       }),
     });
     db = getFirestore(adminApp);
+    auth = getAuth(adminApp);
     console.log('Firebase Admin SDK initialized successfully');
   } catch (error) {
     console.error('Firebase Admin initialization error:', error);
   }
 
-  return { adminApp, db };
+  return { adminApp, db, auth };
 }
 
 export function getAdminDb(): Firestore | null {
@@ -43,6 +47,38 @@ export function getAdminDb(): Firestore | null {
     db = result.db;
   }
   return db;
+}
+
+export function getAdminAuth(): Auth | null {
+  if (!auth) {
+    const result = initializeFirebaseAdmin();
+    auth = result.auth;
+  }
+  return auth;
+}
+
+export async function verifyAuthToken(authHeader: string | null): Promise<string | null> {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null;
+  }
+
+  const token = authHeader.split('Bearer ')[1];
+  if (!token) {
+    return null;
+  }
+
+  const adminAuth = getAdminAuth();
+  if (!adminAuth) {
+    return null;
+  }
+
+  try {
+    const decodedToken = await adminAuth.verifyIdToken(token);
+    return decodedToken.uid;
+  } catch (error) {
+    console.error('Error verifying auth token:', error);
+    return null;
+  }
 }
 
 export { adminApp };
