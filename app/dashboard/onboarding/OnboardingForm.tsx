@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { HiCheckCircle, HiUpload } from 'react-icons/hi';
+import { HiCheckCircle, HiUpload, HiX, HiDownload, HiEye } from 'react-icons/hi';
 import { useAuth } from '@/contexts/AuthContext';
 
 const CHANNEL_OPTIONS = [
@@ -23,6 +23,130 @@ interface OnboardingData {
   businessContextUrl?: string;
 }
 
+interface FilePreviewModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  fileName: string;
+  fileUrl: string;
+}
+
+function FilePreviewModal({ isOpen, onClose, fileName, fileUrl }: FilePreviewModalProps) {
+  const [previewContent, setPreviewContent] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fileExtension = fileName.split('.').pop()?.toLowerCase();
+  const isTextFile = fileExtension === 'txt';
+  const isPdfFile = fileExtension === 'pdf';
+  const isDocFile = fileExtension === 'doc' || fileExtension === 'docx';
+
+  useEffect(() => {
+    if (isOpen && isTextFile && fileUrl) {
+      setIsLoading(true);
+      setError(null);
+      fetch(fileUrl)
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to load file');
+          return res.text();
+        })
+        .then(text => {
+          setPreviewContent(text);
+          setIsLoading(false);
+        })
+        .catch(err => {
+          setError('Unable to load file preview');
+          setIsLoading(false);
+        });
+    }
+  }, [isOpen, isTextFile, fileUrl]);
+
+  const handleDownload = () => {
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = fileName;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-3xl w-full mx-4 max-h-[80vh] flex flex-col">
+        <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-3">
+            <HiEye className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{fileName}</h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+          >
+            <HiX className="h-5 w-5 text-slate-500" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-auto p-4">
+          {isLoading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <span className="ml-3 text-slate-600 dark:text-slate-300">Loading preview...</span>
+            </div>
+          )}
+
+          {error && (
+            <div className="text-center py-12">
+              <p className="text-slate-500 dark:text-slate-400">{error}</p>
+            </div>
+          )}
+
+          {isTextFile && previewContent && !isLoading && (
+            <pre className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 p-4 rounded-lg overflow-auto max-h-96">
+              {previewContent}
+            </pre>
+          )}
+
+          {isPdfFile && (
+            <div className="text-center py-8">
+              <iframe
+                src={fileUrl}
+                className="w-full h-96 rounded-lg border border-slate-200 dark:border-slate-700"
+                title="PDF Preview"
+              />
+            </div>
+          )}
+
+          {isDocFile && (
+            <div className="text-center py-12">
+              <p className="text-slate-500 dark:text-slate-400 mb-4">
+                Word documents cannot be previewed directly. Please download the file to view it.
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="p-4 border-t border-slate-200 dark:border-slate-700 flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+          >
+            Close
+          </button>
+          <button
+            onClick={handleDownload}
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          >
+            <HiDownload className="h-4 w-4" />
+            Download
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function OnboardingForm() {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
@@ -39,7 +163,9 @@ export default function OnboardingForm() {
   const [isEditing, setIsEditing] = useState(false);
   const [existingDocId, setExistingDocId] = useState<string | null>(null);
   const [existingFileName, setExistingFileName] = useState<string | null>(null);
+  const [existingFileUrl, setExistingFileUrl] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(true);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   useEffect(() => {
     async function fetchExistingData() {
@@ -75,6 +201,7 @@ export default function OnboardingForm() {
 
           setExistingDocId(data.id);
           setExistingFileName(data.businessContextFileName || null);
+          setExistingFileUrl(data.businessContextUrl || null);
           setIsEditing(true);
         }
       } catch (error) {
@@ -332,9 +459,17 @@ export default function OnboardingForm() {
           Business Context Document
         </label>
         {existingFileName && !file && (
-          <div className="mb-2 p-3 bg-slate-100 dark:bg-slate-800 rounded-lg">
+          <div className="mb-2 p-3 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-between">
             <p className="text-sm text-slate-600 dark:text-slate-400">
-              Current file: <span className="font-medium text-slate-900 dark:text-white">{existingFileName}</span>
+              Current file:{' '}
+              <button
+                type="button"
+                onClick={() => setIsPreviewOpen(true)}
+                className="font-medium text-primary hover:text-blue-700 hover:underline transition-colors inline-flex items-center gap-1"
+              >
+                {existingFileName}
+                <HiEye className="h-4 w-4" />
+              </button>
             </p>
           </div>
         )}
@@ -391,6 +526,15 @@ export default function OnboardingForm() {
           : (isEditing ? 'Update Onboarding' : 'Submit Onboarding')
         }
       </button>
+
+      {existingFileName && existingFileUrl && (
+        <FilePreviewModal
+          isOpen={isPreviewOpen}
+          onClose={() => setIsPreviewOpen(false)}
+          fileName={existingFileName}
+          fileUrl={existingFileUrl}
+        />
+      )}
     </form>
   );
 }
