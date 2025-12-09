@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FiUsers, 
   FiPhone, 
@@ -10,7 +11,6 @@ import {
   FiCalendar,
   FiTrendingUp,
   FiSearch,
-  FiFilter,
   FiEdit2,
   FiCheck,
   FiX,
@@ -18,7 +18,11 @@ import {
   FiAlertCircle,
   FiLogOut,
   FiBriefcase,
-  FiMail
+  FiMail,
+  FiChevronRight,
+  FiHash,
+  FiGlobe,
+  FiClock
 } from 'react-icons/fi';
 
 interface Owner {
@@ -36,6 +40,148 @@ interface Owner {
   uuid: string;
 }
 
+const statColors = {
+  blue: {
+    bg: 'bg-blue-50 dark:bg-blue-900/20',
+    icon: 'text-blue-600 dark:text-blue-400',
+  },
+  emerald: {
+    bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+    icon: 'text-emerald-600 dark:text-emerald-400',
+  },
+  purple: {
+    bg: 'bg-purple-50 dark:bg-purple-900/20',
+    icon: 'text-purple-600 dark:text-purple-400',
+  },
+  orange: {
+    bg: 'bg-orange-50 dark:bg-orange-900/20',
+    icon: 'text-orange-600 dark:text-orange-400',
+  },
+};
+
+function DetailPanel({ owner, onClose, onEdit, formatFullDate, getStatusColor, getStatusDot }: {
+  owner: Owner;
+  onClose: () => void;
+  onEdit: (e: React.MouseEvent, owner: Owner) => void;
+  formatFullDate: (date: string | null) => string;
+  getStatusColor: (status: string) => string;
+  getStatusDot: (status: string) => string;
+}) {
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/50 dark:border-slate-700/50 overflow-hidden">
+      <div className="relative h-32 bg-gradient-to-br from-blue-500 to-indigo-600">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 text-white rounded-xl transition-all backdrop-blur-sm"
+        >
+          <FiX className="w-5 h-5" />
+        </button>
+        <div className="absolute -bottom-10 left-6">
+          <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-3xl shadow-xl border-4 border-white dark:border-slate-800">
+            {owner.ownerName.charAt(0).toUpperCase()}
+          </div>
+        </div>
+      </div>
+      
+      <div className="pt-14 px-6 pb-6">
+        <div className="flex items-start justify-between mb-1">
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white">{owner.ownerName}</h3>
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(owner.status)}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${getStatusDot(owner.status)}`} />
+            {owner.status.charAt(0).toUpperCase() + owner.status.slice(1)}
+          </span>
+        </div>
+        <p className="text-slate-500 dark:text-slate-400 text-sm">{owner.businessName}</p>
+
+        <div className="grid grid-cols-2 gap-3 mt-6">
+          <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 text-center">
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">{owner.customersCount || 0}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Customers</p>
+          </div>
+          <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 text-center">
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">{owner.totalMessages || 0}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Messages</p>
+          </div>
+        </div>
+
+        <div className="mt-6 space-y-4">
+          <h4 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Details</h4>
+          
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 text-sm">
+              <div className="w-9 h-9 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center flex-shrink-0">
+                <FiMail className="w-4 h-4 text-slate-500" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-slate-400">Email</p>
+                <p className="text-slate-900 dark:text-white truncate">{owner.ownerEmail}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 text-sm">
+              <div className="w-9 h-9 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center flex-shrink-0">
+                <FiPhone className="w-4 h-4 text-slate-500" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-slate-400">Assigned Number</p>
+                <p className="text-slate-900 dark:text-white">{owner.assignedNumber || 'Not assigned'}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 text-sm">
+              <div className="w-9 h-9 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center flex-shrink-0">
+                <FiGlobe className="w-4 h-4 text-slate-500" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-slate-400">Industry</p>
+                <p className="text-slate-900 dark:text-white">{owner.industryType || 'Not specified'}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 text-sm">
+              <div className="w-9 h-9 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center flex-shrink-0">
+                <FiBriefcase className="w-4 h-4 text-slate-500" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-slate-400">Business Type</p>
+                <p className="text-slate-900 dark:text-white">{owner.type || 'Not specified'}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 text-sm">
+              <div className="w-9 h-9 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center flex-shrink-0">
+                <FiClock className="w-4 h-4 text-slate-500" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-slate-400">Sign-up Date</p>
+                <p className="text-slate-900 dark:text-white">{formatFullDate(owner.submittedAt)}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 text-sm">
+              <div className="w-9 h-9 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center flex-shrink-0">
+                <FiHash className="w-4 h-4 text-slate-500" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-slate-400">UUID</p>
+                <p className="text-slate-900 dark:text-white font-mono text-xs truncate">{owner.uuid || owner.id}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={(e) => onEdit(e, owner)}
+          className="w-full mt-6 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2"
+        >
+          <FiEdit2 className="w-4 h-4" />
+          Edit Owner Details
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPage() {
   const { user, loading: authLoading, logout } = useAuth();
   const router = useRouter();
@@ -44,6 +190,7 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedOwner, setSelectedOwner] = useState<Owner | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
@@ -91,7 +238,8 @@ export default function AdminPage() {
     }
   };
 
-  const handleEdit = (owner: Owner) => {
+  const handleEdit = (e: React.MouseEvent, owner: Owner) => {
+    e.stopPropagation();
     setEditingId(owner.id);
     setEditForm({
       assignedNumber: owner.assignedNumber || '',
@@ -99,7 +247,8 @@ export default function AdminPage() {
     });
   };
 
-  const handleSave = async (ownerId: string) => {
+  const handleSave = async (e: React.MouseEvent, ownerId: string) => {
+    e.stopPropagation();
     try {
       setUpdateError(null);
       const idToken = await user?.getIdToken();
@@ -124,10 +273,23 @@ export default function AdminPage() {
 
       setEditingId(null);
       fetchOwners();
+      if (selectedOwner?.id === ownerId) {
+        setSelectedOwner({ ...selectedOwner, ...editForm });
+      }
     } catch (err) {
       console.error('Error saving owner:', err);
       setUpdateError('Failed to save changes. Please try again.');
     }
+  };
+
+  const handleCancelEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingId(null);
+  };
+
+  const handleRowClick = (owner: Owner) => {
+    if (editingId) return;
+    setSelectedOwner(owner);
   };
 
   const handleLogout = async () => {
@@ -149,13 +311,26 @@ export default function AdminPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800';
       case 'pending':
-        return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400';
+        return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800';
       case 'inactive':
-        return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400';
+        return 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700';
       default:
-        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+        return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800';
+    }
+  };
+
+  const getStatusDot = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-emerald-500';
+      case 'pending':
+        return 'bg-amber-500';
+      case 'inactive':
+        return 'bg-slate-400';
+      default:
+        return 'bg-blue-500';
     }
   };
 
@@ -169,61 +344,91 @@ export default function AdminPage() {
     });
   };
 
+  const formatFullDate = (dateString: string | null) => {
+    if (!dateString) return 'Not available';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
   const totalCustomers = owners.reduce((sum, o) => sum + (o.customersCount || 0), 0);
   const totalMessages = owners.reduce((sum, o) => sum + (o.totalMessages || 0), 0);
   const activeOwners = owners.filter(o => o.status === 'active').length;
 
+  const stats = [
+    { label: 'Total Owners', value: owners.length, icon: FiBriefcase, color: 'blue' as const },
+    { label: 'Active', value: activeOwners, icon: FiTrendingUp, color: 'emerald' as const },
+    { label: 'Total Customers', value: totalCustomers, icon: FiUsers, color: 'purple' as const },
+    { label: 'Total Messages', value: totalMessages, icon: FiMessageCircle, color: 'orange' as const },
+  ];
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <FiLoader className="w-8 h-8 animate-spin text-blue-600" />
-          <p className="text-gray-600 dark:text-gray-400">Loading admin panel...</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <div className="w-16 h-16 bg-white dark:bg-slate-800 rounded-2xl shadow-lg flex items-center justify-center">
+            <FiLoader className="w-8 h-8 animate-spin text-blue-600" />
+          </div>
+          <p className="text-slate-600 dark:text-slate-400 font-medium">Loading admin panel...</p>
+        </motion.div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 max-w-md w-full text-center shadow-xl">
-          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FiAlertCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white dark:bg-slate-800 rounded-3xl p-8 max-w-md w-full text-center shadow-2xl border border-slate-200 dark:border-slate-700"
+        >
+          <div className="w-20 h-20 bg-red-50 dark:bg-red-900/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <FiAlertCircle className="w-10 h-10 text-red-500" />
           </div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Access Denied</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Access Denied</h2>
+          <p className="text-slate-600 dark:text-slate-400 mb-8">{error}</p>
           <button
             onClick={() => router.push('/dashboard')}
-            className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
+            className="w-full px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-semibold shadow-lg shadow-blue-600/20"
           >
             Go to Dashboard
           </button>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
-      <header className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 sticky top-0 z-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <header className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+            <div className="flex items-center gap-4">
+              <div className="w-11 h-11 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
                 <FiUsers className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">TalkServe Admin</h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Business Owners Management</p>
+                <h1 className="text-xl font-bold text-slate-900 dark:text-white">TalkServe Admin</h1>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Business Owners Management</p>
               </div>
             </div>
             
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600 dark:text-gray-400">{user?.email}</span>
+              <span className="text-sm text-slate-600 dark:text-slate-400 hidden sm:block">{user?.email}</span>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-xl transition-all"
               >
                 <FiLogOut className="w-4 h-4" />
                 <span className="hidden sm:inline">Logout</span>
@@ -234,205 +439,263 @@ export default function AdminPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-700">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                <FiBriefcase className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Owners</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{owners.length}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-700">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center">
-                <FiTrendingUp className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Active</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{activeOwners}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-700">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
-                <FiUsers className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Customers</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalCustomers}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-700">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
-                <FiMessageCircle className="w-6 h-6 text-orange-600 dark:text-orange-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Messages</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalMessages}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
-          <div className="p-4 sm:p-6 border-b border-gray-100 dark:border-slate-700">
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Business Owners
-                <span className="ml-2 text-sm font-normal text-gray-500">({filteredOwners.length})</span>
-              </h2>
-              
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <div className="relative flex-1 sm:flex-initial">
-                  <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search owners..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full sm:w-64 pl-10 pr-4 py-2 rounded-xl border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+        >
+          {stats.map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200/50 dark:border-slate-700/50 hover:shadow-lg transition-shadow duration-300"
+            >
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 ${statColors[stat.color].bg} rounded-xl flex items-center justify-center`}>
+                  <stat.icon className={`w-6 h-6 ${statColors[stat.color].icon}`} />
                 </div>
+                <div>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{stat.label}</p>
+                  <p className="text-2xl font-bold text-slate-900 dark:text-white">{stat.value}</p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <div className="flex gap-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="flex-1 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/50 dark:border-slate-700/50 overflow-hidden"
+          >
+            <div className="p-5 border-b border-slate-100 dark:border-slate-700/50">
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+                  Business Owners
+                  <span className="ml-2 px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded-full text-sm font-normal text-slate-500 dark:text-slate-400">{filteredOwners.length}</span>
+                </h2>
                 
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="all">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="pending">Pending</option>
-                  <option value="inactive">Inactive</option>
-                </select>
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                  <div className="relative flex-1 sm:flex-initial">
+                    <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="Search owners..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full sm:w-64 pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    />
+                  </div>
+                  
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="pending">Pending</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-slate-700/50">
-                <tr>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Owner / Business</th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assigned Number</th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Customers</th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Messages</th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sign-up Date</th>
-                  <th className="px-4 sm:px-6 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
-                {filteredOwners.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                      No business owners found
-                    </td>
-                  </tr>
-                ) : (
-                  filteredOwners.map((owner) => (
-                    <tr key={owner.id} className="hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors">
-                      <td className="px-4 sm:px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white font-semibold">
+            <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
+              {filteredOwners.length === 0 ? (
+                <div className="px-6 py-16 text-center">
+                  <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <FiUsers className="w-8 h-8 text-slate-400" />
+                  </div>
+                  <p className="text-slate-500 dark:text-slate-400 font-medium">No business owners found</p>
+                  <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">Try adjusting your search or filters</p>
+                </div>
+              ) : (
+                filteredOwners.map((owner, index) => (
+                  <motion.div
+                    key={owner.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: index * 0.02 }}
+                    onClick={() => handleRowClick(owner)}
+                    className={`group px-5 py-4 cursor-pointer transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-700/30 ${selectedOwner?.id === owner.id ? 'bg-blue-50/50 dark:bg-blue-900/10 border-l-4 border-l-blue-500' : 'border-l-4 border-l-transparent'}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="relative">
+                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-500/20">
                             {owner.ownerName.charAt(0).toUpperCase()}
                           </div>
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">{owner.ownerName}</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">{owner.businessName}</p>
-                            <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
-                              <FiMail className="w-3 h-3" />
-                              {owner.ownerEmail}
-                            </p>
-                          </div>
+                          <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 ${getStatusDot(owner.status)} rounded-full border-2 border-white dark:border-slate-800`} />
                         </div>
-                      </td>
-                      <td className="px-4 sm:px-6 py-4">
-                        {editingId === owner.id ? (
-                          <input
-                            type="text"
-                            value={editForm.assignedNumber}
-                            onChange={(e) => setEditForm({ ...editForm, assignedNumber: e.target.value })}
-                            placeholder="+1 234 567 8900"
-                            className="w-full px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
-                          />
-                        ) : (
-                          <div className="flex items-center gap-2 text-gray-900 dark:text-white">
-                            <FiPhone className="w-4 h-4 text-gray-400" />
-                            <span>{owner.assignedNumber || 'Not assigned'}</span>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">{owner.ownerName}</p>
+                          <p className="text-sm text-slate-600 dark:text-slate-400 truncate">{owner.businessName}</p>
+                          <p className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1 mt-0.5">
+                            <FiMail className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{owner.ownerEmail}</span>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-6">
+                        <div className="hidden md:flex items-center gap-6">
+                          {editingId === owner.id ? (
+                            <input
+                              type="text"
+                              value={editForm.assignedNumber}
+                              onChange={(e) => setEditForm({ ...editForm, assignedNumber: e.target.value })}
+                              onClick={(e) => e.stopPropagation()}
+                              placeholder="+1 234 567 8900"
+                              className="w-40 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm"
+                            />
+                          ) : (
+                            <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-sm min-w-[120px]">
+                              <FiPhone className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                              <span className="truncate">{owner.assignedNumber || 'Not assigned'}</span>
+                            </div>
+                          )}
+
+                          <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
+                            <span className="flex items-center gap-1">
+                              <FiUsers className="w-4 h-4" />
+                              {owner.customersCount || 0}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <FiMessageCircle className="w-4 h-4" />
+                              {owner.totalMessages || 0}
+                            </span>
                           </div>
-                        )}
-                      </td>
-                      <td className="px-4 sm:px-6 py-4">
-                        <span className="text-gray-900 dark:text-white font-medium">{owner.customersCount || 0}</span>
-                      </td>
-                      <td className="px-4 sm:px-6 py-4">
-                        <span className="text-gray-900 dark:text-white font-medium">{owner.totalMessages || 0}</span>
-                      </td>
-                      <td className="px-4 sm:px-6 py-4">
-                        {editingId === owner.id ? (
-                          <select
-                            value={editForm.status}
-                            onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
-                            className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
-                          >
-                            <option value="pending">Pending</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                          </select>
-                        ) : (
-                          <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(owner.status)}`}>
-                            {owner.status.charAt(0).toUpperCase() + owner.status.slice(1)}
+
+                          {editingId === owner.id ? (
+                            <select
+                              value={editForm.status}
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                              className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm"
+                            >
+                              <option value="pending">Pending</option>
+                              <option value="active">Active</option>
+                              <option value="inactive">Inactive</option>
+                            </select>
+                          ) : (
+                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(owner.status)}`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${getStatusDot(owner.status)}`} />
+                              {owner.status.charAt(0).toUpperCase() + owner.status.slice(1)}
+                            </span>
+                          )}
+
+                          <span className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5 min-w-[100px]">
+                            <FiCalendar className="w-4 h-4" />
+                            {formatDate(owner.submittedAt)}
                           </span>
-                        )}
-                      </td>
-                      <td className="px-4 sm:px-6 py-4">
-                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-sm">
-                          <FiCalendar className="w-4 h-4" />
-                          <span>{formatDate(owner.submittedAt)}</span>
                         </div>
-                      </td>
-                      <td className="px-4 sm:px-6 py-4 text-right">
-                        {editingId === owner.id ? (
-                          <div className="flex items-center justify-end gap-2">
+
+                        <div className="flex items-center gap-2">
+                          {editingId === owner.id ? (
+                            <>
+                              <button
+                                onClick={(e) => handleSave(e, owner.id)}
+                                className="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-all"
+                              >
+                                <FiCheck className="w-5 h-5" />
+                              </button>
+                              <button
+                                onClick={handleCancelEdit}
+                                className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all"
+                              >
+                                <FiX className="w-5 h-5" />
+                              </button>
+                            </>
+                          ) : (
                             <button
-                              onClick={() => handleSave(owner.id)}
-                              className="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
+                              onClick={(e) => handleEdit(e, owner)}
+                              className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all opacity-0 group-hover:opacity-100"
                             >
-                              <FiCheck className="w-4 h-4" />
+                              <FiEdit2 className="w-5 h-5" />
                             </button>
-                            <button
-                              onClick={() => setEditingId(null)}
-                              className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-                            >
-                              <FiX className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => handleEdit(owner)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                          >
-                            <FiEdit2 className="w-4 h-4" />
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                          )}
+                          <FiChevronRight className={`w-5 h-5 text-slate-300 dark:text-slate-600 transition-transform ${selectedOwner?.id === owner.id ? 'rotate-90' : ''}`} />
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
+          </motion.div>
+
+          <AnimatePresence>
+            {selectedOwner && (
+              <motion.div
+                initial={{ opacity: 0, x: 50, width: 0 }}
+                animate={{ opacity: 1, x: 0, width: 380 }}
+                exit={{ opacity: 0, x: 50, width: 0 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                className="hidden lg:block flex-shrink-0 sticky top-24"
+              >
+                <DetailPanel
+                  owner={selectedOwner}
+                  onClose={() => setSelectedOwner(null)}
+                  onEdit={handleEdit}
+                  formatFullDate={formatFullDate}
+                  getStatusColor={getStatusColor}
+                  getStatusDot={getStatusDot}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
+
+        <AnimatePresence>
+          {selectedOwner && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="lg:hidden fixed inset-0 z-50"
+            >
+              <div 
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                onClick={() => setSelectedOwner(null)}
+              />
+              <motion.div
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                className="absolute bottom-0 left-0 right-0 max-h-[90vh] overflow-y-auto"
+              >
+                <DetailPanel
+                  owner={selectedOwner}
+                  onClose={() => setSelectedOwner(null)}
+                  onEdit={handleEdit}
+                  formatFullDate={formatFullDate}
+                  getStatusColor={getStatusColor}
+                  getStatusDot={getStatusDot}
+                />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {updateError && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="fixed bottom-6 right-6 bg-red-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3"
+          >
+            <FiAlertCircle className="w-5 h-5" />
+            {updateError}
+            <button onClick={() => setUpdateError(null)} className="ml-2 hover:bg-red-600 p-1 rounded-lg transition-colors">
+              <FiX className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
       </main>
     </div>
   );
