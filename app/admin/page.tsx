@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FiUsers, 
   FiPhone, 
-  FiMessageCircle, 
   FiCalendar,
   FiTrendingUp,
   FiSearch,
@@ -53,10 +52,6 @@ const statColors = {
     bg: 'bg-purple-50 dark:bg-purple-900/20',
     icon: 'text-purple-600 dark:text-purple-400',
   },
-  orange: {
-    bg: 'bg-orange-50 dark:bg-orange-900/20',
-    icon: 'text-orange-600 dark:text-orange-400',
-  },
 };
 
 function DetailPanel({ owner, onClose, onEdit, formatFullDate, getStatusColor, getStatusDot }: {
@@ -93,14 +88,10 @@ function DetailPanel({ owner, onClose, onEdit, formatFullDate, getStatusColor, g
         </div>
         <p className="text-slate-500 dark:text-slate-400 text-sm">{owner.businessName}</p>
 
-        <div className="grid grid-cols-2 gap-3 mt-6">
+        <div className="mt-6">
           <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 text-center">
             <p className="text-2xl font-bold text-slate-900 dark:text-white">{owner.customersCount || 0}</p>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Customers</p>
-          </div>
-          <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">{owner.totalMessages || 0}</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Messages</p>
           </div>
         </div>
 
@@ -358,14 +349,12 @@ export default function AdminPage() {
   };
 
   const totalCustomers = owners.reduce((sum, o) => sum + (o.customersCount || 0), 0);
-  const totalMessages = owners.reduce((sum, o) => sum + (o.totalMessages || 0), 0);
   const activeOwners = owners.filter(o => o.status === 'active').length;
 
   const stats = [
     { label: 'Total Owners', value: owners.length, icon: FiBriefcase, color: 'blue' as const },
     { label: 'Active', value: activeOwners, icon: FiTrendingUp, color: 'emerald' as const },
     { label: 'Total Customers', value: totalCustomers, icon: FiUsers, color: 'purple' as const },
-    { label: 'Total Messages', value: totalMessages, icon: FiMessageCircle, color: 'orange' as const },
   ];
 
   if (loading) {
@@ -442,7 +431,7 @@ export default function AdminPage() {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+          className="grid grid-cols-3 gap-4 mb-8"
         >
           {stats.map((stat, index) => (
             <motion.div
