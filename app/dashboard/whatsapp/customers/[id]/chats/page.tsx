@@ -385,7 +385,9 @@ export default function CustomerChatsPage() {
                         <div className="flex items-start gap-2">
                           <FiFileText className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
                           <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 leading-relaxed">
-                            {session.summary || 'No summary available'}
+                            {session.messageCount > 0 && session.summary?.toLowerCase().includes('no messages') 
+                              ? 'Click "Open Chat" to view conversation and generate AI summary' 
+                              : (session.summary || 'No summary available')}
                           </p>
                         </div>
                       </div>
