@@ -20,6 +20,15 @@ import {
   FiFileText
 } from 'react-icons/fi';
 
+interface Message {
+  id: string;
+  from: string;
+  to: string;
+  message: string;
+  created_at: string;
+  direction: 'incoming' | 'outgoing';
+}
+
 interface ChatSession {
   date: string;
   messageCount: number;
@@ -34,15 +43,13 @@ interface Customer {
   experience: string;
 }
 
-interface ChatSessionsResponse {
+interface ConversationResponse {
   success: boolean;
-  customer: string;
-  sessions: ChatSession[];
-  pagination: {
-    returned: number;
-    hasMore: boolean;
-    nextStartAfter: string | null;
-  };
+  phone: string;
+  totalReturned: number;
+  hasMore: boolean;
+  nextStartAfter: string;
+  messages: Message[];
 }
 
 export default function CustomerChatsPage() {
@@ -89,14 +96,56 @@ export default function CustomerChatsPage() {
 
     async function fetchChatSessions(phone: number) {
       try {
-        const response = await fetch(`/api/chat-sessions?customer=${phone}`);
-        if (!response.ok) throw new Error('Failed to fetch chat sessions');
+        // Fetch all conversations and group them by date
+        let allMessages: Message[] = [];
+        let hasMore = true;
+        let startAfter: string | null = null;
         
-        const data: ChatSessionsResponse = await response.json();
-        if (data.success) {
-          setChatSessions(data.sessions || []);
-          setFilteredSessions(data.sessions || []);
+        while (hasMore) {
+          const url = new URL(`/api/conversations`, window.location.origin);
+          url.searchParams.set('phone', phone.toString());
+          if (startAfter) {
+            url.searchParams.set('startAfter', startAfter);
+          }
+          
+          const response = await fetch(url.toString());
+          if (!response.ok) {
+            throw new Error('Failed to fetch conversations');
+          }
+          const data: ConversationResponse = await response.json();
+          if (data.success) {
+            allMessages = [...allMessages, ...(data.messages || [])];
+            hasMore = data.hasMore;
+            startAfter = data.nextStartAfter;
+          } else {
+            throw new Error('API returned unsuccessful response');
+          }
         }
+        
+        // Group messages by date to create sessions
+        const sessionsByDate: { [key: string]: Message[] } = {};
+        allMessages.forEach((message) => {
+          const dateKey = new Date(message.created_at).toISOString().split('T')[0];
+          if (!sessionsByDate[dateKey]) {
+            sessionsByDate[dateKey] = [];
+          }
+          sessionsByDate[dateKey].push(message);
+        });
+        
+        // Convert to ChatSession format
+        const sessions: ChatSession[] = Object.entries(sessionsByDate)
+          .map(([date, messages]) => ({
+            date,
+            messageCount: messages.length,
+            mood: 'neutral', // Default mood since we're creating from messages
+            summary: messages.length > 0 
+              ? messages[0].message.substring(0, 150) + (messages[0].message.length > 150 ? '...' : '')
+              : 'No messages'
+          }))
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Sort newest first
+        
+        setChatSessions(sessions);
+        setFilteredSessions(sessions);
       } catch (err) {
         console.error('Error fetching chat sessions:', err);
       } finally {
