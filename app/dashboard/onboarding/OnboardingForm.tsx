@@ -31,43 +31,13 @@ interface FilePreviewModalProps {
 }
 
 function FilePreviewModal({ isOpen, onClose, fileName, fileUrl }: FilePreviewModalProps) {
-  const [previewContent, setPreviewContent] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
   const fileExtension = fileName.split('.').pop()?.toLowerCase();
   const isTextFile = fileExtension === 'txt';
   const isPdfFile = fileExtension === 'pdf';
   const isDocFile = fileExtension === 'doc' || fileExtension === 'docx';
 
-  useEffect(() => {
-    if (isOpen && isTextFile && fileUrl) {
-      setIsLoading(true);
-      setError(null);
-      fetch(fileUrl)
-        .then(res => {
-          if (!res.ok) throw new Error('Failed to load file');
-          return res.text();
-        })
-        .then(text => {
-          setPreviewContent(text);
-          setIsLoading(false);
-        })
-        .catch(err => {
-          setError('Unable to load file preview');
-          setIsLoading(false);
-        });
-    }
-  }, [isOpen, isTextFile, fileUrl]);
-
   const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = fileUrl;
-    link.download = fileName;
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    window.open(fileUrl, '_blank');
   };
 
   if (!isOpen) return null;
@@ -89,26 +59,7 @@ function FilePreviewModal({ isOpen, onClose, fileName, fileUrl }: FilePreviewMod
         </div>
 
         <div className="flex-1 overflow-auto p-4">
-          {isLoading && (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <span className="ml-3 text-slate-600 dark:text-slate-300">Loading preview...</span>
-            </div>
-          )}
-
-          {error && (
-            <div className="text-center py-12">
-              <p className="text-slate-500 dark:text-slate-400">{error}</p>
-            </div>
-          )}
-
-          {isTextFile && previewContent && !isLoading && (
-            <pre className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 p-4 rounded-lg overflow-auto max-h-96">
-              {previewContent}
-            </pre>
-          )}
-
-          {isPdfFile && (
+          {isPdfFile ? (
             <div className="text-center py-8">
               <iframe
                 src={fileUrl}
@@ -116,12 +67,21 @@ function FilePreviewModal({ isOpen, onClose, fileName, fileUrl }: FilePreviewMod
                 title="PDF Preview"
               />
             </div>
-          )}
-
-          {isDocFile && (
+          ) : (
             <div className="text-center py-12">
+              <div className="mb-4">
+                <HiDownload className="h-16 w-16 text-slate-400 mx-auto mb-4" />
+                <p className="text-slate-700 dark:text-slate-300 font-medium mb-2">
+                  {fileName}
+                </p>
+                <p className="text-slate-500 dark:text-slate-400 text-sm">
+                  {isTextFile && 'Text file'}
+                  {isDocFile && 'Word document'}
+                  {!isTextFile && !isDocFile && !isPdfFile && 'Document'}
+                </p>
+              </div>
               <p className="text-slate-500 dark:text-slate-400 mb-4">
-                Word documents cannot be previewed directly. Please download the file to view it.
+                Click the button below to download and view your file.
               </p>
             </div>
           )}
