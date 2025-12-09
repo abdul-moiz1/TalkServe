@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { FiHome, FiUsers, FiUserPlus, FiMenu, FiX, FiLogOut, FiMessageSquare } from 'react-icons/fi';
+import { usePathname, useRouter } from 'next/navigation';
+import { FiHome, FiUsers, FiUserPlus, FiMenu, FiX, FiLogOut, FiMessageSquare, FiLoader } from 'react-icons/fi';
 
 interface SidebarProps {
   onSignOut: () => void;
@@ -20,7 +20,10 @@ const navItems = [
 
 export default function DashboardSidebar({ onSignOut, userEmail, userName }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [loadingHref, setLoadingHref] = useState<string | null>(null);
 
   const isActive = (href: string) => {
     const hrefPath = href.split('?')[0];
@@ -28,6 +31,28 @@ export default function DashboardSidebar({ onSignOut, userEmail, userName }: Sid
       return pathname === '/dashboard';
     }
     return pathname.startsWith(hrefPath);
+  };
+
+  const handleNavClick = (href: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsMobileMenuOpen(false);
+    
+    if (isActive(href)) return;
+    
+    setLoadingHref(href);
+    startTransition(() => {
+      router.push(href);
+    });
+  };
+
+  React.useEffect(() => {
+    if (!isPending) {
+      setLoadingHref(null);
+    }
+  }, [isPending]);
+
+  const handlePrefetch = (href: string) => {
+    router.prefetch(href);
   };
 
   return (
@@ -71,20 +96,27 @@ export default function DashboardSidebar({ onSignOut, userEmail, userName }: Sid
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
+              const isLoading = loadingHref === item.href;
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={(e) => handleNavClick(item.href, e)}
+                  onMouseEnter={() => handlePrefetch(item.href)}
                   className={`
                     flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
                     ${active 
                       ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium' 
                       : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700/50 hover:text-gray-900 dark:hover:text-gray-200'
                     }
+                    ${isLoading ? 'opacity-70' : ''}
                   `}
                 >
-                  <Icon className={`w-5 h-5 ${active ? 'text-blue-600 dark:text-blue-400' : ''}`} />
+                  {isLoading ? (
+                    <FiLoader className="w-5 h-5 animate-spin text-blue-600 dark:text-blue-400" />
+                  ) : (
+                    <Icon className={`w-5 h-5 ${active ? 'text-blue-600 dark:text-blue-400' : ''}`} />
+                  )}
                   <span>{item.name}</span>
                 </Link>
               );
