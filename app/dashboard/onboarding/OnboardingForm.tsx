@@ -220,6 +220,20 @@ export default function OnboardingForm() {
       });
 
       if (response.ok) {
+        const result = await response.json();
+        if (result.data) {
+          if (result.data.businessContextFileName) {
+            setExistingFileName(result.data.businessContextFileName);
+          }
+          if (result.data.businessContextUrl) {
+            setExistingFileUrl(result.data.businessContextUrl);
+          }
+          if (result.data.id && !existingDocId) {
+            setExistingDocId(result.data.id);
+            setIsEditing(true);
+          }
+        }
+        setFile(null);
         setStatus('success');
       } else {
         setStatus('error');
