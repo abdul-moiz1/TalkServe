@@ -154,11 +154,7 @@ export default function FullSMSConversationPage() {
     }
   }, [user, phone, fetchConversations]);
 
-  useEffect(() => {
-    if (messages.length > 0 && !fetchingMessages) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages, fetchingMessages]);
+  // Removed auto-scroll to bottom - keep conversation at top when opened
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
