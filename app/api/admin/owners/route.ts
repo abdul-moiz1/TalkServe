@@ -1,16 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminDb, verifyAuthToken, getAdminAuth } from "@/lib/firebase-admin";
+import {
+  getAdminDb,
+  verifyAuthToken,
+  getAdminAuth,
+} from "@/lib/firebase-admin";
 
 const ADMIN_EMAILS = [
   "admin@talkserve.com",
+  "admin@talkserve.ca",
   "support@talkserve.com",
   "abdulmoiz6501@gmail.com",
 ];
 
-async function verifyAdminAccess(authenticatedUserId: string): Promise<boolean> {
+async function verifyAdminAccess(
+  authenticatedUserId: string,
+): Promise<boolean> {
   const adminAuth = getAdminAuth();
   if (!adminAuth) return false;
-  
+
   try {
     const userRecord = await adminAuth.getUser(authenticatedUserId);
     const userEmail = (userRecord.email || "").toLowerCase();
@@ -28,7 +35,7 @@ export async function GET(request: NextRequest) {
     if (!authenticatedUserId) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -36,7 +43,7 @@ export async function GET(request: NextRequest) {
     if (!isAdmin) {
       return NextResponse.json(
         { success: false, error: "Admin access required" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -44,7 +51,7 @@ export async function GET(request: NextRequest) {
     if (!db) {
       return NextResponse.json(
         { success: false, error: "Database not available" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -79,9 +86,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to fetch owners",
+        error:
+          error instanceof Error ? error.message : "Failed to fetch owners",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -94,7 +102,7 @@ export async function PUT(request: NextRequest) {
     if (!authenticatedUserId) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -102,7 +110,7 @@ export async function PUT(request: NextRequest) {
     if (!isAdmin) {
       return NextResponse.json(
         { success: false, error: "Admin access required" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -110,17 +118,18 @@ export async function PUT(request: NextRequest) {
     if (!db) {
       return NextResponse.json(
         { success: false, error: "Database not available" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     const body = await request.json();
-    const { ownerId, assignedNumber, status, customersCount, totalMessages } = body;
+    const { ownerId, assignedNumber, status, customersCount, totalMessages } =
+      body;
 
     if (!ownerId) {
       return NextResponse.json(
         { success: false, error: "Owner ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -128,9 +137,11 @@ export async function PUT(request: NextRequest) {
       updatedAt: new Date(),
     };
 
-    if (assignedNumber !== undefined) updateData.assignedNumber = assignedNumber;
+    if (assignedNumber !== undefined)
+      updateData.assignedNumber = assignedNumber;
     if (status !== undefined) updateData.status = status;
-    if (customersCount !== undefined) updateData.customersCount = customersCount;
+    if (customersCount !== undefined)
+      updateData.customersCount = customersCount;
     if (totalMessages !== undefined) updateData.totalMessages = totalMessages;
 
     await db.collection("onboarding").doc(ownerId).update(updateData);
@@ -144,9 +155,10 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to update owner",
+        error:
+          error instanceof Error ? error.message : "Failed to update owner",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
