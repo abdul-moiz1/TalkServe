@@ -18,12 +18,14 @@
 
 html {
   color-scheme: light dark;
+  overflow-x: hidden;
 }
 
 body {
   color: var(--foreground);
   background: linear-gradient(to bottom, var(--background) 0%, #e0f2fe 100%);
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 @media (prefers-reduced-motion: no-preference) {

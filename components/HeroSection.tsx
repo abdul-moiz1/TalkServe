@@ -53,7 +53,7 @@ export default function HeroSection({
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 pt-24 pb-16 sm:pt-28 sm:pb-20">
+    <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 min-h-[calc(100vh-4rem)] flex items-center py-8 sm:py-12">
       <div className="absolute inset-0 bg-grid-slate-100 dark:bg-grid-slate-900/50 [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] opacity-40" />
       
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

@@ -158,13 +158,13 @@ export default function Header() {
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2"
+              className="md:hidden p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? (
-                <HiX className="h-6 w-6" />
+                <HiX className="h-6 w-6 text-slate-700 dark:text-slate-300" />
               ) : (
-                <HiMenu className="h-6 w-6" />
+                <HiMenu className="h-6 w-6 text-slate-700 dark:text-slate-300" />
               )}
             </button>
           </div>
