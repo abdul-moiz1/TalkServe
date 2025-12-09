@@ -18,8 +18,11 @@ export async function POST(request: NextRequest) {
       sentiment,
       customerMood,
       keyTopics,
-      rating
+      rating,
+      type
     } = await request.json();
+    
+    const conversationType = type || 'Whatsapp agent';
 
     if (!customer) {
       return NextResponse.json(
@@ -80,7 +83,7 @@ export async function POST(request: NextRequest) {
         rating,
         created_at: new Date(),
         updated_at: new Date(),
-        type: 'Conversation'
+        type: conversationType
       });
 
       return NextResponse.json({
@@ -122,7 +125,7 @@ export async function POST(request: NextRequest) {
           rating,
           created_at: new Date(),
           updated_at: new Date(),
-          type: 'Conversation'
+          type: conversationType
         });
 
         return NextResponse.json({

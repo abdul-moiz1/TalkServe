@@ -99,7 +99,8 @@ export default function ConversationDetailPage() {
             sentiment: data.sentiment,
             customerMood: data.customerMood,
             keyTopics: data.keyTopics,
-            rating: data.rating
+            rating: data.rating,
+            type: 'Whatsapp agent'
           })
         });
       } catch (saveErr) {

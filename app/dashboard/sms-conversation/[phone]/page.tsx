@@ -121,6 +121,25 @@ export default function FullSMSConversationPage() {
       const result = await response.json();
       setSentimentResult(result);
       setShowSentiment(true);
+      
+      try {
+        await fetch('/api/save-summary', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customer: phone,
+            date: new Date().toISOString().split('T')[0],
+            summary: result.summary,
+            sentiment: result.sentiment,
+            customerMood: result.customerMood,
+            keyTopics: result.keyTopics,
+            rating: result.rating,
+            type: 'SMS agent'
+          })
+        });
+      } catch (saveErr) {
+        console.error('Error saving summary to database:', saveErr);
+      }
     } catch (err) {
       console.error('Error analyzing sentiment:', err);
       alert('Failed to analyze conversation. Please try again.');
