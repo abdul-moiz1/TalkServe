@@ -46,7 +46,7 @@ ${conversationText}
 
 Respond with JSON in this exact format:
 {
-  "sentiment": "positive" | "negative" | "neutral",
+  "sentiment": "positive" or "negative" or "neutral",
   "summary": "Brief summary here",
   "keyTopics": ["topic1", "topic2", "topic3"],
   "customerMood": "Description of customer mood",
@@ -71,7 +71,12 @@ Respond with JSON in this exact format:
           required: ["sentiment", "summary", "keyTopics", "customerMood", "rating"],
         },
       },
-      contents: userPrompt,
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: userPrompt }]
+        }
+      ],
     });
 
     const content = response.text;
