@@ -1,262 +1,41 @@
 # TalkServe AI Marketing Website
 
 ## Overview
-Professional marketing website for TalkServe AI - an AI receptionist service that answers calls 24/7, books appointments, and handles customer inquiries automatically.
+TalkServe AI is an AI receptionist service offering 24/7 call answering, appointment booking, and automated customer inquiry handling. This professional marketing website showcases TalkServe AI's capabilities, aiming to attract and convert businesses seeking to automate their customer communication. The project emphasizes a robust, modern web presence with a focus on user experience, performance, and clear communication of the service's value.
 
-**Tech Stack:**
-- Next.js 15+ (App Router)
-- React 19
-- TypeScript
-- Tailwind CSS
-- Framer Motion (animations)
-- React Icons
-- next-sitemap (SEO)
-- Firebase Authentication (email/password + Google OAuth)
+## User Preferences
+I prefer detailed explanations. Do not make changes to the folder `Z`. Do not make changes to the file `Y`.
 
-**Current Status:** Fully implemented with 11 pages, dark mode, animations, responsive design, and Firebase authentication.
+## System Architecture
+The website is built with Next.js 15+ (App Router), React 19, TypeScript, and Tailwind CSS, providing a modern, scalable, and responsive foundation. Framer Motion is used for sophisticated UI animations, enhancing user engagement.
 
-## Project Structure
+**UI/UX Decisions:**
+- **Color Scheme:** Primary blue (#2563EB) accents, complemented by slate grays and clean white backgrounds.
+- **Typography:** Inter for body text and Plus Jakarta Sans for headings, ensuring readability and a modern aesthetic.
+- **Dark Mode:** Implemented with system preference detection and localStorage persistence for a personalized viewing experience.
+- **Animations:** Extensive use of Framer Motion for entrance effects, scroll reveals, and interactive hover states to create a dynamic interface.
+- **Responsiveness:** A mobile-first design approach with Tailwind CSS breakpoints ensures optimal viewing across all devices.
 
-```
-/
-├── app/
-│   ├── components/         # Home page sections
-│   │   ├── Hero.tsx
-│   │   ├── MissedCalls.tsx
-│   │   ├── MeetTalkServe.tsx
-│   │   ├── IndustryCards.tsx
-│   │   ├── HowItWorks.tsx
-│   │   ├── Results.tsx
-│   │   ├── Features.tsx
-│   │   ├── PricingPreview.tsx
-│   │   ├── WhyChoose.tsx
-│   │   └── FinalCTA.tsx
-│   ├── signin/             # Sign in page
-│   │   └── page.tsx
-│   ├── signup/             # Sign up page
-│   │   └── page.tsx
-│   ├── dashboard/          # Protected dashboard
-│   │   ├── page.tsx        # Contacts list
-│   │   └── contact/[id]/   # Contact detail with messages
-│   │       └── page.tsx
-│   ├── dental/             # Dental industry page
-│   ├── restaurants/        # Restaurants industry page
-│   ├── services/           # Service businesses page
-│   ├── features/           # Features page
-│   ├── pricing/            # Pricing page
-│   ├── security/           # Security & compliance page
-│   ├── onboarding/         # Business onboarding form
-│   │   ├── page.tsx
-│   │   └── OnboardingForm.tsx
-│   ├── contact/            # Contact page with form
-│   │   └── ContactForm.tsx
-│   ├── api/
-│   │   ├── contact/
-│   │   │   └── route.ts    # Contact form API endpoint
-│   │   ├── onboarding/
-│   │   │   └── route.ts    # Onboarding form API endpoint
-│   │   └── outbound-call/
-│   │       └── route.ts    # VoiceFlow outbound call API
-│   ├── layout.tsx          # Root layout with fonts
-│   ├── page.tsx            # Home page
-│   ├── globals.css         # Global styles
-│   └── not-found.tsx       # 404 page
-├── components/             # Reusable components
-│   ├── auth/               # Firebase authentication components
-│   │   ├── LoginForm.tsx   # Email/password + Google login (legacy)
-│   │   ├── SignupForm.tsx  # Email/password registration (legacy)
-│   │   ├── UserProfile.tsx # User profile dropdown
-│   │   └── README.md       # Authentication documentation
-│   ├── Header.tsx          # Sticky header with hide-on-scroll
-│   ├── Footer.tsx          # Footer with links
-│   ├── DarkModeProvider.tsx # Dark mode context
-│   ├── Button.tsx          # Animated button component
-│   ├── AnimatedSection.tsx # Scroll-reveal animations
-│   ├── TestimonialCarousel.tsx # Auto-playing carousel
-│   ├── VoiceflowWidget.tsx # VoiceFlow outbound call widget
-│   └── VoiceAgentDialog.tsx # Contact form for voice calls
-├── contexts/               # React contexts
-│   └── AuthContext.tsx     # Firebase auth state management
-├── lib/                    # Utilities and configuration
-│   └── firebase.ts         # Firebase SDK configuration
-└── public/                 # Static assets
-```
+**Technical Implementations:**
+- **Routing:** Utilizes Next.js App Router for efficient page navigation and organization.
+- **State Management:** React Context API, specifically `AuthContext`, handles global authentication state.
+- **API Endpoints:** Next.js API routes manage backend interactions, including contact form submissions, onboarding data, and integrations with external services like VoiceFlow.
+- **SEO:** Optimized with per-page metadata, Open Graph tags, `next-sitemap` for sitemap generation, and semantic HTML5 for improved search engine visibility.
 
-## Features Implemented
+**Feature Specifications:**
+- **Core Pages:** Includes Home, dedicated Sign In/Sign Up, a protected Dashboard, Contact Detail, industry-specific pages (Dental, Restaurants, Services), Features, Pricing, Security, Onboarding, and Contact pages.
+- **Authentication:** Firebase Authentication supports email/password and Google OAuth, with protected routes for authenticated users.
+- **Forms:** Contact and Onboarding forms with client-side validation and server-side processing. The Onboarding form supports file uploads and integrates with Firebase Cloud Functions.
+- **Dashboard:** Features customer contact lists, chat session viewing, and conversation history.
+- **Navigation:** Sticky header with hide-on-scroll, mobile hamburger menu, and dark mode toggle.
 
-### Pages (13 total)
-1. **Home** - Hero, problems, solutions, industry cards, how it works, results, features preview, pricing preview, testimonials
-2. **Sign In** - Dedicated login page with email/password and Google OAuth
-3. **Sign Up** - Dedicated registration page with email/password and Google OAuth
-4. **Dashboard** - Protected page with contacts list (name, number, detail button)
-5. **Contact Detail** - Shows message history for a specific contact
-6. **Dental** - Industry-specific content for dental practices
-7. **Restaurants** - Industry-specific content for restaurants
-8. **Services** - Industry-specific content for service businesses
-9. **Features** - Full feature list with categorized sections
-10. **Pricing** - Three pricing tiers with testimonials carousel
-11. **Security** - Security & compliance information
-12. **Onboarding** - Business onboarding form with file upload
-13. **Contact** - Contact information and working form
-14. **404** - Custom not found page
-
-### Design Features
-- **Colors:** Primary blue (#2563EB), slate grays, clean white backgrounds
-- **Typography:** Inter (body), Plus Jakarta Sans (headings)
-- **Dark Mode:** System preference detection with localStorage persistence
-- **Animations:** Framer Motion entrance effects, scroll reveals, hover states
-- **Responsive:** Mobile-first design with Tailwind breakpoints
-- **Performance:** Next.js Image optimization, lazy loading, minimal bundle size
-
-### Navigation
-- Sticky header with hide-on-scroll behavior
-- Dropdown menu for Industries section
-- Mobile hamburger menu
-- Dark mode toggle
-- Smooth scrolling
-
-### SEO Optimization
-- Per-page metadata and Open Graph tags
-- next-sitemap for sitemap.xml generation
-- robots.txt for crawler access
-- Semantic HTML5 markup
-- Proper heading hierarchy
-
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-```
-
-## Firebase Authentication
-
-### Setup
-The website includes Firebase authentication with:
-- Email/password login and signup
-- Google OAuth sign-in
-- User profile management
-- Password reset functionality
-
-### Components
-- **AuthContext**: Manages authentication state across the app
-- **Sign In Page**: Dedicated page at /signin with email/password and Google login
-- **Sign Up Page**: Dedicated page at /signup with user registration
-- **UserProfile**: Displays logged-in user with logout option
-
-### Environment Variables
-Required Firebase credentials (stored in Replit Secrets):
-- `NEXT_PUBLIC_FIREBASE_API_KEY`
-- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
-- `NEXT_PUBLIC_FIREBASE_APP_ID`
-
-### Usage
-Wrap your app with `AuthProvider` in `app/layout.tsx`:
-```tsx
-import { AuthProvider } from '@/contexts/AuthContext';
-
-<AuthProvider>
-  {children}
-</AuthProvider>
-```
-
-Use the `useAuth` hook in any component:
-```tsx
-import { useAuth } from '@/contexts/AuthContext';
-
-const { user, signIn, signUp, signInWithGoogle, logout } = useAuth();
-```
-
-See `components/auth/README.md` for detailed documentation.
-
-## Recent Changes
-- **2025-12-02:** Integrated getChatSessions API - customers page View Chat button now fetches chat sessions from `https://us-central1-talkserve.cloudfunctions.net/getChatSessions` with customer phone
-- **2025-12-02:** Created `/api/chat-sessions` route to proxy getChatSessions requests with proper error handling
-- **2025-12-02:** Updated conversations API to accept date parameter for filtering messages by specific date
-- **2025-12-02:** Created new conversation page at `/dashboard/conversation/[phone]/[date]` to display messages for a specific date
-- **2025-12-02:** Chat sessions page now displays per-session mood from API (Positive/Neutral/Negative) instead of customer experience
-- **2025-12-02:** Updated customers page empty state with gradient header and helpful onboarding guidance
-- **2025-12-02:** Improved API error handling - both chat-sessions and conversations APIs now handle `success:false` and 404 responses gracefully
-- **2025-12-01:** Added Customer Chats page (/dashboard/customers/[id]/chats) showing list of chat sessions with date, customer name, experience, summary, and Open Chat button
-- **2025-12-01:** Added date range filter to Customer Chats page for filtering chat sessions by date
-- **2025-12-01:** Updated View Chat button in customers list to navigate to new chats page instead of direct conversation
-- **2025-12-01:** Fixed mobile sidebar to start below main navigation (60px from top) like YouTube
-- **2025-12-01:** Made main navigation sticky on dashboard pages when sidebar is open
-- **2025-12-01:** Updated sidebar user section to display name/email and sign out button in same row using flexbox
-- **2025-12-01:** Moved onboarding page to /dashboard/onboarding so it uses dashboard layout with sidebar
-- **2025-12-01:** Removed onboarding link from profile dropdown (now only accessible via dashboard sidebar)
-- **2025-12-01:** Made dashboard sidebar sticky so it stays visible while scrolling content
-- **2025-12-01:** Fixed analytics graph display issue with proper animation timing
-- **2025-12-01:** Updated sidebar onboarding link to match profile dropdown (/onboarding)
-- **2025-12-01:** Enhanced customers page with stat card filters, search, experience badges with emojis, and mobile-friendly card layout
-- **2025-12-01:** Improved conversation page with modern chat bubbles, date grouping, auto-scroll, and read-only footer
-- **2025-11-27:** Added Dashboard page with contacts list (name, number, detail button) - protected route requiring authentication
-- **2025-11-27:** Added Contact Detail page showing message history for each contact (dummy data)
-- **2025-11-27:** Updated login/signup to redirect to /dashboard after successful authentication
-- **2025-11-27:** Fixed registerUser API payload - changed fullName to name to match backend expectation
-- **2025-11-26:** Added backend user registration - calls Firebase Cloud Function after signup to register user with fullName, email, and uid
-- **2025-11-26:** Converted authentication from modal popups to dedicated pages
-- **2025-11-26:** Created /signin page with email/password and Google OAuth login
-- **2025-11-26:** Created /signup page with user registration form
-- **2025-11-26:** Updated Header to use Link navigation to auth pages instead of modals
-- **2025-11-26:** Removed AuthModal component (replaced by dedicated pages)
-- **2025-11-25:** Implemented Firebase Authentication with email/password login/signup and Google OAuth
-- **2025-11-25:** Created AuthContext for managing authentication state across the application
-- **2025-11-25:** Configured Firebase SDK with secure environment variables (NEXT_PUBLIC_FIREBASE_*)
-- **2025-11-25:** Wrapped application with AuthProvider in layout.tsx for app-wide auth state
-- **2025-11-25:** Added comprehensive authentication documentation in components/auth/README.md
-- **2025-11-25:** Removed WhatsApp widget from the application
-- **2025-11-25:** Updated onboarding form success message to show WhatsApp activation notice (24-hour activation timeline)
-- **2025-11-24:** Created business onboarding form page with fields for owner info, business details, services, industry type, and file upload for business context documents
-- **2025-11-24:** Added onboarding page to main navigation between Security and Contact
-- **2025-11-24:** Implemented onboarding API endpoint to handle form submissions with multipart/form-data support
-- **2025-11-24:** Integrated onboarding form with Firebase Cloud Function (https://us-central1-talkserve.cloudfunctions.net/onboarding) to store form data and files
-- **2025-10-31:** Modernized phone call widget UI with rounded corners, better focus states, and improved spacing
-- **2025-10-31:** Limited country selector to US (+1), Canada (+1), and UK (+44) only
-- **2025-10-31:** Redesigned success state to show minimal dialog with only success message and Done button
-- **2025-10-31:** Enhanced form inputs with gradient backgrounds, ring effects, and modern styling
-- **2025-10-31:** Improved country dropdown with better layout and hover states
-- **2025-10-30:** Implemented VoiceFlow outbound calling feature with fully controlled form and state persistence
-- **2025-10-30:** Added API route for VoiceFlow phone number integration (agent ID: 6902ebd8bcc0c2e54603a7f6)
-- **2025-10-30:** Created VoiceAgentDialog with comprehensive error handling and user feedback
-- **2025-10-28:** Initial implementation of all 8 pages with complete content
-- **2025-10-28:** Set up Framer Motion animations across all components
-- **2025-10-28:** Implemented dark mode with system preference detection
-- **2025-10-28:** Added contact form with Next.js API route
-- **2025-10-28:** Configured SEO with metadata and sitemap generation
-
-## VoiceFlow Integration
-
-### Outbound Calling Feature
-- **Floating Phone Button:** Bottom-right corner, triggers voice call dialog
-- **Contact Form:** Collects user info (name, email, phone, consent)
-- **API Integration:** Secure server-side API calls to VoiceFlow
-- **State Management:** Fully controlled form with data persistence across dialog close/reopen
-- **Error Handling:** Comprehensive error messages, retry capability with preserved data
-- **Success Flow:** User acknowledges success with "Done" button before dialog closes
-
-### Environment Variables Required
-- `VOICEFLOW_DM_API_KEY` - VoiceFlow Dialog Manager API key for outbound calls
-
-### API Endpoint
-- **POST /api/outbound-call** - Initiates outbound phone call via VoiceFlow
-  - Body: `{ phoneNumber, firstName, lastName, email }`
-  - Returns: `{ success, message, data }` or error
-
-## Notes
-- The website runs on port 5000 for development and production
-- Contact form logs submissions to console (connect to email service for production)
-- VoiceFlow outbound calls require valid VOICEFLOW_DM_API_KEY in environment
-- Form data persists across dialog closures until successful call completion
-- All content is from the provided TalkServe marketing copy
-- Animations use smooth timing functions (220-300ms) for professional feel
-- Design inspired by Linear and Vercel marketing sites
+## External Dependencies
+- **Firebase:** Utilized for user authentication (Email/Password, Google OAuth) and backend services (Cloud Functions for onboarding data storage and user registration).
+- **VoiceFlow:** Integrated for outbound calling features, enabling automated voice interactions.
+- **next-sitemap:** For automatic generation of `sitemap.xml` to enhance SEO.
+- **React Icons:** Provides a collection of popular icons for UI elements.
+- **Framer Motion:** A production-ready motion library for React to power animations.
+- **External APIs:**
+    - `https://us-central1-talkserve.cloudfunctions.net/getChatSessions`: Fetches chat sessions.
+    - `https://us-central1-talkserve.cloudfunctions.net/onboarding`: Handles business onboarding form submissions.
+    - VoiceFlow Dialog Manager API: Used for initiating outbound calls via `/api/outbound-call`.
