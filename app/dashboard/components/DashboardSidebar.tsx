@@ -85,10 +85,10 @@ export default function DashboardSidebar({ onSignOut, userEmail, userName, isCol
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0 lg:sticky lg:top-[60px] lg:z-auto lg:h-[calc(100vh-60px)]
           ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}
-          w-64
+          w-64 overflow-y-auto
         `}
       >
-        <div className="flex flex-col h-full relative">
+        <div className="flex flex-col h-full relative min-h-0">
           <button
             onClick={onToggleCollapse}
             className="hidden lg:flex absolute -right-3 top-6 w-6 h-6 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-full items-center justify-center shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors z-10"
