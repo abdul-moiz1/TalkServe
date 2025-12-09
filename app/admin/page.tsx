@@ -531,8 +531,8 @@ export default function AdminPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-6">
-                        <div className="hidden md:flex items-center gap-6">
+                      <div className="flex items-center gap-8">
+                        <div className="hidden md:flex items-center gap-8">
                           {editingId === owner.id ? (
                             <input
                               type="text"
