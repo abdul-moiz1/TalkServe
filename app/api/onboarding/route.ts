@@ -37,6 +37,8 @@ export async function GET(request: NextRequest) {
     const doc = snapshot.docs[0];
     const data = doc.data();
 
+    console.log("Fetched onboarding data:", JSON.stringify(data, null, 2));
+
     return NextResponse.json({
       success: true,
       exists: true,

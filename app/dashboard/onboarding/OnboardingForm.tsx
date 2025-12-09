@@ -185,6 +185,7 @@ export default function OnboardingForm() {
 
         if (result.success && result.exists && result.data) {
           const data: OnboardingData = result.data;
+          console.log("Onboarding data received:", data);
           setFormData({
             ownerName: data.ownerName || '',
             ownerEmail: data.ownerEmail || '',
@@ -200,8 +201,11 @@ export default function OnboardingForm() {
           }
 
           setExistingDocId(data.id);
-          setExistingFileName(data.businessContextFileName || null);
-          setExistingFileUrl(data.businessContextUrl || null);
+          const fileName = data.businessContextFileName || (data as any).business_context_filename || (data as any).file_name || null;
+          const fileUrl = data.businessContextUrl || (data as any).business_context_url || (data as any).file_url || null;
+          console.log("File info - fileName:", fileName, "fileUrl:", fileUrl);
+          setExistingFileName(fileName);
+          setExistingFileUrl(fileUrl);
           setIsEditing(true);
         }
       } catch (error) {
