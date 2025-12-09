@@ -161,13 +161,6 @@ function DetailPanel({ owner, onClose, onEdit, formatFullDate, getStatusColor, g
           </div>
         </div>
 
-        <button
-          onClick={(e) => onEdit(e, owner)}
-          className="w-full mt-6 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2"
-        >
-          <FiEdit2 className="w-4 h-4" />
-          Edit Owner Details
-        </button>
       </div>
     </div>
   );
