@@ -55,10 +55,18 @@ export interface AppointmentEvent {
   attendeeEmail?: string;
 }
 
+function isValidEmail(email: string | undefined): boolean {
+  if (!email || typeof email !== 'string') return false;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email.trim());
+}
+
 export async function createCalendarEvent(event: AppointmentEvent) {
   const calendar = await getUncachableGoogleCalendarClient();
   
-  const calendarEvent = {
+  const hasValidEmail = isValidEmail(event.attendeeEmail);
+  
+  const calendarEvent: any = {
     summary: event.summary,
     description: event.description,
     start: {
@@ -69,7 +77,6 @@ export async function createCalendarEvent(event: AppointmentEvent) {
       dateTime: event.endDateTime,
       timeZone: 'America/New_York',
     },
-    attendees: event.attendeeEmail ? [{ email: event.attendeeEmail }] : [],
     reminders: {
       useDefault: false,
       overrides: [
@@ -78,6 +85,10 @@ export async function createCalendarEvent(event: AppointmentEvent) {
       ],
     },
   };
+
+  if (hasValidEmail) {
+    calendarEvent.attendees = [{ email: event.attendeeEmail!.trim() }];
+  }
 
   const response = await calendar.events.insert({
     calendarId: 'primary',
