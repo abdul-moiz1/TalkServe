@@ -27,6 +27,7 @@ The website is built with Next.js 15+ (App Router), React 19, TypeScript, and Ta
 - **Authentication:** Firebase Authentication supports email/password and Google OAuth, with protected routes for authenticated users.
 - **Forms:** Contact and Onboarding forms with client-side validation and server-side processing. The Onboarding form supports file uploads and integrates with Firebase Cloud Functions.
 - **Dashboard:** Features customer contact lists, chat session viewing, and conversation history.
+- **Admin Panel:** Admin-only page with tab navigation for managing Business Owners and viewing Appointments. The Appointments tab displays appointment data from Firebase Firestore including client details, appointment date/time, industry, service type, and confirmation method.
 - **Navigation:** Sticky header with hide-on-scroll, mobile hamburger menu, and dark mode toggle.
 
 ## External Dependencies
