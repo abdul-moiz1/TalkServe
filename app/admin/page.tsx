@@ -23,6 +23,9 @@ import {
   FiGlobe,
   FiClock
 } from 'react-icons/fi';
+import AppointmentsTab from './components/AppointmentsTab';
+
+type AdminTab = 'owners' | 'appointments';
 
 interface Owner {
   id: string;
@@ -175,6 +178,7 @@ export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedOwner, setSelectedOwner] = useState<Owner | null>(null);
+  const [activeTab, setActiveTab] = useState<AdminTab>('owners');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
@@ -402,7 +406,7 @@ export default function AdminPage() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-slate-900 dark:text-white">TalkServe Admin</h1>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Business Owners Management</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Management Portal</p>
               </div>
             </div>
             
@@ -417,37 +421,66 @@ export default function AdminPage() {
               </button>
             </div>
           </div>
+          
+          <div className="flex gap-1 -mb-px">
+            <button
+              onClick={() => setActiveTab('owners')}
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all ${
+                activeTab === 'owners'
+                  ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400'
+                  : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
+              }`}
+            >
+              <FiBriefcase className="w-4 h-4" />
+              Business Owners
+            </button>
+            <button
+              onClick={() => setActiveTab('appointments')}
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all ${
+                activeTab === 'appointments'
+                  ? 'border-emerald-600 text-emerald-600 dark:text-emerald-400 dark:border-emerald-400'
+                  : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
+              }`}
+            >
+              <FiCalendar className="w-4 h-4" />
+              Appointments
+            </button>
+          </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-3 gap-4 mb-8"
-        >
-          {stats.map((stat, index) => (
-            <motion.div
-              key={stat.label}
+        {activeTab === 'appointments' ? (
+          <AppointmentsTab user={user} />
+        ) : (
+          <>
+            <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200/50 dark:border-slate-700/50 hover:shadow-lg transition-shadow duration-300"
+              className="grid grid-cols-3 gap-4 mb-8"
             >
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 ${statColors[stat.color].bg} rounded-xl flex items-center justify-center`}>
-                  <stat.icon className={`w-6 h-6 ${statColors[stat.color].icon}`} />
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{stat.label}</p>
-                  <p className="text-2xl font-bold text-slate-900 dark:text-white">{stat.value}</p>
-                </div>
-              </div>
+              {stats.map((stat, index) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200/50 dark:border-slate-700/50 hover:shadow-lg transition-shadow duration-300"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 ${statColors[stat.color].bg} rounded-xl flex items-center justify-center`}>
+                      <stat.icon className={`w-6 h-6 ${statColors[stat.color].icon}`} />
+                    </div>
+                    <div>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{stat.label}</p>
+                      <p className="text-2xl font-bold text-slate-900 dark:text-white">{stat.value}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
             </motion.div>
-          ))}
-        </motion.div>
 
-        <div className="flex gap-6">
+            <div className="flex gap-6">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -673,6 +706,8 @@ export default function AdminPage() {
               <FiX className="w-4 h-4" />
             </button>
           </motion.div>
+        )}
+          </>
         )}
       </main>
     </div>

@@ -8,8 +8,7 @@ import {
 const ADMIN_EMAILS = [
   "admin@talkserve.com",
   "admin@talkserve.ca",
-  "support@talkserve.com",
-  "abdulmoiz6501@gmail.com",
+  "support@talkserve.ca",
 ];
 
 async function verifyAdminAccess(
