@@ -27,7 +27,7 @@ async function verifyAdminAccess(
   }
 }
 
-function parseAppointmentDateTime(dateStr: string, timeStr: string): { start: Date; end: Date } | null {
+function parseAppointmentDateTime(dateStr: string, timeStr: string): { startDateTime: string; endDateTime: string } | null {
   try {
     const months: { [key: string]: number } = {
       'january': 0, 'february': 1, 'march': 2, 'april': 3,
@@ -35,16 +35,15 @@ function parseAppointmentDateTime(dateStr: string, timeStr: string): { start: Da
       'september': 8, 'october': 9, 'november': 10, 'december': 11
     };
 
-    const dateMatch = dateStr.match(/(\w+)\s+(\d+)/i);
+    const dateMatch = dateStr.match(/(\w+)\s+(\d+)(?:,?\s*(\d{4}))?/i);
     if (!dateMatch) return null;
 
     const monthName = dateMatch[1].toLowerCase();
     const day = parseInt(dateMatch[2]);
+    const year = dateMatch[3] ? parseInt(dateMatch[3]) : new Date().getFullYear();
     const month = months[monthName];
     
     if (month === undefined) return null;
-
-    const year = new Date().getFullYear();
 
     let hours = 9;
     let minutes = 0;
@@ -61,10 +60,13 @@ function parseAppointmentDateTime(dateStr: string, timeStr: string): { start: Da
       }
     }
 
-    const start = new Date(year, month, day, hours, minutes);
-    const end = new Date(year, month, day, hours + 1, minutes);
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    
+    const startDateTime = `${year}-${pad(month + 1)}-${pad(day)}T${pad(hours)}:${pad(minutes)}:00`;
+    const endHours = hours + 1;
+    const endDateTime = `${year}-${pad(month + 1)}-${pad(day)}T${pad(endHours)}:${pad(minutes)}:00`;
 
-    return { start, end };
+    return { startDateTime, endDateTime };
   } catch {
     return null;
   }
@@ -131,12 +133,12 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
-        const dateTime = parseAppointmentDateTime(
+        const parsedDateTime = parseAppointmentDateTime(
           data.appointment_date || "",
           data.appointment_time || ""
         );
 
-        if (!dateTime) {
+        if (!parsedDateTime) {
           results.push({ id: appointmentId, success: false, error: "Could not parse date/time" });
           continue;
         }
@@ -144,8 +146,8 @@ export async function POST(request: NextRequest) {
         const event = await createCalendarEvent({
           summary: `TalkServe Appointment: ${data.user_name}`,
           description: `Service: ${data.user_service || 'N/A'}\nPhone: ${data.user_phone || 'N/A'}\nEmail: ${data.user_email || 'N/A'}\nIndustry: ${data.user_industry || 'N/A'}\nConfirmation Method: ${data.confirmation_method || 'N/A'}`,
-          startDateTime: dateTime.start.toISOString(),
-          endDateTime: dateTime.end.toISOString(),
+          startDateTime: parsedDateTime.startDateTime,
+          endDateTime: parsedDateTime.endDateTime,
           attendeeEmail: data.user_email || undefined,
         });
 
