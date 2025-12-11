@@ -31,66 +31,6 @@ outputType = "webview"
 localPort = 5000
 externalPort = 80
 
-[[ports]]
-localPort = 32941
-externalPort = 5173
-
-[[ports]]
-localPort = 38295
-externalPort = 8081
-
-[[ports]]
-localPort = 38513
-externalPort = 8008
-
-[[ports]]
-localPort = 39113
-externalPort = 3002
-
-[[ports]]
-localPort = 41433
-externalPort = 8000
-
-[[ports]]
-localPort = 42837
-externalPort = 5000
-
-[[ports]]
-localPort = 43011
-externalPort = 3000
-
-[[ports]]
-localPort = 43241
-externalPort = 6000
-
-[[ports]]
-localPort = 43255
-externalPort = 4200
-
-[[ports]]
-localPort = 43539
-externalPort = 9000
-
-[[ports]]
-localPort = 43703
-externalPort = 3003
-
-[[ports]]
-localPort = 44517
-externalPort = 8080
-
-[[ports]]
-localPort = 44807
-externalPort = 6800
-
-[[ports]]
-localPort = 46677
-externalPort = 3001
-
-[[ports]]
-localPort = 46787
-externalPort = 8099
-
 [nix]
 channel = "stable-25_05"
 
