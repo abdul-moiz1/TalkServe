@@ -47,10 +47,8 @@ function DetailPanel({ appointment, onClose, formatFullDate }: {
     switch (method.toLowerCase()) {
       case 'sms':
         return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800';
-      case 'email':
-        return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800';
-      case 'call':
-        return 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800';
+      case 'whatsapp':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800';
       default:
         return 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700';
     }
@@ -284,10 +282,8 @@ export default function AppointmentsTab({ user }: AppointmentsTabProps) {
     switch (method.toLowerCase()) {
       case 'sms':
         return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800';
-      case 'email':
-        return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800';
-      case 'call':
-        return 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800';
+      case 'whatsapp':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800';
       default:
         return 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700';
     }
@@ -439,8 +435,7 @@ export default function AppointmentsTab({ user }: AppointmentsTabProps) {
                   >
                     <option value="all">All Methods</option>
                     <option value="sms">SMS</option>
-                    <option value="email">Email</option>
-                    <option value="call">Call</option>
+                    <option value="whatsapp">WhatsApp</option>
                   </select>
                 </div>
               </div>
