@@ -70,6 +70,7 @@ export async function GET(request: NextRequest) {
         userName: data.user_name || "",
         userPhone: data.user_phone || "",
         userService: data.user_service || "",
+        calendarSynced: data.calendar_synced || false,
       };
     });
 

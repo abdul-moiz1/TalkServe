@@ -13,7 +13,10 @@ import {
   FiSearch,
   FiLoader,
   FiX,
-  FiHash
+  FiHash,
+  FiRefreshCw,
+  FiCheck,
+  FiCheckCircle
 } from 'react-icons/fi';
 import { User } from 'firebase/auth';
 
@@ -28,6 +31,7 @@ interface Appointment {
   userName: string;
   userPhone: string;
   userService: string;
+  calendarSynced?: boolean;
 }
 
 interface AppointmentsTabProps {
@@ -158,6 +162,9 @@ export default function AppointmentsTab({ user }: AppointmentsTabProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [methodFilter, setMethodFilter] = useState('all');
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [selectedForSync, setSelectedForSync] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (user) {
@@ -203,6 +210,75 @@ export default function AppointmentsTab({ user }: AppointmentsTabProps) {
     
     return matchesSearch && matchesMethod;
   });
+
+  const toggleSelectForSync = (id: string) => {
+    setSelectedForSync(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const selectAllForSync = () => {
+    const unsyncedIds = filteredAppointments
+      .filter(a => !a.calendarSynced)
+      .map(a => a.id);
+    setSelectedForSync(new Set(unsyncedIds));
+  };
+
+  const clearSelection = () => {
+    setSelectedForSync(new Set());
+  };
+
+  const syncToCalendar = async () => {
+    if (selectedForSync.size === 0) {
+      setSyncMessage({ type: 'error', text: 'Please select appointments to sync' });
+      setTimeout(() => setSyncMessage(null), 3000);
+      return;
+    }
+
+    try {
+      setSyncing(true);
+      setSyncMessage(null);
+      
+      const idToken = await user?.getIdToken();
+      const response = await fetch('/api/admin/appointments/sync-calendar', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${idToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          appointmentIds: Array.from(selectedForSync),
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to sync');
+      }
+
+      setSyncMessage({ type: 'success', text: data.message });
+      setSelectedForSync(new Set());
+      fetchAppointments();
+      
+      setTimeout(() => setSyncMessage(null), 5000);
+    } catch (err) {
+      console.error('Error syncing to calendar:', err);
+      setSyncMessage({ 
+        type: 'error', 
+        text: err instanceof Error ? err.message : 'Failed to sync to calendar' 
+      });
+      setTimeout(() => setSyncMessage(null), 5000);
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const getMethodBadgeColor = (method: string) => {
     switch (method.toLowerCase()) {
@@ -337,34 +413,80 @@ export default function AppointmentsTab({ user }: AppointmentsTabProps) {
           className={`${selectedAppointment ? 'flex-1' : 'w-full'} bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/50 dark:border-slate-700/50 overflow-hidden`}
         >
           <div className="p-5 border-b border-slate-100 dark:border-slate-700/50">
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-                Appointments
-                <span className="ml-2 px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded-full text-sm font-normal text-slate-500 dark:text-slate-400">{filteredAppointments.length}</span>
-              </h2>
-              
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <div className="relative flex-1 sm:flex-initial">
-                  <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder="Search appointments..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full sm:w-64 pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-                  />
-                </div>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+                  Appointments
+                  <span className="ml-2 px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded-full text-sm font-normal text-slate-500 dark:text-slate-400">{filteredAppointments.length}</span>
+                </h2>
                 
-                <select
-                  value={methodFilter}
-                  onChange={(e) => setMethodFilter(e.target.value)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all cursor-pointer"
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                  <div className="relative flex-1 sm:flex-initial">
+                    <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="Search appointments..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full sm:w-64 pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                    />
+                  </div>
+                  
+                  <select
+                    value={methodFilter}
+                    onChange={(e) => setMethodFilter(e.target.value)}
+                    className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all cursor-pointer"
+                  >
+                    <option value="all">All Methods</option>
+                    <option value="sms">SMS</option>
+                    <option value="email">Email</option>
+                    <option value="call">Call</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  onClick={selectAllForSync}
+                  className="px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors"
                 >
-                  <option value="all">All Methods</option>
-                  <option value="sms">SMS</option>
-                  <option value="email">Email</option>
-                  <option value="call">Call</option>
-                </select>
+                  Select All Unsynced
+                </button>
+                {selectedForSync.size > 0 && (
+                  <button
+                    onClick={clearSelection}
+                    className="px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors"
+                  >
+                    Clear Selection ({selectedForSync.size})
+                  </button>
+                )}
+                <button
+                  onClick={syncToCalendar}
+                  disabled={syncing || selectedForSync.size === 0}
+                  className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all flex items-center gap-2 ${
+                    selectedForSync.size > 0 && !syncing
+                      ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 shadow-lg shadow-blue-500/25'
+                      : 'bg-slate-200 dark:bg-slate-600 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                  }`}
+                >
+                  {syncing ? (
+                    <>
+                      <FiLoader className="w-4 h-4 animate-spin" />
+                      Syncing...
+                    </>
+                  ) : (
+                    <>
+                      <FiCalendar className="w-4 h-4" />
+                      Sync to Google Calendar
+                    </>
+                  )}
+                </button>
+
+                {syncMessage && (
+                  <span className={`text-sm font-medium ${syncMessage.type === 'success' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                    {syncMessage.text}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -385,12 +507,36 @@ export default function AppointmentsTab({ user }: AppointmentsTabProps) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: index * 0.02 }}
-                  onClick={() => setSelectedAppointment(appointment)}
-                  className={`group px-5 py-4 cursor-pointer transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-700/30 ${selectedAppointment?.id === appointment.id ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-l-4 border-l-emerald-500' : 'border-l-4 border-l-transparent'}`}
+                  className={`group px-5 py-4 transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-700/30 ${selectedAppointment?.id === appointment.id ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-l-4 border-l-emerald-500' : 'border-l-4 border-l-transparent'}`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="relative">
+                      <div 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!appointment.calendarSynced) {
+                            toggleSelectForSync(appointment.id);
+                          }
+                        }}
+                        className={`w-6 h-6 rounded-md flex items-center justify-center cursor-pointer transition-all ${
+                          appointment.calendarSynced
+                            ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                            : selectedForSync.has(appointment.id)
+                            ? 'bg-blue-500 text-white'
+                            : 'border-2 border-slate-300 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500'
+                        }`}
+                        title={appointment.calendarSynced ? 'Already synced to Google Calendar' : 'Select for sync'}
+                      >
+                        {appointment.calendarSynced ? (
+                          <FiCheckCircle className="w-4 h-4" />
+                        ) : selectedForSync.has(appointment.id) ? (
+                          <FiCheck className="w-4 h-4" />
+                        ) : null}
+                      </div>
+                      <div 
+                        className="relative cursor-pointer"
+                        onClick={() => setSelectedAppointment(appointment)}
+                      >
                         <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-emerald-500/20">
                           {appointment.userName.charAt(0).toUpperCase()}
                         </div>
