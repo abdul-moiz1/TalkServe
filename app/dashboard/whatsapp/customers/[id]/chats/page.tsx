@@ -17,7 +17,9 @@ import {
   FiMinus,
   FiFilter,
   FiX,
-  FiFileText
+  FiFileText,
+  FiStar,
+  FiTag
 } from 'react-icons/fi';
 
 interface Message {
@@ -34,6 +36,19 @@ interface ChatSession {
   messageCount: number;
   mood: string;
   summary: string;
+  rating?: number;
+  keyTopics?: string[];
+}
+
+interface SavedSummary {
+  id: string;
+  customer: string;
+  conversation_date: string;
+  summary: string;
+  sentiment: string;
+  customer_mood: string;
+  key_topics: string[];
+  rating: number;
 }
 
 interface Customer {
@@ -96,31 +111,34 @@ export default function CustomerChatsPage() {
 
     async function fetchChatSessions(phone: number) {
       try {
-        // Fetch all conversations and group them by date
-        let allMessages: Message[] = [];
-        let hasMore = true;
-        let startAfter: string | null = null;
+        // Fetch all conversations and saved summaries in parallel
+        const [messagesResult, summariesResult] = await Promise.all([
+          fetchAllMessages(phone),
+          fetchSavedSummaries(phone.toString())
+        ]);
+
+        const allMessages = messagesResult;
+        const savedSummaries = summariesResult;
         
-        while (hasMore) {
-          const url = new URL(`/api/conversations`, window.location.origin);
-          url.searchParams.set('phone', phone.toString());
-          if (startAfter) {
-            url.searchParams.set('startAfter', startAfter);
+        // Helper to normalize date to YYYY-MM-DD format
+        const normalizeDateKey = (dateStr: string): string => {
+          try {
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return dateStr;
+            return date.toISOString().split('T')[0];
+          } catch {
+            return dateStr;
           }
-          
-          const response = await fetch(url.toString());
-          if (!response.ok) {
-            throw new Error('Failed to fetch conversations');
+        };
+        
+        // Create a map of saved summaries by normalized date for quick lookup
+        const summaryByDate: { [key: string]: SavedSummary } = {};
+        savedSummaries.forEach((summary: SavedSummary) => {
+          if (summary.conversation_date) {
+            const normalizedDate = normalizeDateKey(summary.conversation_date);
+            summaryByDate[normalizedDate] = summary;
           }
-          const data: ConversationResponse = await response.json();
-          if (data.success) {
-            allMessages = [...allMessages, ...(data.messages || [])];
-            hasMore = data.hasMore;
-            startAfter = data.nextStartAfter;
-          } else {
-            throw new Error('API returned unsuccessful response');
-          }
-        }
+        });
         
         // Group messages by date to create sessions
         const sessionsByDate: { [key: string]: Message[] } = {};
@@ -132,17 +150,41 @@ export default function CustomerChatsPage() {
           sessionsByDate[dateKey].push(message);
         });
         
-        // Convert to ChatSession format
-        const sessions: ChatSession[] = Object.entries(sessionsByDate)
-          .map(([date, messages]) => ({
-            date,
-            messageCount: messages.length,
-            mood: 'neutral', // Default mood since we're creating from messages
-            summary: messages.length > 0 
-              ? messages[0].message.substring(0, 150) + (messages[0].message.length > 150 ? '...' : '')
-              : 'No messages'
-          }))
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Sort newest first
+        // Convert to ChatSession format with saved summaries
+        const sessionsFromMessages: ChatSession[] = Object.entries(sessionsByDate)
+          .map(([date, messages]) => {
+            const savedSummary = summaryByDate[date];
+            return {
+              date,
+              messageCount: messages.length,
+              mood: savedSummary?.sentiment || 'neutral',
+              summary: savedSummary?.summary || (messages.length > 0 
+                ? messages[0].message.substring(0, 150) + (messages[0].message.length > 150 ? '...' : '')
+                : 'No messages'),
+              rating: savedSummary?.rating,
+              keyTopics: savedSummary?.key_topics
+            };
+          });
+        
+        // Add sessions from saved summaries that don't have matching messages
+        const messagesDates = new Set(Object.keys(sessionsByDate));
+        const summaryOnlySessions: ChatSession[] = savedSummaries
+          .filter((summary: SavedSummary) => {
+            if (!summary.conversation_date) return false;
+            const normalizedDate = normalizeDateKey(summary.conversation_date);
+            return !messagesDates.has(normalizedDate);
+          })
+          .map((summary: SavedSummary) => ({
+            date: normalizeDateKey(summary.conversation_date),
+            messageCount: 0,
+            mood: summary.sentiment || 'neutral',
+            summary: summary.summary || 'No summary available',
+            rating: summary.rating,
+            keyTopics: summary.key_topics
+          }));
+        
+        const sessions = [...sessionsFromMessages, ...summaryOnlySessions]
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         
         setChatSessions(sessions);
         setFilteredSessions(sessions);
@@ -150,6 +192,49 @@ export default function CustomerChatsPage() {
         console.error('Error fetching chat sessions:', err);
       } finally {
         setLoading(false);
+      }
+    }
+
+    async function fetchAllMessages(phone: number): Promise<Message[]> {
+      let allMessages: Message[] = [];
+      let hasMore = true;
+      let startAfter: string | null = null;
+      
+      while (hasMore) {
+        const url = new URL(`/api/conversations`, window.location.origin);
+        url.searchParams.set('phone', phone.toString());
+        if (startAfter) {
+          url.searchParams.set('startAfter', startAfter);
+        }
+        
+        const response = await fetch(url.toString());
+        if (!response.ok) {
+          throw new Error('Failed to fetch conversations');
+        }
+        const data: ConversationResponse = await response.json();
+        if (data.success) {
+          allMessages = [...allMessages, ...(data.messages || [])];
+          hasMore = data.hasMore;
+          startAfter = data.nextStartAfter;
+        } else {
+          throw new Error('API returned unsuccessful response');
+        }
+      }
+      return allMessages;
+    }
+
+    async function fetchSavedSummaries(customer: string): Promise<SavedSummary[]> {
+      try {
+        const response = await fetch(`/api/get-summaries?customer=${encodeURIComponent(customer)}`);
+        if (!response.ok) {
+          console.error('Failed to fetch saved summaries');
+          return [];
+        }
+        const data = await response.json();
+        return data.success ? data.summaries : [];
+      } catch (err) {
+        console.error('Error fetching saved summaries:', err);
+        return [];
       }
     }
 
@@ -439,6 +524,45 @@ export default function CustomerChatsPage() {
                               : (session.summary || 'No summary available')}
                           </p>
                         </div>
+                        
+                        {(session.rating != null || session.keyTopics !== undefined) && (
+                          <div className="flex flex-wrap items-center gap-2 mt-1">
+                            {session.rating != null && (
+                              <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                                <FiStar className="w-3 h-3 text-amber-500" />
+                                <span className="text-xs font-medium text-amber-700 dark:text-amber-400">
+                                  {session.rating}/5
+                                </span>
+                              </div>
+                            )}
+                            {session.keyTopics !== undefined && (
+                              <div className="flex items-center gap-1 flex-wrap">
+                                <FiTag className="w-3 h-3 text-gray-400" />
+                                {session.keyTopics.length > 0 ? (
+                                  <>
+                                    {session.keyTopics.slice(0, 3).map((topic, i) => (
+                                      <span 
+                                        key={i} 
+                                        className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400 rounded-full"
+                                      >
+                                        {topic}
+                                      </span>
+                                    ))}
+                                    {session.keyTopics.length > 3 && (
+                                      <span className="text-xs text-gray-500 dark:text-gray-500">
+                                        +{session.keyTopics.length - 3} more
+                                      </span>
+                                    )}
+                                  </>
+                                ) : (
+                                  <span className="text-xs text-gray-400 dark:text-gray-500 italic">
+                                    No topics
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                     
