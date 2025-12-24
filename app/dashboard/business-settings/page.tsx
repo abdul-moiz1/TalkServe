@@ -19,7 +19,7 @@ interface Business {
 }
 
 export default function BusinessSettingsPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const [business, setBusiness] = useState<Business | null>(null);
   const [businessName, setBusinessName] = useState('');
@@ -33,13 +33,9 @@ export default function BusinessSettingsPage() {
   const [activeTab, setActiveTab] = useState('info');
 
   useEffect(() => {
-    if (authLoading) return;
-    if (!user) {
-      router.push('/signin');
-      return;
-    }
+    if (!user?.uid) return;
     fetchBusinessContext();
-  }, [user?.uid, authLoading, router]);
+  }, [user?.uid]);
 
   const fetchBusinessContext = async () => {
     try {
