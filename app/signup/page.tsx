@@ -55,7 +55,7 @@ export default function SignUpPage() {
     try {
       const user = await signUp(email, password, name);
       await registerUserInBackend(name, email, user.uid);
-      router.push("/welcome");
+      router.push("/dashboard/business-settings");
     } catch (err: any) {
       setError(err.message || "Failed to create account. Please try again.");
     } finally {
@@ -74,7 +74,7 @@ export default function SignUpPage() {
         user.email || "",
         user.uid,
       );
-      router.push("/welcome");
+      router.push("/dashboard/business-settings");
     } catch (err: any) {
       setError(err.message || "Failed to sign up with Google.");
     } finally {
