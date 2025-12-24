@@ -4,6 +4,12 @@ import { useState, useEffect } from 'react';
 import { HiCheckCircle, HiUpload, HiX, HiDownload, HiEye } from 'react-icons/hi';
 import { useAuth } from '@/contexts/AuthContext';
 
+interface BusinessContext {
+  description?: string;
+  hours?: string;
+  rules?: string[];
+}
+
 const CHANNEL_OPTIONS = [
   { value: 'Whatsapp agent', label: 'Whatsapp agent' },
   { value: 'SMS agent', label: 'SMS agent' },
@@ -109,6 +115,7 @@ function FilePreviewModal({ isOpen, onClose, fileName, fileUrl }: FilePreviewMod
 
 export default function OnboardingForm() {
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState('general');
   const [formData, setFormData] = useState({
     ownerName: '',
     ownerEmail: '',
@@ -116,6 +123,11 @@ export default function OnboardingForm() {
     businessDescription: '',
     services: '',
     industryType: '',
+  });
+  const [businessContext, setBusinessContext] = useState<BusinessContext>({
+    description: '',
+    hours: '',
+    rules: ['']
   });
   const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
   const [file, setFile] = useState<File | null>(null);
@@ -135,16 +147,20 @@ export default function OnboardingForm() {
       }
 
       try {
-        const idToken = await user.getIdToken();
-        const response = await fetch('/api/onboarding', {
-          headers: {
-            'Authorization': `Bearer ${idToken}`,
-          },
-        });
-        const result = await response.json();
+        const [onboardingRes, businessRes] = await Promise.all([
+          fetch('/api/onboarding', {
+            headers: {
+              'Authorization': `Bearer ${await user.getIdToken()}`,
+            },
+          }),
+          fetch(`/api/save-business-context?uid=${user.uid}`)
+        ]);
 
-        if (result.success && result.exists && result.data) {
-          const data: OnboardingData = result.data;
+        const onboardingResult = await onboardingRes.json();
+        const businessResult = await businessRes.json();
+
+        if (onboardingResult.success && onboardingResult.exists && onboardingResult.data) {
+          const data: OnboardingData = onboardingResult.data;
           setFormData({
             ownerName: data.ownerName || '',
             ownerEmail: data.ownerEmail || '',
@@ -164,8 +180,16 @@ export default function OnboardingForm() {
           setExistingFileUrl(data.businessContextUrl || null);
           setIsEditing(true);
         }
+
+        if (businessResult.success && businessResult.data) {
+          setBusinessContext({
+            description: businessResult.data.context?.description || '',
+            hours: businessResult.data.context?.hours || '',
+            rules: businessResult.data.context?.rules || ['']
+          });
+        }
       } catch (error) {
-        console.error('Error fetching existing onboarding data:', error);
+        console.error('Error fetching existing data:', error);
       } finally {
         setIsFetching(false);
       }
@@ -292,217 +316,352 @@ export default function OnboardingForm() {
     );
   }
 
+  const saveBusinessContext = async () => {
+    try {
+      const response = await fetch('/api/save-business-context', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          uid: user?.uid,
+          businessName: formData.businessName || 'Business',
+          context: businessContext
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert('Business context saved successfully!');
+      }
+    } catch (error) {
+      console.error('Error saving business context:', error);
+      alert('Failed to save business context');
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="bg-slate-50 dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-700">
+    <form onSubmit={handleSubmit} className="bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
       {isEditing && (
-        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/30 rounded-lg">
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/10 border-b border-blue-200 dark:border-blue-900/30">
           <p className="text-blue-700 dark:text-blue-400">
             You have an existing onboarding submission. Update your information below.
           </p>
         </div>
       )}
 
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
-        <div>
-          <label htmlFor="ownerName" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Owner Name *
-          </label>
-          <input
-            type="text"
-            id="ownerName"
-            name="ownerName"
-            required
-            value={formData.ownerName}
-            onChange={handleChange}
-            className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-          />
-        </div>
-        <div>
-          <label htmlFor="ownerEmail" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Owner Email *
-          </label>
-          <input
-            type="email"
-            id="ownerEmail"
-            name="ownerEmail"
-            required
-            value={formData.ownerEmail}
-            onChange={handleChange}
-            className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-          />
-        </div>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
-        <div>
-          <label htmlFor="businessName" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Business Name *
-          </label>
-          <input
-            type="text"
-            id="businessName"
-            name="businessName"
-            required
-            value={formData.businessName}
-            onChange={handleChange}
-            className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-          />
-        </div>
-        <div>
-          <label htmlFor="industryType" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Industry or Business Type *
-          </label>
-          <select
-            id="industryType"
-            name="industryType"
-            required
-            value={formData.industryType}
-            onChange={handleChange}
-            className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+      {/* Tabs */}
+      <div className="flex border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+        {['general', 'services', 'business'].map(tab => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => setActiveTab(tab)}
+            className={`flex-1 px-6 py-4 font-medium transition-colors ${
+              activeTab === tab
+                ? 'border-b-2 border-primary text-primary dark:text-blue-400'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300'
+            }`}
           >
-            <option value="">Select an industry</option>
-            <option value="dental">Dental Clinic</option>
-            <option value="restaurant">Restaurant</option>
-            <option value="healthcare">Healthcare</option>
-            <option value="retail">Retail</option>
-            <option value="professional-services">Professional Services</option>
-            <option value="home-services">Home Services</option>
-            <option value="automotive">Automotive</option>
-            <option value="hospitality">Hospitality</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
+            {tab === 'general' ? 'Owner Info' : tab === 'services' ? 'Services & Channels' : 'Business Context'}
+          </button>
+        ))}
       </div>
 
-      <div className="mb-6">
-        <label htmlFor="businessDescription" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-          Business Short Description *
-        </label>
-        <textarea
-          id="businessDescription"
-          name="businessDescription"
-          required
-          rows={4}
-          value={formData.businessDescription}
-          onChange={handleChange}
-          placeholder="Briefly describe your business and what you do..."
-          className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-        />
-      </div>
+      <div className="p-8">
+        {activeTab === 'general' && (
+          <>
+                    <div>
+                <label htmlFor="ownerName" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Owner Name *
+                </label>
+                <input
+                  type="text"
+                  id="ownerName"
+                  name="ownerName"
+                  required
+                  value={formData.ownerName}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label htmlFor="ownerEmail" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Owner Email *
+                </label>
+                <input
+                  type="email"
+                  id="ownerEmail"
+                  name="ownerEmail"
+                  required
+                  value={formData.ownerEmail}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+            </div>
 
-      <div className="mb-6">
-        <label htmlFor="services" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-          Services *
-        </label>
-        <textarea
-          id="services"
-          name="services"
-          required
-          rows={4}
-          value={formData.services}
-          onChange={handleChange}
-          placeholder="List the services you offer (e.g., consultations, repairs, appointments, etc.)..."
-          className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-        />
-      </div>
+            <div className="grid md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label htmlFor="businessName" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Business Name *
+                </label>
+                <input
+                  type="text"
+                  id="businessName"
+                  name="businessName"
+                  required
+                  value={formData.businessName}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label htmlFor="industryType" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Industry or Business Type *
+                </label>
+                <select
+                  id="industryType"
+                  name="industryType"
+                  required
+                  value={formData.industryType}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="">Select an industry</option>
+                  <option value="dental">Dental Clinic</option>
+                  <option value="restaurant">Restaurant</option>
+                  <option value="healthcare">Healthcare</option>
+                  <option value="retail">Retail</option>
+                  <option value="professional-services">Professional Services</option>
+                  <option value="home-services">Home Services</option>
+                  <option value="automotive">Automotive</option>
+                  <option value="hospitality">Hospitality</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
 
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-          Channel *
-        </label>
-        <div className="flex flex-wrap gap-4">
-          {CHANNEL_OPTIONS.map((option) => (
-            <label
-              key={option.value}
-              className="flex items-center gap-2 cursor-pointer"
-            >
-              <input
-                type="checkbox"
-                checked={selectedChannels.includes(option.value)}
-                onChange={(e) => handleChannelChange(option.value, e.target.checked)}
-                className="w-5 h-5 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary focus:ring-2 bg-white dark:bg-slate-800"
+            <div className="mb-6">
+              <label htmlFor="businessDescription" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Business Short Description *
+              </label>
+              <textarea
+                id="businessDescription"
+                name="businessDescription"
+                required
+                rows={4}
+                value={formData.businessDescription}
+                onChange={handleChange}
+                placeholder="Briefly describe your business and what you do..."
+                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
               />
-              <span className="text-slate-700 dark:text-slate-300">{option.label}</span>
-            </label>
-          ))}
-        </div>
-        {selectedChannels.length === 0 && status !== 'idle' && (
-          <p className="mt-2 text-sm text-red-500">Please select at least one channel</p>
+            </div>
+          </>
+        )}
+
+        {activeTab === 'services' && (
+          <>
+            <div className="mb-6">
+              <label htmlFor="services" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Services *
+              </label>
+              <textarea
+                id="services"
+                name="services"
+                required
+                rows={4}
+                value={formData.services}
+                onChange={handleChange}
+                placeholder="List the services you offer (e.g., consultations, repairs, appointments, etc.)..."
+                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Channel *
+              </label>
+              <div className="flex flex-wrap gap-4">
+                {CHANNEL_OPTIONS.map((option) => (
+                  <label
+                    key={option.value}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedChannels.includes(option.value)}
+                      onChange={(e) => handleChannelChange(option.value, e.target.checked)}
+                      className="w-5 h-5 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary focus:ring-2 bg-white dark:bg-slate-800"
+                    />
+                    <span className="text-slate-700 dark:text-slate-300">{option.label}</span>
+                  </label>
+                ))}
+              </div>
+              {selectedChannels.length === 0 && status !== 'idle' && (
+                <p className="mt-2 text-sm text-red-500">Please select at least one channel</p>
+              )}
+            </div>
+
+              <label htmlFor="businessContext" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Business Context Document
+              </label>
+              {existingFileName && !file && (
+                <div className="mb-2 p-3 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-between">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    Current file:{' '}
+                    <button
+                      type="button"
+                      onClick={() => setIsPreviewOpen(true)}
+                      className="font-medium text-primary hover:text-blue-700 hover:underline transition-colors inline-flex items-center gap-1"
+                    >
+                      {existingFileName}
+                      <HiEye className="h-4 w-4" />
+                    </button>
+                  </p>
+                </div>
+              )}
+              <div className="mt-2">
+                <label
+                  htmlFor="businessContext"
+                  className="flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg cursor-pointer hover:border-primary dark:hover:border-primary transition-colors bg-white dark:bg-slate-800"
+                >
+                  <div className="text-center">
+                    <HiUpload className="mx-auto h-12 w-12 text-slate-400" />
+                    <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                      {file ? (
+                        <span className="font-medium text-primary">{file.name}</span>
+                      ) : (
+                        <>
+                          <span className="font-medium text-primary">
+                            {existingFileName ? 'Click to replace file' : 'Click to upload'}
+                          </span>
+                          <span> or drag and drop</span>
+                        </>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                      PDF, Word, or Text files up to 10MB
+                    </p>
+                  </div>
+                  <input
+                    id="businessContext"
+                    name="businessContext"
+                    type="file"
+                    accept=".pdf,.doc,.docx,.txt"
+                    onChange={handleFileChange}
+                    className="sr-only"
+                  />
+                </label>
+              </div>
+            </div>
+          </>
+        )}
+
+        {activeTab === 'business' && (
+          <>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Business Description
+              </label>
+              <textarea
+                rows={4}
+                value={businessContext.description}
+                onChange={(e) => setBusinessContext({...businessContext, description: e.target.value})}
+                placeholder="Describe your business context..."
+                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Business Hours
+              </label>
+              <textarea
+                rows={3}
+                value={businessContext.hours}
+                onChange={(e) => setBusinessContext({...businessContext, hours: e.target.value})}
+                placeholder="e.g., Monday - Friday: 9:00 AM - 5:00 PM&#10;Saturday: 10:00 AM - 3:00 PM"
+                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-4">
+                Business Rules
+              </label>
+              <div className="space-y-3">
+                {businessContext.rules?.map((rule, idx) => (
+                  <div key={idx} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={rule}
+                      onChange={(e) => {
+                        const newRules = [...(businessContext.rules || [])];
+                        newRules[idx] = e.target.value;
+                        setBusinessContext({...businessContext, rules: newRules});
+                      }}
+                      placeholder={`Rule ${idx + 1}`}
+                      className="flex-1 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                    {businessContext.rules && businessContext.rules.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBusinessContext({
+                            ...businessContext,
+                            rules: (businessContext.rules || []).filter((_, i) => i !== idx)
+                          });
+                        }}
+                        className="px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setBusinessContext({...businessContext, rules: [...(businessContext.rules || []), '']})}
+                className="mt-4 px-4 py-2 text-primary border border-primary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+              >
+                + Add Rule
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={saveBusinessContext}
+              className="w-full px-8 py-3 text-lg font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors shadow-lg"
+            >
+              Save Business Context
+            </button>
+          </>
         )}
       </div>
 
-      <div className="mb-6">
-        <label htmlFor="businessContext" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-          Business Context Document
-        </label>
-        {existingFileName && !file && (
-          <div className="mb-2 p-3 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-between">
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              Current file:{' '}
-              <button
-                type="button"
-                onClick={() => setIsPreviewOpen(true)}
-                className="font-medium text-primary hover:text-blue-700 hover:underline transition-colors inline-flex items-center gap-1"
-              >
-                {existingFileName}
-                <HiEye className="h-4 w-4" />
-              </button>
+      {activeTab !== 'business' && (
+        <>
+
+
+        {status === 'error' && (
+          <div className="p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-lg">
+            <p className="text-red-600 dark:text-red-400">
+              Something went wrong. Please try again or contact us at hello@talkserve.ai
             </p>
           </div>
         )}
-        <div className="mt-2">
-          <label
-            htmlFor="businessContext"
-            className="flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg cursor-pointer hover:border-primary dark:hover:border-primary transition-colors bg-white dark:bg-slate-800"
-          >
-            <div className="text-center">
-              <HiUpload className="mx-auto h-12 w-12 text-slate-400" />
-              <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                {file ? (
-                  <span className="font-medium text-primary">{file.name}</span>
-                ) : (
-                  <>
-                    <span className="font-medium text-primary">
-                      {existingFileName ? 'Click to replace file' : 'Click to upload'}
-                    </span>
-                    <span> or drag and drop</span>
-                  </>
-                )}
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
-                PDF, Word, or Text files up to 10MB
-              </p>
-            </div>
-            <input
-              id="businessContext"
-              name="businessContext"
-              type="file"
-              accept=".pdf,.doc,.docx,.txt"
-              onChange={handleFileChange}
-              className="sr-only"
-            />
-          </label>
-        </div>
-      </div>
 
-      {status === 'error' && (
-        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-lg">
-          <p className="text-red-600 dark:text-red-400">
-            Something went wrong. Please try again or contact us at hello@talkserve.ai
-          </p>
-        </div>
+        <button
+          type="submit"
+          disabled={status === 'loading'}
+          className="w-full px-8 py-4 text-lg font-medium text-white bg-primary rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30"
+        >
+          {status === 'loading' 
+            ? (isEditing ? 'Updating...' : 'Submitting...') 
+            : (isEditing ? 'Update Onboarding' : 'Submit Onboarding')
+          }
+        </button>
+        </>
       )}
-
-      <button
-        type="submit"
-        disabled={status === 'loading'}
-        className="w-full px-8 py-4 text-lg font-medium text-white bg-primary rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30"
-      >
-        {status === 'loading' 
-          ? (isEditing ? 'Updating...' : 'Submitting...') 
-          : (isEditing ? 'Update Onboarding' : 'Submit Onboarding')
-        }
-      </button>
 
       {existingFileName && existingFileUrl && (
         <FilePreviewModal
