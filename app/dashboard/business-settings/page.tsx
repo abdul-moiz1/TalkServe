@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { FiSave, FiArrowLeft, FiAlertCircle } from 'react-icons/fi';
+import { FiSave, FiArrowLeft, FiAlertCircle, FiRefreshCw } from 'react-icons/fi';
 
 interface BusinessContext {
   description?: string;
@@ -31,27 +31,49 @@ export default function BusinessSettingsPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [activeTab, setActiveTab] = useState('info');
+  const [fetchError, setFetchError] = useState('');
 
   useEffect(() => {
-    if (!user?.uid) return;
+    // Redirect to login if not authenticated
+    if (!user) {
+      router.push('/signin');
+      return;
+    }
     fetchBusinessContext();
-  }, [user?.uid]);
+  }, [user]);
 
   const fetchBusinessContext = async () => {
+    setLoading(true);
+    setFetchError('');
     try {
-      const response = await fetch(`/api/save-business-context?uid=${user?.uid}`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.data) {
-          setBusiness(data.data);
-          setBusinessName(data.data.businessName);
-          setDescription(data.data.context?.description || '');
-          setHours(data.data.context?.hours || '');
-          setRules(data.data.context?.rules || ['']);
-        }
+      if (!user?.uid) {
+        setFetchError('User not authenticated');
+        return;
+      }
+
+      const response = await fetch(`/api/save-business-context?uid=${user.uid}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch business context');
+      }
+
+      const data = await response.json();
+      if (data.success && data.data) {
+        setBusiness(data.data);
+        setBusinessName(data.data.businessName || '');
+        setDescription(data.data.context?.description || '');
+        setHours(data.data.context?.hours || '');
+        setRules(data.data.context?.rules && data.data.context.rules.length > 0 ? data.data.context.rules : ['']);
+      } else if (data.success && !data.data) {
+        // New business - reset to empty
+        setBusiness(null);
+        setBusinessName('');
+        setDescription('');
+        setHours('');
+        setRules(['']);
       }
     } catch (err) {
       console.error('Error fetching business context:', err);
+      setFetchError('Failed to load business settings. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -100,8 +122,11 @@ export default function BusinessSettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading your business settings...</p>
+        </div>
       </div>
     );
   }
@@ -122,10 +147,21 @@ export default function BusinessSettingsPage() {
           </h1>
         </div>
 
-        {error && (
+        {(error || fetchError) && (
           <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-3">
             <FiAlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-            <p className="text-red-700 dark:text-red-400">{error}</p>
+            <div className="flex-1">
+              <p className="text-red-700 dark:text-red-400">{error || fetchError}</p>
+              {fetchError && (
+                <button
+                  onClick={fetchBusinessContext}
+                  className="mt-2 flex items-center gap-1 text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+                >
+                  <FiRefreshCw className="w-4 h-4" />
+                  Try again
+                </button>
+              )}
+            </div>
           </div>
         )}
 
