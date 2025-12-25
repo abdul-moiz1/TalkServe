@@ -24,8 +24,9 @@ import {
   FiClock
 } from 'react-icons/fi';
 import AppointmentsTab from './components/AppointmentsTab';
+import BusinessWidgetTab from './components/BusinessWidgetTab';
 
-type AdminTab = 'owners' | 'appointments';
+type AdminTab = 'owners' | 'appointments' | 'business-widget';
 
 interface Owner {
   id: string;
@@ -445,6 +446,17 @@ export default function AdminPage() {
               <FiCalendar className="w-4 h-4" />
               Appointments
             </button>
+            <button
+              onClick={() => setActiveTab('business-widget')}
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all ${
+                activeTab === 'business-widget'
+                  ? 'border-purple-600 text-purple-600 dark:text-purple-400 dark:border-purple-400'
+                  : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
+              }`}
+            >
+              <FiBriefcase className="w-4 h-4" />
+              Business Widget
+            </button>
           </div>
         </div>
       </header>
@@ -452,6 +464,8 @@ export default function AdminPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'appointments' ? (
           <AppointmentsTab user={user} />
+        ) : activeTab === 'business-widget' ? (
+          <BusinessWidgetTab owners={owners} user={user} />
         ) : (
           <>
             <motion.div 
