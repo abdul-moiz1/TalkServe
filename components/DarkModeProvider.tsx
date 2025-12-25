@@ -16,8 +16,7 @@ export function DarkModeProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    const stored = localStorage.getItem('theme') as Theme;
+    const stored = localStorage.getItem('theme') as Theme | null;
     const initialTheme = stored || 'light';
     setTheme(initialTheme);
     
@@ -29,6 +28,8 @@ export function DarkModeProvider({ children }: { children: ReactNode }) {
     } else {
       root.classList.remove('dark');
     }
+    
+    setMounted(true);
   }, []);
 
   const toggleTheme = () => {
@@ -46,10 +47,6 @@ export function DarkModeProvider({ children }: { children: ReactNode }) {
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
   };
-
-  if (!mounted) {
-    return null;
-  }
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>

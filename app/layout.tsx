@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { ReactNode } from "react";
-import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/Header";
 import ConditionalFooter from "@/components/ConditionalFooter";
@@ -10,6 +9,7 @@ import { DarkModeProvider } from "@/components/DarkModeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import VoiceflowWidget from "@/components/VoiceflowWidget";
 import { VoiceAgentProvider } from "@/components/VoiceAgentContext";
+import AIVoiceWidget from "@/components/AIVoiceWidget";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -49,21 +49,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${plusJakarta.variable}`}>
-      <head>
-        <Script
-          id="ai-widget-config"
-          dangerouslySetInnerHTML={{
-            __html: `window.AIVoiceWidgetConfig = {
-              businessId: "rhplHrWnwFWb9WQaRo5H",
-            };`,
-          }}
-          strategy="beforeInteractive"
-        />
-        <Script
-          src="https://talkserve.web.app/widget.js"
-          strategy="lazyOnload"
-        />
-      </head>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <DarkModeProvider>
           <AuthProvider>
@@ -73,6 +58,7 @@ export default function RootLayout({
               <ConditionalFooter />
               <CookieConsent />
               <VoiceflowWidget />
+              <AIVoiceWidget />
             </VoiceAgentProvider>
           </AuthProvider>
         </DarkModeProvider>
