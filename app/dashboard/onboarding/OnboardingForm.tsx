@@ -23,6 +23,14 @@ interface OnboardingData {
   businessContextUrl?: string;
 }
 
+interface WidgetSettings {
+  widgetName?: string;
+  widgetColor?: string;
+  widgetPosition?: string;
+  widgetBehavior?: string;
+  initialsGreeting?: string;
+}
+
 interface FilePreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -117,6 +125,13 @@ export default function OnboardingForm() {
     services: '',
     industryType: '',
   });
+  const [widgetSettings, setWidgetSettings] = useState<WidgetSettings>({
+    widgetName: '',
+    widgetColor: '#2563EB',
+    widgetPosition: 'bottom-right',
+    widgetBehavior: 'always-open',
+    initialsGreeting: '',
+  });
   const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -126,6 +141,7 @@ export default function OnboardingForm() {
   const [existingFileUrl, setExistingFileUrl] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(true);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('onboarding');
 
   useEffect(() => {
     async function fetchExistingData() {
@@ -136,15 +152,20 @@ export default function OnboardingForm() {
 
       try {
         const idToken = await user.getIdToken();
-        const response = await fetch('/api/onboarding', {
-          headers: {
-            'Authorization': `Bearer ${idToken}`,
-          },
-        });
-        const result = await response.json();
+        const [onboardingRes, widgetRes] = await Promise.all([
+          fetch('/api/onboarding', {
+            headers: {
+              'Authorization': `Bearer ${idToken}`,
+            },
+          }),
+          fetch(`/api/save-widget-settings?uid=${user.uid}`),
+        ]);
 
-        if (result.success && result.exists && result.data) {
-          const data: OnboardingData = result.data;
+        const onboardingResult = await onboardingRes.json();
+        const widgetResult = await widgetRes.json();
+
+        if (onboardingResult.success && onboardingResult.exists && onboardingResult.data) {
+          const data: OnboardingData = onboardingResult.data;
           setFormData({
             ownerName: data.ownerName || '',
             ownerEmail: data.ownerEmail || '',
@@ -164,8 +185,12 @@ export default function OnboardingForm() {
           setExistingFileUrl(data.businessContextUrl || null);
           setIsEditing(true);
         }
+
+        if (widgetResult.success && widgetResult.data) {
+          setWidgetSettings(widgetResult.data);
+        }
       } catch (error) {
-        console.error('Error fetching existing onboarding data:', error);
+        console.error('Error fetching existing data:', error);
       } finally {
         setIsFetching(false);
       }
@@ -255,6 +280,35 @@ export default function OnboardingForm() {
     }
   };
 
+  const handleWidgetChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setWidgetSettings(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSaveWidgetSettings = async () => {
+    if (!user?.uid) return;
+
+    try {
+      const response = await fetch('/api/save-widget-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          uid: user.uid,
+          widgetSettings,
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setStatus('success');
+        setTimeout(() => setStatus('idle'), 3000);
+      }
+    } catch (error) {
+      console.error('Error saving widget settings:', error);
+      setStatus('error');
+    }
+  };
+
   if (isFetching) {
     return (
       <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-700">
@@ -293,7 +347,34 @@ export default function OnboardingForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-slate-50 dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-700">
+    <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+      {/* Tab Navigation */}
+      <div className="border-b border-slate-200 dark:border-slate-700 flex">
+        <button
+          onClick={() => setActiveTab('onboarding')}
+          className={`px-6 py-4 font-medium border-b-2 transition-colors ${
+            activeTab === 'onboarding'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+          }`}
+        >
+          Onboarding
+        </button>
+        <button
+          onClick={() => setActiveTab('widget')}
+          className={`px-6 py-4 font-medium border-b-2 transition-colors ${
+            activeTab === 'widget'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+          }`}
+        >
+          Widget Settings
+        </button>
+      </div>
+
+      {/* Onboarding Tab */}
+      {activeTab === 'onboarding' && (
+    <form onSubmit={handleSubmit} className="p-8">
       {isEditing && (
         <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/30 rounded-lg">
           <p className="text-blue-700 dark:text-blue-400">
@@ -504,14 +585,131 @@ export default function OnboardingForm() {
         }
       </button>
 
-      {existingFileName && existingFileUrl && (
-        <FilePreviewModal
-          isOpen={isPreviewOpen}
-          onClose={() => setIsPreviewOpen(false)}
-          fileName={existingFileName}
-          fileUrl={existingFileUrl}
-        />
+        {existingFileName && existingFileUrl && (
+          <FilePreviewModal
+            isOpen={isPreviewOpen}
+            onClose={() => setIsPreviewOpen(false)}
+            fileName={existingFileName}
+            fileUrl={existingFileUrl}
+          />
+        )}
+        </form>
       )}
-    </form>
+
+      {/* Widget Settings Tab */}
+      {activeTab === 'widget' && (
+        <div className="p-8">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
+            Configure Your Chat Widget
+          </h3>
+
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label htmlFor="widgetName" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Widget Name
+              </label>
+              <input
+                type="text"
+                id="widgetName"
+                name="widgetName"
+                value={widgetSettings.widgetName}
+                onChange={handleWidgetChange}
+                placeholder="e.g., Support Chat"
+                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label htmlFor="widgetColor" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Widget Color
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  id="widgetColor"
+                  name="widgetColor"
+                  value={widgetSettings.widgetColor}
+                  onChange={handleWidgetChange}
+                  className="w-14 h-10 rounded-lg cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={widgetSettings.widgetColor}
+                  onChange={handleWidgetChange}
+                  name="widgetColor"
+                  className="flex-1 px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label htmlFor="widgetPosition" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Widget Position
+              </label>
+              <select
+                id="widgetPosition"
+                name="widgetPosition"
+                value={widgetSettings.widgetPosition}
+                onChange={handleWidgetChange}
+                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+              >
+                <option value="bottom-right">Bottom Right</option>
+                <option value="bottom-left">Bottom Left</option>
+                <option value="top-right">Top Right</option>
+                <option value="top-left">Top Left</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="widgetBehavior" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Widget Behavior
+              </label>
+              <select
+                id="widgetBehavior"
+                name="widgetBehavior"
+                value={widgetSettings.widgetBehavior}
+                onChange={handleWidgetChange}
+                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+              >
+                <option value="always-open">Always Open</option>
+                <option value="minimized">Minimized by Default</option>
+                <option value="on-click">Open on Click</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <label htmlFor="initialsGreeting" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Initial Greeting Message
+            </label>
+            <textarea
+              id="initialsGreeting"
+              name="initialsGreeting"
+              value={widgetSettings.initialsGreeting}
+              onChange={handleWidgetChange}
+              placeholder="e.g., Hello! How can we help you today?"
+              rows={3}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+          </div>
+
+          {status === 'error' && (
+            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-lg">
+              <p className="text-red-600 dark:text-red-400">
+                Something went wrong. Please try again.
+              </p>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleSaveWidgetSettings}
+            className="w-full px-8 py-4 text-lg font-medium text-white bg-primary rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30"
+          >
+            Save Widget Settings
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
