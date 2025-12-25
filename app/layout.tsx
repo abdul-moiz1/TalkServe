@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { ReactNode } from "react";
+import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/Header";
 import ConditionalFooter from "@/components/ConditionalFooter";
@@ -48,6 +49,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${plusJakarta.variable}`}>
+      <head>
+        <Script
+          id="ai-widget-config"
+          dangerouslySetInnerHTML={{
+            __html: `window.AIVoiceWidgetConfig = {
+              businessId: "rhplHrWnwFWb9WQaRo5H",
+            };`,
+          }}
+          strategy="beforeInteractive"
+        />
+        <Script
+          src="https://talkserve.web.app/widget.js"
+          strategy="lazyOnload"
+        />
+      </head>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <DarkModeProvider>
           <AuthProvider>
