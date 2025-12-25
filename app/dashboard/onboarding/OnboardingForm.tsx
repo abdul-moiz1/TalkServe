@@ -127,6 +127,7 @@ export default function OnboardingForm() {
   const [businessDescription, setBusinessDescription] = useState('');
   const [businessHours, setBusinessHours] = useState('');
   const [businessRules, setBusinessRules] = useState<string[]>(['']);
+  const [businessServices, setBusinessServices] = useState('');
   const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -186,6 +187,7 @@ export default function OnboardingForm() {
           setBusinessName(businessData.businessName || '');
           setBusinessDescription(businessData.context?.description || '');
           setBusinessHours(businessData.context?.hours || '');
+          setBusinessServices(businessData.context?.services || '');
           setBusinessRules(businessData.context?.rules && businessData.context.rules.length > 0 ? businessData.context.rules : ['']);
         }
       } catch (error) {
@@ -293,6 +295,7 @@ export default function OnboardingForm() {
           context: {
             description: businessDescription.trim(),
             hours: businessHours.trim(),
+            services: businessServices.trim(),
             rules: businessRules.filter(r => r.trim())
           }
         })
@@ -363,34 +366,14 @@ export default function OnboardingForm() {
           Onboarding
         </button>
         <button
-          onClick={() => setActiveTab('business-info')}
+          onClick={() => setActiveTab('business-settings')}
           className={`px-6 py-4 font-medium border-b-2 transition-colors ${
-            activeTab === 'business-info'
+            activeTab === 'business-settings'
               ? 'border-primary text-primary'
               : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
           }`}
         >
-          Business Info
-        </button>
-        <button
-          onClick={() => setActiveTab('hours')}
-          className={`px-6 py-4 font-medium border-b-2 transition-colors ${
-            activeTab === 'hours'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-          }`}
-        >
-          Hours
-        </button>
-        <button
-          onClick={() => setActiveTab('rules')}
-          className={`px-6 py-4 font-medium border-b-2 transition-colors ${
-            activeTab === 'rules'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-          }`}
-        >
-          Rules
+          Business Settings
         </button>
       </div>
 
@@ -618,14 +601,15 @@ export default function OnboardingForm() {
         </form>
       )}
 
-      {/* Business Info Tab */}
-      {activeTab === 'business-info' && (
-        <div className="p-8">
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
-            Business Information
+      {/* Business Settings Tab */}
+      {activeTab === 'business-settings' && (
+        <form onSubmit={(e) => { e.preventDefault(); handleSaveBusinessSettings(); }} className="p-8 space-y-6">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+            Business Settings
           </h3>
-          
-          <div className="mb-6">
+
+          {/* Business Name */}
+          <div>
             <label htmlFor="businessName" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Business Name
             </label>
@@ -639,47 +623,23 @@ export default function OnboardingForm() {
             />
           </div>
 
-          <div className="mb-6">
+          {/* Business Description */}
+          <div>
             <label htmlFor="businessDescription" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Description
+              Business Description
             </label>
             <textarea
               id="businessDescription"
               value={businessDescription}
               onChange={(e) => setBusinessDescription(e.target.value)}
               placeholder="Describe your business..."
-              rows={5}
+              rows={4}
               className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
 
-          {status === 'error' && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-lg">
-              <p className="text-red-600 dark:text-red-400">
-                Something went wrong. Please try again.
-              </p>
-            </div>
-          )}
-
-          <button
-            type="button"
-            onClick={handleSaveBusinessSettings}
-            disabled={status === 'loading'}
-            className="w-full px-8 py-4 text-lg font-medium text-white bg-primary rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30"
-          >
-            {status === 'loading' ? 'Saving...' : 'Save Business Info'}
-          </button>
-        </div>
-      )}
-
-      {/* Hours Tab */}
-      {activeTab === 'hours' && (
-        <div className="p-8">
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
-            Business Hours
-          </h3>
-          
-          <div className="mb-6">
+          {/* Business Hours */}
+          <div>
             <label htmlFor="businessHours" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Business Hours
             </label>
@@ -691,13 +651,69 @@ export default function OnboardingForm() {
               rows={4}
               className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
             />
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              Enter your business hours in a clear format
-            </p>
+          </div>
+
+          {/* Services */}
+          <div>
+            <label htmlFor="businessServices" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Services
+            </label>
+            <textarea
+              id="businessServices"
+              value={businessServices}
+              onChange={(e) => setBusinessServices(e.target.value)}
+              placeholder="List the services you offer..."
+              rows={4}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+          </div>
+
+          {/* Rules */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-4">
+              Business Rules / Instructions
+            </label>
+            <div className="space-y-3">
+              {businessRules.map((rule, index) => (
+                <div key={index} className="flex gap-2">
+                  <span className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-sm font-medium text-primary dark:text-blue-400">
+                    {index + 1}
+                  </span>
+                  <input
+                    type="text"
+                    value={rule}
+                    onChange={(e) => {
+                      const newRules = [...businessRules];
+                      newRules[index] = e.target.value;
+                      setBusinessRules(newRules);
+                    }}
+                    className="flex-1 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder={`Rule ${index + 1}`}
+                  />
+                  {businessRules.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setBusinessRules(businessRules.filter((_, i) => i !== index))}
+                      className="px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setBusinessRules([...businessRules, ''])}
+              className="mt-4 px-4 py-2 text-primary border border-primary/20 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+            >
+              + Add Rule
+            </button>
           </div>
 
           {status === 'error' && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-lg">
+            <div className="p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-lg">
               <p className="text-red-600 dark:text-red-400">
                 Something went wrong. Please try again.
               </p>
@@ -705,78 +721,13 @@ export default function OnboardingForm() {
           )}
 
           <button
-            type="button"
-            onClick={handleSaveBusinessSettings}
+            type="submit"
             disabled={status === 'loading'}
             className="w-full px-8 py-4 text-lg font-medium text-white bg-primary rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30"
           >
-            {status === 'loading' ? 'Saving...' : 'Save Hours'}
+            {status === 'loading' ? 'Saving...' : 'Save Business Settings'}
           </button>
-        </div>
-      )}
-
-      {/* Rules Tab */}
-      {activeTab === 'rules' && (
-        <div className="p-8">
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
-            Business Rules / Instructions
-          </h3>
-          
-          <div className="space-y-3">
-            {businessRules.map((rule, index) => (
-              <div key={index} className="flex gap-2">
-                <span className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-sm font-medium text-primary dark:text-blue-400">
-                  {index + 1}
-                </span>
-                <input
-                  type="text"
-                  value={rule}
-                  onChange={(e) => {
-                    const newRules = [...businessRules];
-                    newRules[index] = e.target.value;
-                    setBusinessRules(newRules);
-                  }}
-                  className="flex-1 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder={`Rule ${index + 1}`}
-                />
-                {businessRules.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => setBusinessRules(businessRules.filter((_, i) => i !== index))}
-                    className="px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setBusinessRules([...businessRules, ''])}
-            className="mt-4 px-4 py-2 text-primary border border-primary/20 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-          >
-            + Add Rule
-          </button>
-
-          {status === 'error' && (
-            <div className="mt-6 p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-lg">
-              <p className="text-red-600 dark:text-red-400">
-                Something went wrong. Please try again.
-              </p>
-            </div>
-          )}
-
-          <button
-            type="button"
-            onClick={handleSaveBusinessSettings}
-            disabled={status === 'loading'}
-            className="w-full mt-6 px-8 py-4 text-lg font-medium text-white bg-primary rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30"
-          >
-            {status === 'loading' ? 'Saving...' : 'Save Rules'}
-          </button>
-        </div>
+        </form>
       )}
     </div>
   );
