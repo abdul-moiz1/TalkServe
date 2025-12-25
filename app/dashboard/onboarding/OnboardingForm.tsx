@@ -23,12 +23,10 @@ interface OnboardingData {
   businessContextUrl?: string;
 }
 
-interface WidgetSettings {
-  widgetName?: string;
-  widgetColor?: string;
-  widgetPosition?: string;
-  widgetBehavior?: string;
-  initialsGreeting?: string;
+interface BusinessContext {
+  description?: string;
+  hours?: string;
+  rules?: string[];
 }
 
 interface FilePreviewModalProps {
@@ -125,13 +123,10 @@ export default function OnboardingForm() {
     services: '',
     industryType: '',
   });
-  const [widgetSettings, setWidgetSettings] = useState<WidgetSettings>({
-    widgetName: '',
-    widgetColor: '#2563EB',
-    widgetPosition: 'bottom-right',
-    widgetBehavior: 'always-open',
-    initialsGreeting: '',
-  });
+  const [businessName, setBusinessName] = useState('');
+  const [businessDescription, setBusinessDescription] = useState('');
+  const [businessHours, setBusinessHours] = useState('');
+  const [businessRules, setBusinessRules] = useState<string[]>(['']);
   const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -152,17 +147,17 @@ export default function OnboardingForm() {
 
       try {
         const idToken = await user.getIdToken();
-        const [onboardingRes, widgetRes] = await Promise.all([
+        const [onboardingRes, businessContextRes] = await Promise.all([
           fetch('/api/onboarding', {
             headers: {
               'Authorization': `Bearer ${idToken}`,
             },
           }),
-          fetch(`/api/save-widget-settings?uid=${user.uid}`),
+          fetch(`/api/save-business-context?uid=${user.uid}`),
         ]);
 
         const onboardingResult = await onboardingRes.json();
-        const widgetResult = await widgetRes.json();
+        const businessContextResult = await businessContextRes.json();
 
         if (onboardingResult.success && onboardingResult.exists && onboardingResult.data) {
           const data: OnboardingData = onboardingResult.data;
@@ -186,8 +181,12 @@ export default function OnboardingForm() {
           setIsEditing(true);
         }
 
-        if (widgetResult.success && widgetResult.data) {
-          setWidgetSettings(widgetResult.data);
+        if (businessContextResult.success && businessContextResult.data) {
+          const businessData = businessContextResult.data;
+          setBusinessName(businessData.businessName || '');
+          setBusinessDescription(businessData.context?.description || '');
+          setBusinessHours(businessData.context?.hours || '');
+          setBusinessRules(businessData.context?.rules && businessData.context.rules.length > 0 ? businessData.context.rules : ['']);
         }
       } catch (error) {
         console.error('Error fetching existing data:', error);
@@ -280,31 +279,34 @@ export default function OnboardingForm() {
     }
   };
 
-  const handleWidgetChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setWidgetSettings(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSaveWidgetSettings = async () => {
+  const handleSaveBusinessSettings = async () => {
     if (!user?.uid) return;
 
+    setStatus('loading');
     try {
-      const response = await fetch('/api/save-widget-settings', {
+      const response = await fetch('/api/save-business-context', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           uid: user.uid,
-          widgetSettings,
-        }),
+          businessName: businessName.trim(),
+          context: {
+            description: businessDescription.trim(),
+            hours: businessHours.trim(),
+            rules: businessRules.filter(r => r.trim())
+          }
+        })
       });
 
       const result = await response.json();
       if (result.success) {
         setStatus('success');
         setTimeout(() => setStatus('idle'), 3000);
+      } else {
+        setStatus('error');
       }
     } catch (error) {
-      console.error('Error saving widget settings:', error);
+      console.error('Error saving business settings:', error);
       setStatus('error');
     }
   };
@@ -361,14 +363,34 @@ export default function OnboardingForm() {
           Onboarding
         </button>
         <button
-          onClick={() => setActiveTab('widget')}
+          onClick={() => setActiveTab('business-info')}
           className={`px-6 py-4 font-medium border-b-2 transition-colors ${
-            activeTab === 'widget'
+            activeTab === 'business-info'
               ? 'border-primary text-primary'
               : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
           }`}
         >
-          Widget Settings
+          Business Info
+        </button>
+        <button
+          onClick={() => setActiveTab('hours')}
+          className={`px-6 py-4 font-medium border-b-2 transition-colors ${
+            activeTab === 'hours'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+          }`}
+        >
+          Hours
+        </button>
+        <button
+          onClick={() => setActiveTab('rules')}
+          className={`px-6 py-4 font-medium border-b-2 transition-colors ${
+            activeTab === 'rules'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+          }`}
+        >
+          Rules
         </button>
       </div>
 
@@ -596,99 +618,37 @@ export default function OnboardingForm() {
         </form>
       )}
 
-      {/* Widget Settings Tab */}
-      {activeTab === 'widget' && (
+      {/* Business Info Tab */}
+      {activeTab === 'business-info' && (
         <div className="p-8">
           <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
-            Configure Your Chat Widget
+            Business Information
           </h3>
-
-          <div className="grid md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label htmlFor="widgetName" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Widget Name
-              </label>
-              <input
-                type="text"
-                id="widgetName"
-                name="widgetName"
-                value={widgetSettings.widgetName}
-                onChange={handleWidgetChange}
-                placeholder="e.g., Support Chat"
-                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label htmlFor="widgetColor" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Widget Color
-              </label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="color"
-                  id="widgetColor"
-                  name="widgetColor"
-                  value={widgetSettings.widgetColor}
-                  onChange={handleWidgetChange}
-                  className="w-14 h-10 rounded-lg cursor-pointer"
-                />
-                <input
-                  type="text"
-                  value={widgetSettings.widgetColor}
-                  onChange={handleWidgetChange}
-                  name="widgetColor"
-                  className="flex-1 px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label htmlFor="widgetPosition" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Widget Position
-              </label>
-              <select
-                id="widgetPosition"
-                name="widgetPosition"
-                value={widgetSettings.widgetPosition}
-                onChange={handleWidgetChange}
-                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                <option value="bottom-right">Bottom Right</option>
-                <option value="bottom-left">Bottom Left</option>
-                <option value="top-right">Top Right</option>
-                <option value="top-left">Top Left</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="widgetBehavior" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Widget Behavior
-              </label>
-              <select
-                id="widgetBehavior"
-                name="widgetBehavior"
-                value={widgetSettings.widgetBehavior}
-                onChange={handleWidgetChange}
-                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                <option value="always-open">Always Open</option>
-                <option value="minimized">Minimized by Default</option>
-                <option value="on-click">Open on Click</option>
-              </select>
-            </div>
+          
+          <div className="mb-6">
+            <label htmlFor="businessName" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Business Name
+            </label>
+            <input
+              type="text"
+              id="businessName"
+              value={businessName}
+              onChange={(e) => setBusinessName(e.target.value)}
+              placeholder="Enter your business name"
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
           </div>
 
           <div className="mb-6">
-            <label htmlFor="initialsGreeting" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Initial Greeting Message
+            <label htmlFor="businessDescription" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Description
             </label>
             <textarea
-              id="initialsGreeting"
-              name="initialsGreeting"
-              value={widgetSettings.initialsGreeting}
-              onChange={handleWidgetChange}
-              placeholder="e.g., Hello! How can we help you today?"
-              rows={3}
+              id="businessDescription"
+              value={businessDescription}
+              onChange={(e) => setBusinessDescription(e.target.value)}
+              placeholder="Describe your business..."
+              rows={5}
               className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
@@ -703,10 +663,118 @@ export default function OnboardingForm() {
 
           <button
             type="button"
-            onClick={handleSaveWidgetSettings}
+            onClick={handleSaveBusinessSettings}
+            disabled={status === 'loading'}
             className="w-full px-8 py-4 text-lg font-medium text-white bg-primary rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30"
           >
-            Save Widget Settings
+            {status === 'loading' ? 'Saving...' : 'Save Business Info'}
+          </button>
+        </div>
+      )}
+
+      {/* Hours Tab */}
+      {activeTab === 'hours' && (
+        <div className="p-8">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
+            Business Hours
+          </h3>
+          
+          <div className="mb-6">
+            <label htmlFor="businessHours" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Business Hours
+            </label>
+            <textarea
+              id="businessHours"
+              value={businessHours}
+              onChange={(e) => setBusinessHours(e.target.value)}
+              placeholder="e.g., Monday - Friday: 9:00 AM - 5:00 PM&#10;Saturday: 10:00 AM - 3:00 PM&#10;Sunday: Closed"
+              rows={4}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              Enter your business hours in a clear format
+            </p>
+          </div>
+
+          {status === 'error' && (
+            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-lg">
+              <p className="text-red-600 dark:text-red-400">
+                Something went wrong. Please try again.
+              </p>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleSaveBusinessSettings}
+            disabled={status === 'loading'}
+            className="w-full px-8 py-4 text-lg font-medium text-white bg-primary rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30"
+          >
+            {status === 'loading' ? 'Saving...' : 'Save Hours'}
+          </button>
+        </div>
+      )}
+
+      {/* Rules Tab */}
+      {activeTab === 'rules' && (
+        <div className="p-8">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
+            Business Rules / Instructions
+          </h3>
+          
+          <div className="space-y-3">
+            {businessRules.map((rule, index) => (
+              <div key={index} className="flex gap-2">
+                <span className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-sm font-medium text-primary dark:text-blue-400">
+                  {index + 1}
+                </span>
+                <input
+                  type="text"
+                  value={rule}
+                  onChange={(e) => {
+                    const newRules = [...businessRules];
+                    newRules[index] = e.target.value;
+                    setBusinessRules(newRules);
+                  }}
+                  className="flex-1 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder={`Rule ${index + 1}`}
+                />
+                {businessRules.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => setBusinessRules(businessRules.filter((_, i) => i !== index))}
+                    className="px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setBusinessRules([...businessRules, ''])}
+            className="mt-4 px-4 py-2 text-primary border border-primary/20 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+          >
+            + Add Rule
+          </button>
+
+          {status === 'error' && (
+            <div className="mt-6 p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-lg">
+              <p className="text-red-600 dark:text-red-400">
+                Something went wrong. Please try again.
+              </p>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleSaveBusinessSettings}
+            disabled={status === 'loading'}
+            className="w-full mt-6 px-8 py-4 text-lg font-medium text-white bg-primary rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30"
+          >
+            {status === 'loading' ? 'Saving...' : 'Save Rules'}
           </button>
         </div>
       )}
