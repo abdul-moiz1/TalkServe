@@ -9,6 +9,7 @@ interface BusinessContext {
   description?: string;
   hours?: string;
   rules?: string[];
+  services?: string[];
 }
 
 interface Business {
@@ -26,6 +27,7 @@ export default function BusinessSettingsPage() {
   const [description, setDescription] = useState('');
   const [hours, setHours] = useState('');
   const [rules, setRules] = useState<string[]>(['']);
+  const [services, setServices] = useState<string[]>(['']);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -63,6 +65,7 @@ export default function BusinessSettingsPage() {
         setDescription(data.data.context?.description || '');
         setHours(data.data.context?.hours || '');
         setRules(data.data.context?.rules && data.data.context.rules.length > 0 ? data.data.context.rules : ['']);
+        setServices(data.data.context?.services && data.data.context.services.length > 0 ? data.data.context.services : ['']);
       } else if (data.success && !data.data) {
         // New business - reset to empty
         setBusiness(null);
@@ -70,6 +73,7 @@ export default function BusinessSettingsPage() {
         setDescription('');
         setHours('');
         setRules(['']);
+        setServices(['']);
       }
     } catch (err) {
       console.error('Error fetching business context:', err);
@@ -99,7 +103,8 @@ export default function BusinessSettingsPage() {
           context: {
             description: description.trim(),
             hours: hours.trim(),
-            rules: rules.filter(r => r.trim())
+            rules: rules.filter(r => r.trim()),
+            services: services.filter(s => s.trim())
           }
         })
       });
@@ -179,6 +184,7 @@ export default function BusinessSettingsPage() {
               {[
                 { id: 'info', label: 'Business Info' },
                 { id: 'hours', label: 'Hours' },
+                { id: 'services', label: 'Services' },
                 { id: 'rules', label: 'Rules' }
               ].map(tab => (
                 <button
@@ -245,6 +251,54 @@ export default function BusinessSettingsPage() {
                   />
                   <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                     Enter your business hours in a clear format
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Services Tab */}
+            {activeTab === 'services' && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
+                    Services / Offerings
+                  </label>
+                  <div className="space-y-3">
+                    {services.map((service, index) => (
+                      <div key={index} className="flex gap-2">
+                        <span className="flex-shrink-0 w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                          {index + 1}
+                        </span>
+                        <input
+                          type="text"
+                          value={service}
+                          onChange={(e) => {
+                            const newServices = [...services];
+                            newServices[index] = e.target.value;
+                            setServices(newServices);
+                          }}
+                          className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder={`Service ${index + 1}`}
+                        />
+                        {services.length > 1 && (
+                          <button
+                            onClick={() => setServices(services.filter((_, i) => i !== index))}
+                            className="px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => setServices([...services, ''])}
+                    className="mt-4 px-4 py-2 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
+                  >
+                    + Add Service
+                  </button>
+                  <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                    Examples: "Dine-In", "Takeaway", "Home Delivery", "Table Reservation", "Online Booking", etc.
                   </p>
                 </div>
               </div>
