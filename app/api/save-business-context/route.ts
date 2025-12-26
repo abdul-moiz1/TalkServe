@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { uid, businessName, context } = await request.json();
+    const { uid, businessName, context, voice, widget, status } = await request.json();
 
     if (!uid || !businessName) {
       return NextResponse.json(
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const businessesRef = db.collection("businesses");
+    const businessesRef = db.collection("business_context");
     
     // Find existing business for this user
     const existingBusiness = await businessesRef
@@ -32,13 +32,18 @@ export async function POST(request: NextRequest) {
     if (!existingBusiness.empty) {
       // Update existing business
       const docRef = existingBusiness.docs[0].ref;
+      const existingData = existingBusiness.docs[0].data();
+      
       await docRef.update({
         businessName,
         context: {
-          ...existingBusiness.docs[0].data().context,
+          ...(existingData.context || {}),
           ...context,
-          updatedAt: new Date()
-        }
+        },
+        voice: voice || existingData.voice || {},
+        widget: widget || existingData.widget || {},
+        status: status || existingData.status || 'active',
+        updatedAt: new Date()
       });
       result = {
         success: true,
@@ -50,11 +55,12 @@ export async function POST(request: NextRequest) {
       const newDoc = await businessesRef.add({
         uid,
         businessName,
-        context: {
-          ...context,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }
+        context: context || {},
+        voice: voice || {},
+        widget: widget || {},
+        status: status || 'active',
+        createdAt: new Date(),
+        updatedAt: new Date()
       });
       result = {
         success: true,

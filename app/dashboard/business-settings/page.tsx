@@ -34,6 +34,20 @@ export default function BusinessSettingsPage() {
   const [success, setSuccess] = useState('');
   const [activeTab, setActiveTab] = useState('info');
   const [fetchError, setFetchError] = useState('');
+  
+  // Voice settings
+  const [voiceLanguage, setVoiceLanguage] = useState('en');
+  const [voiceGender, setVoiceGender] = useState('female');
+  const [voicePitch, setVoicePitch] = useState(1);
+  const [voiceSpeed, setVoiceSpeed] = useState(1);
+  
+  // Widget settings
+  const [widgetLogoUrl, setWidgetLogoUrl] = useState('');
+  const [widgetThemeMode, setWidgetThemeMode] = useState('dark');
+  const [widgetPrimaryColor, setWidgetPrimaryColor] = useState('#0ea5e9');
+  
+  // Status
+  const [status, setStatus] = useState('active');
 
   useEffect(() => {
     // Redirect to login if not authenticated
@@ -66,6 +80,20 @@ export default function BusinessSettingsPage() {
         setHours(data.data.context?.hours || '');
         setRules(data.data.context?.rules && data.data.context.rules.length > 0 ? data.data.context.rules : ['']);
         setServices(data.data.context?.services && data.data.context.services.length > 0 ? data.data.context.services : ['']);
+        
+        // Load voice settings
+        setVoiceLanguage(data.data.voice?.language || 'en');
+        setVoiceGender(data.data.voice?.voiceGender || 'female');
+        setVoicePitch(data.data.voice?.pitch || 1);
+        setVoiceSpeed(data.data.voice?.speakingSpeed || 1);
+        
+        // Load widget settings
+        setWidgetLogoUrl(data.data.widget?.logoUrl || '');
+        setWidgetThemeMode(data.data.widget?.theme?.mode || 'dark');
+        setWidgetPrimaryColor(data.data.widget?.theme?.primaryColor || '#0ea5e9');
+        
+        // Load status
+        setStatus(data.data.status || 'active');
       } else if (data.success && !data.data) {
         // New business - reset to empty
         setBusiness(null);
@@ -74,6 +102,14 @@ export default function BusinessSettingsPage() {
         setHours('');
         setRules(['']);
         setServices(['']);
+        setVoiceLanguage('en');
+        setVoiceGender('female');
+        setVoicePitch(1);
+        setVoiceSpeed(1);
+        setWidgetLogoUrl('');
+        setWidgetThemeMode('dark');
+        setWidgetPrimaryColor('#0ea5e9');
+        setStatus('active');
       }
     } catch (err) {
       console.error('Error fetching business context:', err);
@@ -100,11 +136,25 @@ export default function BusinessSettingsPage() {
         body: JSON.stringify({
           uid: user?.uid,
           businessName: businessName.trim(),
+          status: status,
           context: {
             description: description.trim(),
             hours: hours.trim(),
             rules: rules.filter(r => r.trim()),
             services: services.filter(s => s.trim())
+          },
+          voice: {
+            language: voiceLanguage,
+            pitch: voicePitch,
+            speakingSpeed: voiceSpeed,
+            voiceGender: voiceGender
+          },
+          widget: {
+            logoUrl: widgetLogoUrl.trim(),
+            theme: {
+              mode: widgetThemeMode,
+              primaryColor: widgetPrimaryColor
+            }
           }
         })
       });
@@ -185,7 +235,9 @@ export default function BusinessSettingsPage() {
                 { id: 'info', label: 'Business Info' },
                 { id: 'hours', label: 'Hours' },
                 { id: 'services', label: 'Services' },
-                { id: 'rules', label: 'Rules' }
+                { id: 'rules', label: 'Rules' },
+                { id: 'voice', label: 'Voice Settings' },
+                { id: 'widget', label: 'Widget' }
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -345,6 +397,146 @@ export default function BusinessSettingsPage() {
                   >
                     + Add Rule
                   </button>
+                </div>
+              </div>
+            )}
+
+            {/* Voice Settings Tab */}
+            {activeTab === 'voice' && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Language
+                  </label>
+                  <select
+                    value={voiceLanguage}
+                    onChange={(e) => setVoiceLanguage(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="en">English</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="de">German</option>
+                    <option value="it">Italian</option>
+                    <option value="pt">Portuguese</option>
+                    <option value="ur">Urdu</option>
+                    <option value="hi">Hindi</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Voice Gender
+                  </label>
+                  <select
+                    value={voiceGender}
+                    onChange={(e) => setVoiceGender(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="female">Female</option>
+                    <option value="male">Male</option>
+                    <option value="neutral">Neutral</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Pitch: <span className="font-semibold text-blue-600">{voicePitch.toFixed(1)}</span>
+                  </label>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="2"
+                    step="0.1"
+                    value={voicePitch}
+                    onChange={(e) => setVoicePitch(parseFloat(e.target.value))}
+                    className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Lower values = deeper voice, Higher values = higher pitch</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Speaking Speed: <span className="font-semibold text-blue-600">{voiceSpeed.toFixed(1)}</span>
+                  </label>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="2"
+                    step="0.1"
+                    value={voiceSpeed}
+                    onChange={(e) => setVoiceSpeed(parseFloat(e.target.value))}
+                    className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Lower values = slower, Higher values = faster speech</p>
+                </div>
+              </div>
+            )}
+
+            {/* Widget Tab */}
+            {activeTab === 'widget' && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Logo URL
+                  </label>
+                  <input
+                    type="url"
+                    value={widgetLogoUrl}
+                    onChange={(e) => setWidgetLogoUrl(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="https://example.com/logo.png"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Theme Mode
+                  </label>
+                  <select
+                    value={widgetThemeMode}
+                    onChange={(e) => setWidgetThemeMode(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Primary Color
+                  </label>
+                  <div className="flex gap-3 items-center">
+                    <input
+                      type="color"
+                      value={widgetPrimaryColor}
+                      onChange={(e) => setWidgetPrimaryColor(e.target.value)}
+                      className="h-12 w-20 border border-gray-300 dark:border-slate-600 rounded-lg cursor-pointer"
+                    />
+                    <input
+                      type="text"
+                      value={widgetPrimaryColor}
+                      onChange={(e) => setWidgetPrimaryColor(e.target.value)}
+                      className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="#0ea5e9"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Status
+                  </label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="pending">Pending</option>
+                  </select>
                 </div>
               </div>
             )}
