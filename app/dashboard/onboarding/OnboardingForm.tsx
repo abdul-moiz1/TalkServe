@@ -138,6 +138,24 @@ export default function OnboardingForm() {
   const [isFetching, setIsFetching] = useState(true);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('onboarding');
+  
+  // Voice settings
+  const [voiceLanguage, setVoiceLanguage] = useState('en');
+  const [voiceGender, setVoiceGender] = useState('female');
+  const [voicePitch, setVoicePitch] = useState(1);
+  const [voiceSpeed, setVoiceSpeed] = useState(1);
+  
+  // Widget settings
+  const [widgetLogoUrl, setWidgetLogoUrl] = useState('');
+  const [widgetThemeMode, setWidgetThemeMode] = useState('dark');
+  const [widgetPrimaryColor, setWidgetPrimaryColor] = useState('#0ea5e9');
+  
+  // Status
+  const [businessStatus, setBusinessStatus] = useState('active');
+  
+  // Timestamps
+  const [createdAt, setCreatedAt] = useState<Date | null>(null);
+  const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
 
   useEffect(() => {
     async function fetchExistingData() {
@@ -189,6 +207,24 @@ export default function OnboardingForm() {
           setBusinessHours(businessData.context?.hours || '');
           setBusinessServices(businessData.context?.services || '');
           setBusinessRules(businessData.context?.rules && businessData.context.rules.length > 0 ? businessData.context.rules : ['']);
+          
+          // Load voice settings
+          setVoiceLanguage(businessData.voice?.language || 'en');
+          setVoiceGender(businessData.voice?.voiceGender || 'female');
+          setVoicePitch(businessData.voice?.pitch || 1);
+          setVoiceSpeed(businessData.voice?.speakingSpeed || 1);
+          
+          // Load widget settings
+          setWidgetLogoUrl(businessData.widget?.logoUrl || '');
+          setWidgetThemeMode(businessData.widget?.theme?.mode || 'dark');
+          setWidgetPrimaryColor(businessData.widget?.theme?.primaryColor || '#0ea5e9');
+          
+          // Load status
+          setBusinessStatus(businessData.status || 'active');
+          
+          // Load timestamps
+          setCreatedAt(businessData.createdAt ? new Date(businessData.createdAt.seconds ? businessData.createdAt.seconds * 1000 : businessData.createdAt) : null);
+          setUpdatedAt(businessData.updatedAt ? new Date(businessData.updatedAt.seconds ? businessData.updatedAt.seconds * 1000 : businessData.updatedAt) : null);
         }
       } catch (error) {
         console.error('Error fetching existing data:', error);
@@ -292,11 +328,25 @@ export default function OnboardingForm() {
         body: JSON.stringify({
           uid: user.uid,
           businessName: businessName.trim(),
+          status: businessStatus,
           context: {
             description: businessDescription.trim(),
             hours: businessHours.trim(),
             services: businessServices.trim(),
             rules: businessRules.filter(r => r.trim())
+          },
+          voice: {
+            language: voiceLanguage,
+            pitch: voicePitch,
+            speakingSpeed: voiceSpeed,
+            voiceGender: voiceGender
+          },
+          widget: {
+            logoUrl: widgetLogoUrl.trim(),
+            theme: {
+              mode: widgetThemeMode,
+              primaryColor: widgetPrimaryColor
+            }
           }
         })
       });
@@ -710,6 +760,183 @@ export default function OnboardingForm() {
             >
               + Add Rule
             </button>
+          </div>
+
+          {/* Voice Settings */}
+          <div className="border-t border-slate-200 dark:border-slate-700 pt-6 mt-6">
+            <h4 className="text-base font-semibold text-slate-900 dark:text-white mb-4">Voice Settings</h4>
+            
+            <div className="grid md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label htmlFor="voiceLanguage" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Language
+                </label>
+                <select
+                  id="voiceLanguage"
+                  value={voiceLanguage}
+                  onChange={(e) => setVoiceLanguage(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="en">English</option>
+                  <option value="es">Spanish</option>
+                  <option value="fr">French</option>
+                  <option value="de">German</option>
+                  <option value="it">Italian</option>
+                  <option value="pt">Portuguese</option>
+                  <option value="ur">Urdu</option>
+                  <option value="hi">Hindi</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="voiceGender" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Voice Gender
+                </label>
+                <select
+                  id="voiceGender"
+                  value={voiceGender}
+                  onChange={(e) => setVoiceGender(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="female">Female</option>
+                  <option value="male">Male</option>
+                  <option value="neutral">Neutral</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="voicePitch" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Pitch: <span className="font-semibold text-primary">{voicePitch.toFixed(1)}</span>
+              </label>
+              <input
+                type="range"
+                id="voicePitch"
+                min="0.5"
+                max="2"
+                step="0.1"
+                value={voicePitch}
+                onChange={(e) => setVoicePitch(parseFloat(e.target.value))}
+                className="w-full"
+              />
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Lower = deeper, Higher = higher pitch</p>
+            </div>
+
+            <div>
+              <label htmlFor="voiceSpeed" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Speaking Speed: <span className="font-semibold text-primary">{voiceSpeed.toFixed(1)}</span>
+              </label>
+              <input
+                type="range"
+                id="voiceSpeed"
+                min="0.5"
+                max="2"
+                step="0.1"
+                value={voiceSpeed}
+                onChange={(e) => setVoiceSpeed(parseFloat(e.target.value))}
+                className="w-full"
+              />
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Lower = slower, Higher = faster</p>
+            </div>
+          </div>
+
+          {/* Widget Settings */}
+          <div className="border-t border-slate-200 dark:border-slate-700 pt-6 mt-6">
+            <h4 className="text-base font-semibold text-slate-900 dark:text-white mb-4">Widget Settings</h4>
+            
+            <div className="mb-4">
+              <label htmlFor="widgetLogoUrl" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Logo URL
+              </label>
+              <input
+                type="url"
+                id="widgetLogoUrl"
+                value={widgetLogoUrl}
+                onChange={(e) => setWidgetLogoUrl(e.target.value)}
+                placeholder="https://example.com/logo.png"
+                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="widgetThemeMode" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Theme Mode
+                </label>
+                <select
+                  id="widgetThemeMode"
+                  value={widgetThemeMode}
+                  onChange={(e) => setWidgetThemeMode(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="light">Light</option>
+                  <option value="dark">Dark</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="widgetPrimaryColor" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Primary Color
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="color"
+                    id="widgetPrimaryColor"
+                    value={widgetPrimaryColor}
+                    onChange={(e) => setWidgetPrimaryColor(e.target.value)}
+                    className="w-12 h-12 rounded-lg border border-slate-300 dark:border-slate-600 cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={widgetPrimaryColor}
+                    onChange={(e) => setWidgetPrimaryColor(e.target.value)}
+                    placeholder="#0ea5e9"
+                    className="flex-1 px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Status & Info */}
+          <div className="border-t border-slate-200 dark:border-slate-700 pt-6 mt-6">
+            <h4 className="text-base font-semibold text-slate-900 dark:text-white mb-4">Status & Information</h4>
+            
+            <div className="mb-4">
+              <label htmlFor="businessStatus" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Status
+              </label>
+              <select
+                id="businessStatus"
+                value={businessStatus}
+                onChange={(e) => setBusinessStatus(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="paused">Paused</option>
+              </select>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Created At
+                </label>
+                <div className="px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm">
+                  {createdAt ? createdAt.toLocaleString() : 'Not yet created'}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Updated At
+                </label>
+                <div className="px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm">
+                  {updatedAt ? updatedAt.toLocaleString() : 'Not yet updated'}
+                </div>
+              </div>
+            </div>
           </div>
 
           {status === 'error' && (
