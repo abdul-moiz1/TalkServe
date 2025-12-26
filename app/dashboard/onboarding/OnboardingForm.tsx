@@ -322,6 +322,12 @@ export default function OnboardingForm() {
 
     setStatus('loading');
     try {
+      // Convert comma-separated services to array
+      const servicesArray = businessServices
+        .split(',')
+        .map(service => service.trim())
+        .filter(service => service.length > 0);
+
       const response = await fetch('/api/save-business-context', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -332,7 +338,7 @@ export default function OnboardingForm() {
           context: {
             description: businessDescription.trim(),
             hours: businessHours.trim(),
-            services: businessServices.trim(),
+            services: servicesArray,
             rules: businessRules.filter(r => r.trim())
           },
           voice: {
@@ -712,10 +718,13 @@ export default function OnboardingForm() {
               id="businessServices"
               value={businessServices}
               onChange={(e) => setBusinessServices(e.target.value)}
-              placeholder="List the services you offer..."
+              placeholder="Enter services separated by commas&#10;e.g., Dine-In, Takeaway, Home Delivery, Table Reservation"
               rows={4}
               className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
             />
+            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+              💡 Enter each service separated by a comma. For example: "Dine-In, Takeaway / Pickup, Home Delivery, Table Reservation"
+            </p>
           </div>
 
           {/* Rules */}

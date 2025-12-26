@@ -29,7 +29,7 @@ export default function BusinessSettingsPage() {
   const [description, setDescription] = useState('');
   const [hours, setHours] = useState('');
   const [rules, setRules] = useState<string[]>(['']);
-  const [services, setServices] = useState<string[]>(['']);
+  const [servicesString, setServicesString] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -85,7 +85,8 @@ export default function BusinessSettingsPage() {
         setDescription(data.data.context?.description || '');
         setHours(data.data.context?.hours || '');
         setRules(data.data.context?.rules && data.data.context.rules.length > 0 ? data.data.context.rules : ['']);
-        setServices(data.data.context?.services && data.data.context.services.length > 0 ? data.data.context.services : ['']);
+        const servicesArray = data.data.context?.services || [];
+        setServicesString(servicesArray.join(', '));
         
         // Load voice settings
         setVoiceLanguage(data.data.voice?.language || 'en');
@@ -111,7 +112,7 @@ export default function BusinessSettingsPage() {
         setDescription('');
         setHours('');
         setRules(['']);
-        setServices(['']);
+        setServicesString('');
         setVoiceLanguage('en');
         setVoiceGender('female');
         setVoicePitch(1);
@@ -142,6 +143,12 @@ export default function BusinessSettingsPage() {
 
     setSaving(true);
     try {
+      // Convert comma-separated services to array
+      const servicesArray = servicesString
+        .split(',')
+        .map(service => service.trim())
+        .filter(service => service.length > 0);
+
       const response = await fetch('/api/save-business-context', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -153,7 +160,7 @@ export default function BusinessSettingsPage() {
             description: description.trim(),
             hours: hours.trim(),
             rules: rules.filter(r => r.trim()),
-            services: services.filter(s => s.trim())
+            services: servicesArray
           },
           voice: {
             language: voiceLanguage,
@@ -370,44 +377,19 @@ export default function BusinessSettingsPage() {
             {activeTab === 'services' && (
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Services / Offerings
                   </label>
-                  <p className="mb-4 text-xs text-gray-600 dark:text-gray-400">Add all the services you offer. Example: "Dine-In", "Takeaway / Pickup", "Home Delivery", "Table Reservation"</p>
-                  <div className="space-y-3">
-                    {services.map((service, index) => (
-                      <div key={index} className="flex gap-2">
-                        <span className="flex-shrink-0 w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center text-sm font-medium text-emerald-600 dark:text-emerald-400">
-                          {index + 1}
-                        </span>
-                        <input
-                          type="text"
-                          value={service}
-                          onChange={(e) => {
-                            const newServices = [...services];
-                            newServices[index] = e.target.value;
-                            setServices(newServices);
-                          }}
-                          className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder={index === 0 ? "e.g., Dine-In" : `Service ${index + 1}`}
-                        />
-                        {services.length > 1 && (
-                          <button
-                            onClick={() => setServices(services.filter((_, i) => i !== index))}
-                            className="px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                          >
-                            Remove
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => setServices([...services, ''])}
-                    className="mt-4 px-4 py-2 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
-                  >
-                    + Add Service
-                  </button>
+                  <textarea
+                    value={servicesString}
+                    onChange={(e) => setServicesString(e.target.value)}
+                    rows={4}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter services separated by commas&#10;e.g., Dine-In, Takeaway / Pickup, Home Delivery, Table Reservation"
+                  />
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    💡 Enter each service separated by a comma. For example: "Dine-In, Takeaway / Pickup, Home Delivery, Table Reservation"
+                  </p>
                 </div>
               </div>
             )}
