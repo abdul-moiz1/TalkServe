@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const businessesRef = db.collection("businesses");
+    const businessesRef = db.collection("business_context");
     const querySnapshot = await businessesRef
       .where("uid", "==", uid)
       .limit(1)
