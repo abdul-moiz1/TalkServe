@@ -261,15 +261,16 @@ export default function BusinessSettingsPage() {
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Business Name
+                    Business Name <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={businessName}
                     onChange={(e) => setBusinessName(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter your business name"
+                    placeholder="e.g., Karahi Point"
                   />
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Your business name that customers will see</p>
                 </div>
 
                 <div>
@@ -281,8 +282,9 @@ export default function BusinessSettingsPage() {
                     onChange={(e) => setDescription(e.target.value)}
                     rows={5}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Describe your business..."
+                    placeholder="e.g., We are a Pakistani restaurant offering authentic desi flavors with freshly prepared karahi, BBQ, handi, and traditional meals..."
                   />
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Describe what your business does, your specialties, and what makes you unique</p>
                 </div>
               </div>
             )}
@@ -299,10 +301,10 @@ export default function BusinessSettingsPage() {
                     onChange={(e) => setHours(e.target.value)}
                     rows={4}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., Monday - Friday: 9:00 AM - 5:00 PM&#10;Saturday: 10:00 AM - 3:00 PM&#10;Sunday: Closed"
+                    placeholder="Monday – Thursday: 12:00 PM – 11:30 PM&#10;Friday: 1:30 PM – 12:00 AM&#10;Saturday – Sunday: 12:00 PM – 12:00 AM"
                   />
-                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                    Enter your business hours in a clear format
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    List your operating hours so the AI assistant can provide accurate information to customers
                   </p>
                 </div>
               </div>
@@ -315,6 +317,7 @@ export default function BusinessSettingsPage() {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
                     Services / Offerings
                   </label>
+                  <p className="mb-4 text-xs text-gray-600 dark:text-gray-400">Add all the services you offer. Example: "Dine-In", "Takeaway / Pickup", "Home Delivery", "Table Reservation"</p>
                   <div className="space-y-3">
                     {services.map((service, index) => (
                       <div key={index} className="flex gap-2">
@@ -330,7 +333,7 @@ export default function BusinessSettingsPage() {
                             setServices(newServices);
                           }}
                           className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder={`Service ${index + 1}`}
+                          placeholder={index === 0 ? "e.g., Dine-In" : `Service ${index + 1}`}
                         />
                         {services.length > 1 && (
                           <button
@@ -349,9 +352,6 @@ export default function BusinessSettingsPage() {
                   >
                     + Add Service
                   </button>
-                  <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                    Examples: "Dine-In", "Takeaway", "Home Delivery", "Table Reservation", "Online Booking", etc.
-                  </p>
                 </div>
               </div>
             )}
@@ -363,6 +363,7 @@ export default function BusinessSettingsPage() {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
                     Business Rules / Instructions
                   </label>
+                  <p className="mb-4 text-xs text-gray-600 dark:text-gray-400">Add instructions that guide your AI assistant on how to handle customer interactions. These rules help the AI provide better service.</p>
                   <div className="space-y-3">
                     {rules.map((rule, index) => (
                       <div key={index} className="flex gap-2">
@@ -378,7 +379,7 @@ export default function BusinessSettingsPage() {
                             setRules(newRules);
                           }}
                           className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder={`Rule ${index + 1}`}
+                          placeholder={index === 0 ? "e.g., Greet customers politely and introduce yourself" : `Rule ${index + 1}`}
                         />
                         {rules.length > 1 && (
                           <button
@@ -404,6 +405,7 @@ export default function BusinessSettingsPage() {
             {/* Voice Settings Tab */}
             {activeTab === 'voice' && (
               <div className="space-y-6">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Configure how your AI assistant sounds and speaks to customers</p>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Language
@@ -422,6 +424,7 @@ export default function BusinessSettingsPage() {
                     <option value="ur">Urdu</option>
                     <option value="hi">Hindi</option>
                   </select>
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Choose the language your AI assistant will speak</p>
                 </div>
 
                 <div>
@@ -437,6 +440,7 @@ export default function BusinessSettingsPage() {
                     <option value="male">Male</option>
                     <option value="neutral">Neutral</option>
                   </select>
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Select the voice tone for your assistant</p>
                 </div>
 
                 <div>
@@ -476,6 +480,7 @@ export default function BusinessSettingsPage() {
             {/* Widget Tab */}
             {activeTab === 'widget' && (
               <div className="space-y-6">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Customize the appearance of your AI widget that appears on your website</p>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Logo URL
@@ -487,6 +492,7 @@ export default function BusinessSettingsPage() {
                     className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="https://example.com/logo.png"
                   />
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Link to your business logo image</p>
                 </div>
 
                 <div>
@@ -501,6 +507,7 @@ export default function BusinessSettingsPage() {
                     <option value="light">Light</option>
                     <option value="dark">Dark</option>
                   </select>
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Choose between light or dark appearance for your widget</p>
                 </div>
 
                 <div>
@@ -522,6 +529,7 @@ export default function BusinessSettingsPage() {
                       placeholder="#0ea5e9"
                     />
                   </div>
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Main color for buttons and interactive elements (hex code or use the color picker)</p>
                 </div>
 
                 <div>
@@ -537,6 +545,7 @@ export default function BusinessSettingsPage() {
                     <option value="inactive">Inactive</option>
                     <option value="pending">Pending</option>
                   </select>
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Set to "Active" to enable your AI assistant for customers</p>
                 </div>
               </div>
             )}

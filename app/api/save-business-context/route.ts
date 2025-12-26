@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const businessesRef = db.collection("business_context");
+    const businessesRef = db.collection("businesses");
     
     // Find existing business for this user
     const existingBusiness = await businessesRef
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       });
       result = {
         success: true,
-        message: "Business context updated successfully",
+        message: "Business settings updated successfully",
         docId: existingBusiness.docs[0].id
       };
     } else {
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       });
       result = {
         success: true,
-        message: "Business context created successfully",
+        message: "Business settings saved successfully",
         docId: newDoc.id
       };
     }
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const businessesRef = db.collection("business_context");
+    const businessesRef = db.collection("businesses");
     const querySnapshot = await businessesRef
       .where("uid", "==", uid)
       .limit(1)
