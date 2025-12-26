@@ -17,6 +17,8 @@ interface Business {
   uid: string;
   businessName: string;
   context: BusinessContext;
+  createdAt?: any;
+  updatedAt?: any;
 }
 
 export default function BusinessSettingsPage() {
@@ -48,6 +50,10 @@ export default function BusinessSettingsPage() {
   
   // Status
   const [status, setStatus] = useState('active');
+  
+  // Timestamps
+  const [createdAt, setCreatedAt] = useState<Date | null>(null);
+  const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
 
   useEffect(() => {
     // Redirect to login if not authenticated
@@ -94,6 +100,10 @@ export default function BusinessSettingsPage() {
         
         // Load status
         setStatus(data.data.status || 'active');
+        
+        // Load timestamps
+        setCreatedAt(data.data.createdAt ? new Date(data.data.createdAt.seconds ? data.data.createdAt.seconds * 1000 : data.data.createdAt) : null);
+        setUpdatedAt(data.data.updatedAt ? new Date(data.data.updatedAt.seconds ? data.data.updatedAt.seconds * 1000 : data.data.updatedAt) : null);
       } else if (data.success && !data.data) {
         // New business - reset to empty
         setBusiness(null);
@@ -110,6 +120,8 @@ export default function BusinessSettingsPage() {
         setWidgetThemeMode('dark');
         setWidgetPrimaryColor('#0ea5e9');
         setStatus('active');
+        setCreatedAt(null);
+        setUpdatedAt(null);
       }
     } catch (err) {
       console.error('Error fetching business context:', err);
@@ -237,7 +249,8 @@ export default function BusinessSettingsPage() {
                 { id: 'services', label: 'Services' },
                 { id: 'rules', label: 'Rules' },
                 { id: 'voice', label: 'Voice Settings' },
-                { id: 'widget', label: 'Widget' }
+                { id: 'widget', label: 'Widget' },
+                { id: 'status', label: 'Status & Info' }
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -285,6 +298,49 @@ export default function BusinessSettingsPage() {
                     placeholder="e.g., We are a Pakistani restaurant offering authentic desi flavors with freshly prepared karahi, BBQ, handi, and traditional meals..."
                   />
                   <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Describe what your business does, your specialties, and what makes you unique</p>
+                </div>
+              </div>
+            )}
+
+            {/* Status & Info Tab */}
+            {activeTab === 'status' && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Status
+                  </label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="paused">Paused</option>
+                  </select>
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Set your AI assistant status</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Created At
+                    </label>
+                    <div className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white">
+                      {createdAt ? createdAt.toLocaleString() : 'Not yet created'}
+                    </div>
+                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Date when this business was created</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Updated At
+                    </label>
+                    <div className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white">
+                      {updatedAt ? updatedAt.toLocaleString() : 'Not yet updated'}
+                    </div>
+                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Date of last update</p>
+                  </div>
                 </div>
               </div>
             )}
