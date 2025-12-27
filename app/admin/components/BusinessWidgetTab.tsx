@@ -303,17 +303,17 @@ export default function BusinessWidgetTab({ owners, user }: { owners: Owner[]; u
         ) : !businessData ? (
           <div className="p-12 text-center">
             <div className="mb-4">
-              <svg className="w-16 h-16 text-amber-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4v2m0 0v2m0-6h2m-2 0h-2m9-6h-4a2 2 0 00-2 2v12a2 2 0 002 2h4a2 2 0 002-2V7a2 2 0 00-2-2zm-2 14H7m0 0a2 2 0 100-4 2 2 0 000 4z" />
+              <svg className="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Widget Not Configured</h3>
+            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Cannot Configure Widget</h3>
             <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-md mx-auto">
-              This business hasn't defined their widget settings yet. Please ask the business owner to set up their widget on their dashboard first.
+              This business has not completed their onboarding yet and cannot configure their widget settings at this time.
             </p>
-            <div className="inline-block bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
-              <p className="text-sm text-amber-800 dark:text-amber-200">
-                <strong>What to do:</strong> The business owner should go to their dashboard and complete the "Business Settings" configuration in the onboarding section.
+            <div className="inline-block bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+              <p className="text-sm text-red-800 dark:text-red-200">
+                <strong>Action Required:</strong> The business owner must complete their onboarding process first before they can configure widget settings.
               </p>
             </div>
           </div>
