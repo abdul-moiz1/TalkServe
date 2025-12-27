@@ -142,12 +142,13 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const businessContextRef = db.collection("business_context");
-    const snapshot = await businessContextRef.where("uid", "==", uuid).get();
+    // Query the correct 'businesses' collection
+    const businessesRef = db.collection("businesses");
+    const snapshot = await businessesRef.where("uid", "==", uuid).get();
 
     if (snapshot.empty) {
       return NextResponse.json(
-        { success: false, error: "Business context not found" },
+        { success: false, error: "Business not found" },
         { status: 404 },
       );
     }
@@ -165,7 +166,7 @@ export async function PUT(request: NextRequest) {
       updateData.context = businessSettings;
     }
 
-    await db.collection("business_context").doc(doc.id).update(updateData);
+    await db.collection("businesses").doc(doc.id).update(updateData);
 
     return NextResponse.json({
       success: true,
