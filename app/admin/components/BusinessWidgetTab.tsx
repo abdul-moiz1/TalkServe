@@ -157,14 +157,15 @@ export default function BusinessWidgetTab({ owners, user }: { owners: Owner[]; u
         .filter(service => service.length > 0);
 
       const idToken = await user?.getIdToken();
-      const response = await fetch('/api/admin/widget-status', {
-        method: 'PUT',
+      // Use the same save endpoint as onboarding form
+      const response = await fetch('/api/save-business-context', {
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${idToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          uuid: selectedOwner.uuid,
+          uid: selectedOwner.uuid,
           businessName: businessName.trim(),
           status: widgetStatus,
           context: {
