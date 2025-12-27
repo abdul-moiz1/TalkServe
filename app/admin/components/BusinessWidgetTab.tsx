@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FiSearch, FiToggle2, FiCopy, FiCheck, FiLoader, FiAlertCircle, FiEdit2, FiSave, FiX } from 'react-icons/fi';
+import { FiSearch, FiPower, FiCopy, FiCheck, FiLoader, FiAlertCircle, FiEdit2, FiSave, FiX } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
 interface Owner {
@@ -301,7 +301,7 @@ export default function BusinessWidgetTab({ owners, user }: { owners: Owner[]; u
                       : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
                   } disabled:opacity-50`}
                 >
-                  <FiToggle2 className="w-6 h-6" />
+                  <FiPower className="w-6 h-6" />
                 </button>
               </div>
             </div>
