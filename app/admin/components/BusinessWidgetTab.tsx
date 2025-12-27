@@ -145,11 +145,20 @@ export default function BusinessWidgetTab({ owners, user }: { owners: Owner[]; u
   };
 
   const handleSaveBusinessSettings = async () => {
-    if (!selectedOwner || !businessData) return;
+    if (!selectedOwner) {
+      setError('No business selected');
+      return;
+    }
 
     setSaving(true);
     setError(null);
     try {
+      if (!businessName.trim()) {
+        setError('Business name is required');
+        setSaving(false);
+        return;
+      }
+
       // Convert comma-separated services to array
       const servicesArray = servicesString
         .split(',')
@@ -157,6 +166,8 @@ export default function BusinessWidgetTab({ owners, user }: { owners: Owner[]; u
         .filter(service => service.length > 0);
 
       const idToken = await user?.getIdToken();
+      console.log('Saving business settings for:', selectedOwner.uuid);
+      
       // Use the same save endpoint as onboarding form
       const response = await fetch('/api/save-business-context', {
         method: 'POST',
@@ -190,18 +201,27 @@ export default function BusinessWidgetTab({ owners, user }: { owners: Owner[]; u
         }),
       });
 
+      if (!response.ok) {
+        setError(`Server error: ${response.status} ${response.statusText}`);
+        setSaving(false);
+        return;
+      }
+
       const result = await response.json();
+      console.log('Save result:', result);
+      
       if (result.success) {
         setSuccess('Business settings saved successfully!');
         setTimeout(() => setSuccess(''), 3000);
         setIsEditing(false);
-        handleOwnerSelect(selectedOwner);
+        // Reload the business data
+        await handleOwnerSelect(selectedOwner);
       } else {
         setError(result.error || 'Failed to save business settings');
       }
     } catch (err) {
-      setError('Failed to save business settings');
-      console.error(err);
+      console.error('Error saving business settings:', err);
+      setError(err instanceof Error ? err.message : 'Failed to save business settings');
     } finally {
       setSaving(false);
     }
