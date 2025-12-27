@@ -47,18 +47,18 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const uuid = searchParams.get("uuid");
+    const businessId = searchParams.get("businessId");
 
-    if (!uuid) {
+    if (!businessId) {
       return NextResponse.json(
-        { success: false, error: "UUID (Business ID) is required" },
+        { success: false, error: "Business ID is required" },
         { status: 400 },
       );
     }
 
     const scriptContent = `<script>
       window.AIVoiceWidgetConfig = {
-        businessId: "${uuid}",
+        businessId: "${businessId}",
       };
     </script>
     <script src="https://talkserve.web.app/widget.js"><\/script>`;
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         script: scriptContent,
-        businessId: uuid,
+        businessId: businessId,
         chatWidgetUrl: chatWidgetUrl,
       },
     });

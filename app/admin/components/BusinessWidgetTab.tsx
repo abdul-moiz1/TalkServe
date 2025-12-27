@@ -121,8 +121,8 @@ export default function BusinessWidgetTab({ owners, user }: { owners: Owner[]; u
           setCreatedAt(result.data.createdAt ? new Date(result.data.createdAt.seconds ? result.data.createdAt.seconds * 1000 : result.data.createdAt) : null);
           setUpdatedAt(result.data.updatedAt ? new Date(result.data.updatedAt.seconds ? result.data.updatedAt.seconds * 1000 : result.data.updatedAt) : null);
 
-          // Fetch widget script
-          const scriptResponse = await fetch(`/api/admin/widget-script?uuid=${owner.uuid}`, {
+          // Fetch widget script using businessId from businesses collection
+          const scriptResponse = await fetch(`/api/admin/widget-script?businessId=${result.data.id}`, {
             headers: {
               'Authorization': `Bearer ${idToken}`,
             },
