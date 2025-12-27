@@ -85,8 +85,9 @@ export default function BusinessWidgetTab({ owners, user }: { owners: Owner[]; u
 
     try {
       const idToken = await user?.getIdToken();
-      // Fetch business data from business collection using the owner's uuid
-      const response = await fetch(`/api/admin/widget-status?uuid=${owner.uuid}`, {
+      
+      // Fetch business data from business collection using the same endpoint as onboarding
+      const response = await fetch(`/api/save-business-context?uid=${owner.uuid}`, {
         headers: {
           'Authorization': `Bearer ${idToken}`,
         },
@@ -96,7 +97,7 @@ export default function BusinessWidgetTab({ owners, user }: { owners: Owner[]; u
       if (result.success && result.data) {
         setBusinessData(result.data);
         
-        // Load all fields from business data
+        // Load all fields from business data (same as onboarding form)
         setBusinessName(result.data.businessName || '');
         setDescription(result.data.context?.description || '');
         setHours(result.data.context?.hours || '');
