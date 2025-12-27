@@ -94,40 +94,47 @@ export default function BusinessWidgetTab({ owners, user }: { owners: Owner[]; u
       });
 
       const result = await response.json();
-      if (result.success && result.data) {
-        setBusinessData(result.data);
-        
-        // Load all fields from business data (same as onboarding form)
-        setBusinessName(result.data.businessName || '');
-        setDescription(result.data.context?.description || '');
-        setHours(result.data.context?.hours || '');
-        
-        // Convert services array to comma-separated string
-        const servicesArray = result.data.context?.services || [];
-        const servicesStr = Array.isArray(servicesArray) ? servicesArray.join(', ') : '';
-        setServicesString(servicesStr);
-        
-        setRules(result.data.context?.rules && result.data.context.rules.length > 0 ? result.data.context.rules : ['']);
-        setVoiceLanguage(result.data.voice?.language || 'en');
-        setVoiceGender(result.data.voice?.voiceGender || 'female');
-        setVoicePitch(result.data.voice?.pitch || 1);
-        setVoiceSpeed(result.data.voice?.speakingSpeed || 1);
-        setWidgetLogoUrl(result.data.widget?.logoUrl || '');
-        setWidgetThemeMode(result.data.widget?.theme?.mode || 'dark');
-        setWidgetPrimaryColor(result.data.widget?.theme?.primaryColor || '#0ea5e9');
-        setWidgetStatus(result.data.status || 'active');
-        setCreatedAt(result.data.createdAt ? new Date(result.data.createdAt.seconds ? result.data.createdAt.seconds * 1000 : result.data.createdAt) : null);
-        setUpdatedAt(result.data.updatedAt ? new Date(result.data.updatedAt.seconds ? result.data.updatedAt.seconds * 1000 : result.data.updatedAt) : null);
+      if (result.success) {
+        if (result.data) {
+          // Business settings exist
+          setBusinessData(result.data);
+          
+          // Load all fields from business data (same as onboarding form)
+          setBusinessName(result.data.businessName || '');
+          setDescription(result.data.context?.description || '');
+          setHours(result.data.context?.hours || '');
+          
+          // Convert services array to comma-separated string
+          const servicesArray = result.data.context?.services || [];
+          const servicesStr = Array.isArray(servicesArray) ? servicesArray.join(', ') : '';
+          setServicesString(servicesStr);
+          
+          setRules(result.data.context?.rules && result.data.context.rules.length > 0 ? result.data.context.rules : ['']);
+          setVoiceLanguage(result.data.voice?.language || 'en');
+          setVoiceGender(result.data.voice?.voiceGender || 'female');
+          setVoicePitch(result.data.voice?.pitch || 1);
+          setVoiceSpeed(result.data.voice?.speakingSpeed || 1);
+          setWidgetLogoUrl(result.data.widget?.logoUrl || '');
+          setWidgetThemeMode(result.data.widget?.theme?.mode || 'dark');
+          setWidgetPrimaryColor(result.data.widget?.theme?.primaryColor || '#0ea5e9');
+          setWidgetStatus(result.data.status || 'active');
+          setCreatedAt(result.data.createdAt ? new Date(result.data.createdAt.seconds ? result.data.createdAt.seconds * 1000 : result.data.createdAt) : null);
+          setUpdatedAt(result.data.updatedAt ? new Date(result.data.updatedAt.seconds ? result.data.updatedAt.seconds * 1000 : result.data.updatedAt) : null);
 
-        // Fetch widget script
-        const scriptResponse = await fetch(`/api/admin/widget-script?uuid=${owner.uuid}`, {
-          headers: {
-            'Authorization': `Bearer ${idToken}`,
-          },
-        });
-        const scriptResult = await scriptResponse.json();
-        if (scriptResult.success) {
-          setWidgetScript(scriptResult.data.script);
+          // Fetch widget script
+          const scriptResponse = await fetch(`/api/admin/widget-script?uuid=${owner.uuid}`, {
+            headers: {
+              'Authorization': `Bearer ${idToken}`,
+            },
+          });
+          const scriptResult = await scriptResponse.json();
+          if (scriptResult.success) {
+            setWidgetScript(scriptResult.data.script);
+          }
+        } else {
+          // No business settings defined yet
+          setBusinessData(null);
+          setError(null);
         }
       }
     } catch (err) {
@@ -292,6 +299,23 @@ export default function BusinessWidgetTab({ owners, user }: { owners: Owner[]; u
           <div className="p-12 text-center flex items-center justify-center gap-3">
             <FiLoader className="w-5 h-5 animate-spin text-blue-600" />
             <span className="text-slate-600 dark:text-slate-400">Loading business data...</span>
+          </div>
+        ) : !businessData ? (
+          <div className="p-12 text-center">
+            <div className="mb-4">
+              <svg className="w-16 h-16 text-amber-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4v2m0 0v2m0-6h2m-2 0h-2m9-6h-4a2 2 0 00-2 2v12a2 2 0 002 2h4a2 2 0 002-2V7a2 2 0 00-2-2zm-2 14H7m0 0a2 2 0 100-4 2 2 0 000 4z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Widget Not Configured</h3>
+            <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-md mx-auto">
+              This business hasn't defined their widget settings yet. Please ask the business owner to set up their widget on their dashboard first.
+            </p>
+            <div className="inline-block bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+              <p className="text-sm text-amber-800 dark:text-amber-200">
+                <strong>What to do:</strong> The business owner should go to their dashboard and complete the "Business Settings" configuration in the onboarding section.
+              </p>
+            </div>
           </div>
         ) : (
           <div className="p-8 space-y-6">
