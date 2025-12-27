@@ -72,10 +72,14 @@ export default function BusinessWidgetTab({ owners, user }: { owners: Owner[]; u
       const result = await response.json();
       if (result.success) {
         setWidgetData(result.data);
+        // Convert services array to comma-separated string for editing
+        const servicesArray = result.data.businessSettings?.services || [];
+        const servicesString = Array.isArray(servicesArray) ? servicesArray.join(', ') : '';
+        
         setEditingData({
           description: result.data.businessSettings?.description || '',
           hours: result.data.businessSettings?.hours || '',
-          services: result.data.businessSettings?.services || '',
+          services: servicesString,
           rules: result.data.businessSettings?.rules || [],
         });
 
@@ -145,6 +149,12 @@ export default function BusinessWidgetTab({ owners, user }: { owners: Owner[]; u
     setSaving(true);
     setError(null);
     try {
+      // Convert comma-separated services to array
+      const servicesArray = editingData.services
+        .split(',')
+        .map(service => service.trim())
+        .filter(service => service.length > 0);
+
       const idToken = await user?.getIdToken();
       const response = await fetch('/api/admin/widget-status', {
         method: 'PUT',
@@ -157,7 +167,7 @@ export default function BusinessWidgetTab({ owners, user }: { owners: Owner[]; u
           businessSettings: {
             description: editingData.description,
             hours: editingData.hours,
-            services: editingData.services,
+            services: servicesArray,
             rules: editingData.rules.filter(r => r.trim()),
           },
         }),
@@ -167,7 +177,12 @@ export default function BusinessWidgetTab({ owners, user }: { owners: Owner[]; u
       if (result.success) {
         setWidgetData({
           ...widgetData!,
-          businessSettings: editingData,
+          businessSettings: {
+            description: editingData.description,
+            hours: editingData.hours,
+            services: servicesArray,
+            rules: editingData.rules,
+          },
         });
         setIsEditing(false);
         setSuccess('Business settings updated successfully');
@@ -397,7 +412,11 @@ export default function BusinessWidgetTab({ owners, user }: { owners: Owner[]; u
                   {widgetData.businessSettings?.services && (
                     <div>
                       <p className="text-xs font-medium text-slate-600 dark:text-slate-400">Services</p>
-                      <p className="text-slate-800 dark:text-slate-200 mt-1 whitespace-pre-wrap">{widgetData.businessSettings.services}</p>
+                      <p className="text-slate-800 dark:text-slate-200 mt-1 whitespace-pre-wrap">
+                        {Array.isArray(widgetData.businessSettings.services) 
+                          ? widgetData.businessSettings.services.join(', ') 
+                          : widgetData.businessSettings.services}
+                      </p>
                     </div>
                   )}
                 </div>
