@@ -41,6 +41,12 @@ export default function HotelAdminPage() {
     // Get businessId from URL or localStorage
     const bid = new URLSearchParams(window.location.search).get('businessId') || 
                 localStorage.getItem('currentBusinessId');
+    
+    if (!bid && !authLoading) {
+      router.push('/dashboard/select-business');
+      return;
+    }
+
     if (bid) setBusinessId(bid);
     
     fetchTeamMembers(bid || '');
