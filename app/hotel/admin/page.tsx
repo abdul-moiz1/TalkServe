@@ -192,7 +192,7 @@ export default function HotelAdminPage() {
               </div>
               <Button onClick={() => setShowInviteForm(!showInviteForm)}>
                 <FiPlus className="w-4 h-4" />
-                Invite Member
+                {showInviteForm ? 'Cancel' : 'Generate Invite'}
               </Button>
             </div>
           </div>
@@ -291,7 +291,7 @@ export default function HotelAdminPage() {
               </div>
               <div className="flex gap-2">
                 <Button type="submit" disabled={submitting}>
-                  {submitting ? 'Sending...' : 'Send Invite'}
+                  {submitting ? 'Generating...' : 'Generate Invite'}
                 </Button>
                 <Button
                   type="button"
