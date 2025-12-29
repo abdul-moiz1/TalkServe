@@ -503,6 +503,7 @@ export default function OnboardingForm() {
             className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
           >
             <option value="">Select an industry</option>
+            <option value="hotel">Hotel</option>
             <option value="dental">Dental Clinic</option>
             <option value="restaurant">Restaurant</option>
             <option value="healthcare">Healthcare</option>
