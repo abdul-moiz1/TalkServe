@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     const businessData = businessDoc.data();
+    console.log('Invite Debug - userId:', userId, 'ownerId:', businessData?.ownerId);
     if (businessData?.ownerId !== userId) {
       return NextResponse.json({ error: 'Forbidden - not business owner' }, { status: 403 });
     }

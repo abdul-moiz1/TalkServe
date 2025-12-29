@@ -105,8 +105,9 @@ export default function HotelAdminPage() {
         setShowInviteForm(false);
         const url = `${window.location.origin}/auth/accept-invite?code=${data.invite.code}&businessId=${businessId}`;
         setInviteUrl(url);
+        setError(null);
       } else {
-        setError(data.error || 'Failed to send invite');
+        setError(data.error || 'Failed to generate invite');
       }
     } catch (err) {
       setError('Failed to send invite');
@@ -196,6 +197,13 @@ export default function HotelAdminPage() {
               </Button>
             </div>
           </div>
+
+          {error && (
+            <div className="m-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-center gap-3 text-red-600 dark:text-red-400 text-sm">
+              <FiAlertCircle className="w-5 h-5 shrink-0" />
+              {error}
+            </div>
+          )}
 
           {inviteUrl && (
             <div
