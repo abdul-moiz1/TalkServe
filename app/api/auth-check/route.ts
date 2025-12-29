@@ -33,7 +33,9 @@ export async function GET(request: NextRequest) {
       if (!businessSnapshot.empty) {
         return NextResponse.json({ 
           redirect: `/hotel/admin?businessId=${businessSnapshot.docs[0].id}`,
-          businessId: businessSnapshot.docs[0].id
+          businessId: businessSnapshot.docs[0].id,
+          role: 'admin',
+          industryType: 'hotel'
         });
       }
     }
@@ -55,7 +57,12 @@ export async function GET(request: NextRequest) {
           if (memberData.role === 'admin') redirect = `/hotel/admin?businessId=${businessId}`;
           if (memberData.role === 'manager') redirect = `/hotel/manager?businessId=${businessId}`;
           
-          return NextResponse.json({ redirect, businessId });
+          return NextResponse.json({ 
+            redirect, 
+            businessId,
+            role: memberData.role,
+            industryType: 'hotel'
+          });
         }
       }
     }
