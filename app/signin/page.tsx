@@ -21,8 +21,8 @@ export default function SignInPage() {
     setLoading(true);
 
     try {
-      await signIn(email, password);
-      const idToken = await auth?.currentUser?.getIdToken();
+      const userResult = await signIn(email, password);
+      const idToken = await userResult.getIdToken();
       const response = await fetch('/api/auth-check', {
         headers: { Authorization: `Bearer ${idToken}` }
       });
@@ -46,8 +46,8 @@ export default function SignInPage() {
     setLoading(true);
 
     try {
-      await signInWithGoogle();
-      const idToken = await auth?.currentUser?.getIdToken();
+      const user = await signInWithGoogle();
+      const idToken = await user.getIdToken();
       const response = await fetch('/api/auth-check', {
         headers: { Authorization: `Bearer ${idToken}` }
       });
