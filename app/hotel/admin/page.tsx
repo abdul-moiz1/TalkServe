@@ -43,7 +43,7 @@ export default function HotelAdminPage() {
                 localStorage.getItem('currentBusinessId');
     
     if (!bid && !authLoading) {
-      router.push('/hotel/select-business');
+      router.push('/dashboard');
       return;
     }
 
