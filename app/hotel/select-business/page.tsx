@@ -50,11 +50,11 @@ export default function BusinessSelectorPage() {
   const handleSelect = (business: Business) => {
     localStorage.setItem('currentBusinessId', business.businessId);
     if (business.role === 'admin') {
-      router.push(`/admin/hotel?businessId=${business.businessId}`);
+      router.push(`/hotel/admin?businessId=${business.businessId}`);
     } else if (business.role === 'manager') {
-      router.push(`/dashboard/hotel/manager?businessId=${business.businessId}`);
+      router.push(`/hotel/manager?businessId=${business.businessId}`);
     } else {
-      router.push(`/dashboard/hotel/staff?businessId=${business.businessId}`);
+      router.push(`/hotel/staff?businessId=${business.businessId}`);
     }
   };
 

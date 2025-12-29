@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
       if (!businessSnapshot.empty) {
         return NextResponse.json({ 
-          redirect: `/admin/hotel?businessId=${businessSnapshot.docs[0].id}`,
+          redirect: `/hotel/admin?businessId=${businessSnapshot.docs[0].id}`,
           businessId: businessSnapshot.docs[0].id
         });
       }
