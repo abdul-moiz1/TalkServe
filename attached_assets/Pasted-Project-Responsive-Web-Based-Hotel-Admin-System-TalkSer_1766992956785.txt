@@ -1,0 +1,447 @@
+Project: Responsive Web-Based Hotel Admin System (TalkServe – Hotel Mode)
+
+You are building a single responsive web application (NOT native) for a hotel management system with role-based access and mobile-optimized UI for staff.
+
+⚠️ IMPORTANT RULES
+
+Do NOT redesign flows
+
+Do NOT remove steps
+
+Do NOT merge roles
+
+Do NOT add new features
+
+Follow the flow and permissions EXACTLY
+
+Desktop = Admin/Manager
+
+Mobile = Staff (responsive UI, same web app)
+
+1️⃣ BUSINESS TYPE LOGIC
+
+During onboarding, user selects business type:
+
+Restaurant
+
+Dental
+
+Services
+
+Hotel
+
+If Hotel is selected:
+
+Enable hotel-only features:
+
+Departments
+
+Tickets
+
+Staff task flow
+
+Invite system
+
+Other business types must NOT see hotel features
+
+2️⃣ AUTH & ROLE CONTEXT
+
+Create an AuthContext that provides:
+
+Logged-in user
+
+All businesses user belongs to
+
+Role per business
+
+Department per business
+
+Preferred language
+
+Current selected business
+
+User object structure must support multiple hotels per user.
+
+3️⃣ ADMIN PANEL (/admin)
+Admin Access Only
+
+UI rules:
+
+Single header: TalkServe Admin
+
+No duplicate headers
+
+Admin features:
+
+View all departments
+
+View all tickets
+
+View analytics
+
+Manage system settings
+
+Manage team members
+
+Manage invites
+
+Configure departments
+
+Configure routing rules
+
+Configure default languages
+
+View invite history and logs
+
+4️⃣ TEAM MANAGEMENT (ADMIN)
+
+Admin can:
+
+Add team member
+
+Fields:
+
+Email
+
+Role (Admin / Manager / Staff)
+
+Department
+
+Preferred language
+
+Generate invite
+
+Admin can also:
+
+Resend invite
+
+Copy invite link
+
+Cancel invite
+
+Remove member
+
+Change role
+
+Change department
+
+5️⃣ INVITE SYSTEM (CORE FEATURE)
+Invite Creation
+
+Generate:
+
+Unique invite code
+
+Business ID
+
+Expiry (7 days)
+
+Create invite link:
+
+/auth/accept-invite?code=XXX&businessId=YYY
+
+InviteSuccessModal
+
+Show:
+
+Email
+
+Role
+
+Department
+
+Preferred language
+
+Copy invite link
+
+Copy email
+
+Instructions
+
+Email
+
+Send invite email containing:
+
+Hotel name
+
+Assigned role
+
+Invite link
+
+Expiration notice
+
+6️⃣ ACCEPT INVITE FLOW (/auth/accept-invite)
+
+Validate:
+
+Invite code exists
+
+Not expired
+
+Email matches
+
+Business exists
+
+Page displays:
+
+Hotel name
+
+Role
+
+Department
+
+Preferred language
+
+Email (read-only)
+
+Form:
+
+Full name
+
+Password
+
+Confirm password
+
+On submit:
+
+Create user
+
+Hash password
+
+Add to:
+
+users collection
+
+businesses/{id}/members
+
+Auto-login
+
+Redirect to dashboard
+
+7️⃣ ROLE-BASED ROUTING
+
+Admin → /admin
+
+Manager → /dashboard/hotel/tickets?department=XYZ
+
+Staff → /dashboard/my-tasks
+
+8️⃣ MANAGER FUNCTIONALITY
+
+Manager CAN:
+
+View own department tickets
+
+Assign tickets to staff in same department
+
+Update ticket status
+
+View team workload
+
+Message staff
+
+View department analytics
+
+Change language
+
+Manager CANNOT:
+
+View other departments
+
+Invite members
+
+Access admin settings
+
+Manage managers
+
+View hotel-wide analytics
+
+Navigation:
+
+Dashboard
+
+My Team
+
+Department Tickets
+
+Department Analytics
+
+9️⃣ STAFF FUNCTIONALITY (MOBILE-FIRST)
+
+Staff CAN:
+
+View only assigned tickets
+
+Update ticket status
+
+Swipe actions:
+
+Left → Complete
+
+Right → Start
+
+Message manager
+
+View personal performance
+
+Change language
+
+Work offline
+
+Staff CANNOT:
+
+Assign tickets
+
+View other staff
+
+Access manager/admin dashboards
+
+View analytics
+
+Invite members
+
+Navigation:
+
+My Tasks
+
+My Performance
+
+Profile
+
+Settings
+
+🔟 TICKET SYSTEM
+
+Ticket lifecycle:
+
+Created
+
+Assigned
+
+In Progress
+
+Completed
+
+Archived
+
+Departments:
+
+Front Desk
+
+Housekeeping
+
+Room Service
+
+Maintenance
+
+Guest request → AI → Department → Ticket creation
+
+Ticket must support:
+
+Translations per language
+
+Priority (urgent / normal / low)
+
+Real-time status updates
+
+1️⃣1️⃣ MULTI-BUSINESS SUPPORT
+
+User may belong to multiple hotels
+
+On login:
+
+Show business selector
+
+Allow switching business anytime
+
+Dashboard updates per selected business
+
+1️⃣2️⃣ LANGUAGE SYSTEM
+
+Language selected during invite
+
+UI rendered in user language
+
+Tickets auto-translated
+
+Mobile language switcher (1 tap)
+
+Live updates on change
+
+1️⃣3️⃣ RESPONSIVE UI RULES
+
+Same web app
+
+Mobile & desktop responsive
+
+Mobile:
+
+Card-based layout
+
+Bottom navigation
+
+Large touch targets
+
+Swipe gestures
+
+Vertical scrolling only
+
+Desktop:
+
+Sidebar
+
+Tables
+
+Analytics panels
+
+1️⃣4️⃣ OFFLINE SUPPORT (STAFF)
+
+Cache tasks locally
+
+Allow status updates offline
+
+Sync automatically when online
+
+Show syncing indicator
+
+1️⃣5️⃣ PWA SUPPORT
+
+Installable web app
+
+Full-screen mode
+
+Offline support
+
+Push notifications for new tasks
+
+1️⃣6️⃣ DATABASE (Firestore)
+
+Collections:
+
+businesses/{businessId}
+
+members
+
+tickets
+
+users
+
+invites
+
+Use businessId as the Firestore document ID everywhere.
+
+🚫 DO NOT:
+
+Convert to native app
+
+Add extra roles
+
+Add analytics to staff UI
+
+Add complex forms to mobile
+
+Break role permissions
+
+Skip validation steps
+
+Build strictly according to this flow.
