@@ -99,7 +99,8 @@ export default function HotelAdminPage() {
       });
 
       const data = await response.json();
-      if (data.success) {
+      console.log('Invite response data:', data);
+      if (data.success && data.invite) {
         setInviteEmail('');
         setShowInviteForm(false);
         const url = `${window.location.origin}/auth/accept-invite?code=${data.invite.code}&businessId=${businessId}`;
@@ -197,9 +198,7 @@ export default function HotelAdminPage() {
           </div>
 
           {inviteUrl && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
+            <div
               className="m-6 p-6 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl"
             >
               <div className="flex items-center justify-between mb-4">
@@ -232,7 +231,7 @@ export default function HotelAdminPage() {
                   Copy Link
                 </Button>
               </div>
-            </motion.div>
+            </div>
           )}
 
           {showInviteForm && (
