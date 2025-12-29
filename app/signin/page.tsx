@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { auth } from '@/lib/firebase';
 import { FcGoogle } from 'react-icons/fc';
 
 export default function SignInPage() {
