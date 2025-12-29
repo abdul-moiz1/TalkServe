@@ -402,13 +402,6 @@ export default function AdminPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              <div className="w-11 h-11 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
-                <FiUsers className="w-5 h-5 text-white" />
-              </div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white">TalkServe Admin</h1>
-            </div>
-            
-            <div className="flex items-center gap-4">
               <span className="text-sm text-slate-600 dark:text-slate-400 hidden sm:block">{user?.email}</span>
               <button
                 onClick={handleLogout}
