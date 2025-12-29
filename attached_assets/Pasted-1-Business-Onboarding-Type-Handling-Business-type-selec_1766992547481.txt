@@ -1,0 +1,435 @@
+1️⃣ Business Onboarding & Type Handling
+
+Business type selection during onboarding
+
+Supported types:
+
+Restaurant
+
+Dental
+
+Services
+
+Hotel
+
+Selecting Hotel:
+
+Unlocks hotel-only modules (departments, tickets, staff flow)
+
+Other business types:
+
+See standard features only
+
+2️⃣ Admin Panel (Hotel)
+Admin Access
+
+Route: /admin
+
+Single header: TalkServe Admin
+
+No duplicate headers
+
+Admin Capabilities
+
+View all departments
+
+View all tickets
+
+View analytics
+
+Manage system settings
+
+Manage team members
+
+Manage invites
+
+Configure departments
+
+Configure ticket routing rules
+
+Configure language defaults
+
+View logs & history
+
+3️⃣ Team Management (Admin)
+Add Team Member
+
+Fields:
+
+Email
+
+Role (Admin / Manager / Staff)
+
+Department
+
+Preferred Language
+
+Generate invite
+
+Admin Actions
+
+Send invite
+
+Resend invite
+
+Copy invite link
+
+Copy recipient email
+
+Cancel invite
+
+Remove member
+
+Change role
+
+Change department
+
+4️⃣ Invite System (End-to-End Flow)
+Invite Creation
+
+Generate:
+
+Unique invite code
+
+Business ID
+
+Expiration (7 days)
+
+Create invite link:
+
+/auth/accept-invite?code=XXX&businessId=YYY
+
+Invite Success Modal
+
+Shows:
+
+Email
+
+Role
+
+Department
+
+Language
+
+Copyable invite link
+
+Copy email
+
+Instructions
+
+Email Delivery
+
+Email includes:
+
+Hotel name
+
+Assigned role
+
+Invite link
+
+Expiration info
+
+5️⃣ Invite Acceptance Flow
+Validation
+
+Code valid
+
+Email matches
+
+Invite not expired
+
+Business exists
+
+Accept Invite Page
+
+Shows:
+
+Hotel name
+
+Role
+
+Department
+
+Language
+
+Email (read-only)
+
+Input:
+
+Full name
+
+Password
+
+Confirm password
+
+Account Creation
+
+Create user
+
+Hash password
+
+Add user to:
+
+users collection
+
+businesses/{id}/members
+
+Auto-login
+
+Redirect to dashboard
+
+6️⃣ Authentication & Context
+Auth Context Includes
+
+User info
+
+Multiple businesses
+
+Role per business
+
+Department per business
+
+Preferred language
+
+Active business (currentBusiness)
+
+7️⃣ Role-Based Routing
+Admin
+
+/admin
+
+Manager
+
+/dashboard/hotel/tickets?department=xyz
+
+Staff
+
+/dashboard/my-tasks
+
+8️⃣ Manager Functionality
+Manager Can
+
+View own department tickets
+
+Assign tickets to staff
+
+Update ticket status
+
+View team workload
+
+Message staff
+
+View department analytics
+
+Change language
+
+Manager Cannot
+
+View other departments
+
+Invite members
+
+Access admin settings
+
+Manage managers
+
+View full hotel analytics
+
+Manager Navigation
+
+Dashboard
+
+My Team
+
+Department Tickets
+
+Department Analytics
+
+9️⃣ Staff Functionality
+Staff Can
+
+View only assigned tickets
+
+Update ticket status
+
+Use swipe actions
+
+Message manager
+
+View personal performance
+
+Change language
+
+Work offline
+
+Staff Cannot
+
+Assign tickets
+
+View other staff
+
+Access admin/manager dashboards
+
+View analytics
+
+Invite members
+
+Staff Navigation
+
+My Tasks
+
+My Performance
+
+Profile
+
+Settings
+
+🔟 Ticket Lifecycle
+
+Created (by AI or system)
+
+Assigned (manager or AI)
+
+In Progress (staff action)
+
+Completed (staff action)
+
+Archived (admin/system)
+
+1️⃣1️⃣ Department-Based Routing
+
+Departments:
+
+Front Desk
+
+Housekeeping
+
+Room Service
+
+Maintenance
+
+Guest request → AI → Department → Ticket creation → Correct dashboards
+
+1️⃣2️⃣ Ticket Fields
+
+Business ID
+
+Department
+
+Guest room
+
+Request text
+
+Translations
+
+Priority
+
+Status
+
+Assigned to
+
+Timestamps
+
+Notes
+
+Time estimates
+
+1️⃣3️⃣ Multiple Business Support
+
+User can belong to multiple hotels
+
+Business selector on login
+
+Switch business anytime
+
+Dashboard updates based on selected business
+
+1️⃣4️⃣ Language System
+
+Language assigned during invite
+
+UI language per user
+
+Ticket auto-translation
+
+Mobile language switcher
+
+Real-time language updates
+
+1️⃣5️⃣ Mobile-Optimized UI (Responsive Web)
+Staff & Manager (Mobile)
+
+Card-based layout
+
+Bottom navigation
+
+Swipe gestures
+
+Large buttons
+
+One-hand usage
+
+No complex forms
+
+No heavy analytics
+
+Admin (Desktop)
+
+Tables
+
+Side navigation
+
+Full analytics
+
+Full settings
+
+1️⃣6️⃣ Offline Support (Staff)
+
+Cached tasks
+
+Offline status updates
+
+Sync when online
+
+Visual sync indicator
+
+1️⃣7️⃣ Progressive Web App (PWA)
+
+Installable from browser
+
+Fullscreen experience
+
+Offline support
+
+Push notifications
+
+1️⃣8️⃣ Widget Integration
+
+Admin configures widget
+
+Widget uses businessId
+
+Guests interact with AI
+
+Guest requests → ticket creation
+
+1️⃣9️⃣ Database Structure
+
+businesses
+
+members
+
+tickets
+
+users
+
+invites
+
+2️⃣0️⃣ Summary by Role
+Feature	Admin	Manager	Staff
+Invite users	✅	❌	❌
+View all departments	✅	❌	❌
+Manage department	✅	✅	❌
+Manage own tasks	❌	❌	✅
+Offline support	❌	❌	✅
+Mobile optimized	❌	✅	✅
