@@ -90,15 +90,41 @@ export default function AcceptInvitePage() {
 
     try {
       // Sign up the new user
-      await signUp(invite.email, formData.password, formData.fullName);
+      const newUser = await signUp(invite.email, formData.password, formData.fullName);
       
-      // TODO: Create user in database with role and department
-      // TODO: Mark invite as used
-      // TODO: Send confirmation email
+      if (!newUser) {
+        throw new Error('Failed to create user account');
+      }
+
+      // Get ID token for the newly created user
+      const idToken = await newUser.getIdToken();
+
+      // Create user in database with role and department and mark invite as used
+      const acceptResponse = await fetch('/api/hotel/invites/accept', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          inviteCode: code,
+          businessId,
+          role: invite.role,
+          department: invite.department,
+          email: invite.email,
+          fullName: formData.fullName,
+        }),
+      });
+
+      if (!acceptResponse.ok) {
+        const acceptError = await acceptResponse.json();
+        throw new Error(acceptError.error || 'Failed to complete invite acceptance');
+      }
 
       setSuccess(true);
       setTimeout(() => {
-        router.push('/dashboard');
+        // Redirect to hotel dashboard if it's a hotel business
+        router.push(`/dashboard/hotel/manager?businessId=${businessId}`);
       }, 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create account');
