@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { FiUsers, FiPlus, FiLoader, FiAlertCircle, FiLogOut } from 'react-icons/fi';
+import { FiUsers, FiPlus, FiLoader, FiAlertCircle, FiLogOut, FiCheckCircle, FiX } from 'react-icons/fi';
 import Button from '@/components/Button';
 
 interface TeamMember {
@@ -28,6 +28,8 @@ export default function HotelAdminPage() {
   const [inviteDepartment, setInviteDepartment] = useState('front-desk');
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  const [inviteUrl, setInviteUrl] = useState<string | null>(null);
 
   const departments = ['front-desk', 'housekeeping', 'room-service', 'maintenance'];
 
@@ -100,7 +102,8 @@ export default function HotelAdminPage() {
       if (data.success) {
         setInviteEmail('');
         setShowInviteForm(false);
-        alert(`Invite sent to ${inviteEmail}`);
+        const url = `${window.location.origin}/auth/accept-invite?code=${data.invite.code}&businessId=${businessId}`;
+        setInviteUrl(url);
       } else {
         setError(data.error || 'Failed to send invite');
       }
@@ -192,6 +195,45 @@ export default function HotelAdminPage() {
               </Button>
             </div>
           </div>
+
+          {inviteUrl && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="m-6 p-6 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-emerald-800 dark:text-emerald-300 font-semibold flex items-center gap-2">
+                  <FiCheckCircle className="w-5 h-5" />
+                  Invite Link Generated
+                </h3>
+                <button 
+                  onClick={() => setInviteUrl(null)}
+                  className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700"
+                >
+                  <FiX className="w-5 h-5" />
+                </button>
+              </div>
+              <p className="text-sm text-emerald-700 dark:text-emerald-400 mb-4">
+                Share this link with your team member. They can use it to join your hotel management system.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  readOnly
+                  value={inviteUrl}
+                  className="flex-1 px-4 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
+                />
+                <Button
+                  onClick={() => {
+                    navigator.clipboard.writeText(inviteUrl);
+                    alert('Copied to clipboard!');
+                  }}
+                >
+                  Copy Link
+                </Button>
+              </div>
+            </motion.div>
+          )}
 
           {showInviteForm && (
             <motion.form
