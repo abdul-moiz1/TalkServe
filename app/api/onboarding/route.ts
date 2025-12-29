@@ -239,18 +239,30 @@ export async function POST(request: NextRequest) {
       type: formData.get("type") as string,
       businessContextUrl,
       businessContextFileName,
-      status: "pending",
+      status: "active",
       submittedAt: new Date(),
     };
 
     const docRef = await db.collection("onboarding").add(onboardingData);
+
+    // Create a business record for hotel types
+    let businessId = null;
+    if (onboardingData.industryType === 'hotel') {
+      const businessRef = await db.collection("businesses").add({
+        name: onboardingData.businessName,
+        type: 'hotel',
+        ownerId: authenticatedUserId,
+        createdAt: new Date().toISOString(),
+      });
+      businessId = businessRef.id;
+    }
 
     console.log("Onboarding saved with ID:", docRef.id);
 
     return NextResponse.json({
       success: true,
       message: "Onboarding submission received successfully",
-      data: { id: docRef.id, ...onboardingData },
+      data: { id: docRef.id, businessId, ...onboardingData },
     });
   } catch (error) {
     console.error("Error processing onboarding:", error);
