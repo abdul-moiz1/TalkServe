@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminDb, getAdminAuth, verifyAuthToken } from '@/lib/firebase-admin';
+import { sendInviteEmail } from '@/lib/email';
 import crypto from 'crypto';
 
 export async function POST(request: NextRequest) {
@@ -54,14 +55,15 @@ export async function POST(request: NextRequest) {
       used: false,
       usedAt: null,
       usedBy: null,
+      createdBy: userId,
     };
 
     const inviteRef = await db.collection('invites').add(inviteData);
 
-    const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/accept-invite?code=${inviteCode}&businessId=${businessId}`;
+    const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000'}/auth/accept-invite?code=${inviteCode}&businessId=${businessId}`;
 
-    // TODO: Send email with invite link
-    // await sendInviteEmail(email, inviteLink, businessData.name, role);
+    // Send email with invite link
+    await sendInviteEmail(email, inviteLink, businessData.name, role);
 
     return NextResponse.json({
       success: true,
