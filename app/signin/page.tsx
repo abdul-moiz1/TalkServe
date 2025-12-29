@@ -21,7 +21,18 @@ export default function SignInPage() {
 
     try {
       await signIn(email, password);
-      router.push('/dashboard');
+      const idToken = await auth?.currentUser?.getIdToken();
+      const response = await fetch('/api/auth-check', {
+        headers: { Authorization: `Bearer ${idToken}` }
+      });
+      const data = await response.json();
+      
+      if (data.redirect) {
+        if (data.businessId) localStorage.setItem('currentBusinessId', data.businessId);
+        router.push(data.redirect);
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to login. Please check your credentials.');
     } finally {
@@ -35,7 +46,18 @@ export default function SignInPage() {
 
     try {
       await signInWithGoogle();
-      router.push('/dashboard');
+      const idToken = await auth?.currentUser?.getIdToken();
+      const response = await fetch('/api/auth-check', {
+        headers: { Authorization: `Bearer ${idToken}` }
+      });
+      const data = await response.json();
+      
+      if (data.redirect) {
+        if (data.businessId) localStorage.setItem('currentBusinessId', data.businessId);
+        router.push(data.redirect);
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to login with Google.');
     } finally {
