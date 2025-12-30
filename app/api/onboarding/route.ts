@@ -229,7 +229,7 @@ export async function POST(request: NextRequest) {
 
     const onboardingData = {
       user_id: authenticatedUserId,
-      uuid: authenticatedUserId,
+      uid: authenticatedUserId,
       ownerName: formData.get("ownerName") as string,
       ownerEmail: formData.get("ownerEmail") as string,
       businessName: formData.get("businessName") as string,
@@ -243,26 +243,43 @@ export async function POST(request: NextRequest) {
       submittedAt: new Date(),
     };
 
-    const docRef = await db.collection("onboarding").add(onboardingData);
+    // Use a transaction to ensure both onboarding and business are created
+    const result = await db.runTransaction(async (transaction) => {
+      const onboardingRef = db.collection("onboarding").doc();
+      transaction.set(onboardingRef, onboardingData);
 
-    // Create a business record for hotel types
-    let businessId = null;
-    if (onboardingData.industryType === 'hotel') {
-      const businessRef = await db.collection("businesses").add({
-        name: onboardingData.businessName,
-        type: 'hotel',
-        ownerId: authenticatedUserId,
-        createdAt: new Date().toISOString(),
-      });
-      businessId = businessRef.id;
-    }
+      let businessId = null;
+      if (onboardingData.industryType === 'hotel') {
+        const businessRef = db.collection("businesses").doc();
+        transaction.set(businessRef, {
+          name: onboardingData.businessName,
+          type: 'hotel',
+          ownerId: authenticatedUserId,
+          createdAt: new Date().toISOString(),
+          onboardingId: onboardingRef.id
+        });
+        businessId = businessRef.id;
+      }
 
-    console.log("Onboarding saved with ID:", docRef.id);
+      // Update user document to link to business
+      if (businessId) {
+        const userRef = db.collection("users").doc(authenticatedUserId);
+        transaction.update(userRef, { 
+          businessId,
+          hasCompletedOnboarding: true,
+          updatedAt: new Date().toISOString()
+        });
+      }
+
+      return { onboardingId: onboardingRef.id, businessId };
+    });
+
+    console.log("Onboarding and Business created successfully:", result);
 
     return NextResponse.json({
       success: true,
       message: "Onboarding submission received successfully",
-      data: { id: docRef.id, businessId, ...onboardingData },
+      data: { id: result.onboardingId, businessId: result.businessId, ...onboardingData },
     });
   } catch (error) {
     console.error("Error processing onboarding:", error);

@@ -18,6 +18,9 @@ async function registerUserInBackend(name: string, email: string, uid: string) {
       name,
       email,
       uid,
+      role: 'admin', // Default role for signup
+      status: 'active',
+      createdAt: new Date().toISOString()
     }),
   });
 
