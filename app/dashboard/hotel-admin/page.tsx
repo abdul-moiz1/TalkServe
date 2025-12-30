@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FiUsers, FiPlus, FiLoader, FiAlertCircle, FiCheckCircle, FiX, FiLink, FiSmartphone, FiArrowRight, FiUser } from 'react-icons/fi';
 import { QRCodeSVG } from 'qrcode.react';
 import Button from '@/components/Button';
@@ -71,7 +71,6 @@ export default function HotelAdminPage() {
         if (result.success && result.exists && result.data?.industryType === 'hotel') {
           setOnboardingData(result.data);
           
-          // If we have onboarding but no businessId in URL, try to get it
           const urlParams = new URLSearchParams(window.location.search);
           const bid = urlParams.get('businessId') || localStorage.getItem('currentBusinessId');
           
@@ -79,7 +78,6 @@ export default function HotelAdminPage() {
             setBusinessId(bid);
             fetchTeamMembers(bid);
           } else {
-            // Fetch business ID if not in URL/localStorage
             const bizRes = await fetch('/api/auth-check', {
               headers: { 'Authorization': `Bearer ${idToken}` },
             });
@@ -89,13 +87,13 @@ export default function HotelAdminPage() {
               fetchTeamMembers(bizData.businessId);
             } else {
               setError('No business found. Please complete onboarding.');
-              setLoading(false); // Stop main loading if error
+              setLoading(false);
             }
           }
         } else {
           console.log('No hotel onboarding found');
           setOnboardingData(null);
-          setLoading(false); // Stop loading to show "Register" state
+          setLoading(false);
         }
       } catch (err) {
         console.error('Error checking onboarding:', err);
@@ -246,231 +244,6 @@ export default function HotelAdminPage() {
           </div>
         </div>
 
-        {error && (
-          <div className="mx-8 mt-8 p-5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl flex items-center gap-4 text-red-600 dark:text-red-400">
-            <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-full">
-              <FiAlertCircle className="w-5 h-5" />
-            </div>
-            <span className="font-medium">{error}</span>
-          </div>
-        )}
-
-        {generatedAccount && (
-          <div className="m-6 p-6 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-emerald-800 dark:text-emerald-300 font-semibold flex items-center gap-2">
-                <FiCheckCircle className="w-5 h-5" />
-                Account Created Successfully
-              </h3>
-              <button 
-                onClick={() => setGeneratedAccount(null)}
-                className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700"
-              >
-                <FiX className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="space-y-6">
-              <p className="text-sm text-emerald-700 dark:text-emerald-400 font-medium">
-                IMPORTANT: Save these credentials and share them with the staff member. They will not be shown again.
-              </p>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-xs text-emerald-600 dark:text-emerald-500 font-semibold uppercase tracking-wider">Email/Username</label>
-                      <div className="flex gap-2">
-                        <input
-                          readOnly
-                          value={generatedAccount.email}
-                          className="flex-1 px-3 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
-                        />
-                        <button 
-                          onClick={() => {
-                            navigator.clipboard.writeText(generatedAccount.email);
-                            alert('Email copied!');
-                          }}
-                          className="p-2 bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-200"
-                        >
-                          Copy
-                        </button>
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs text-emerald-600 dark:text-emerald-500 font-semibold uppercase tracking-wider">Generated Password</label>
-                      <div className="flex gap-2">
-                        <input
-                          readOnly
-                          value={generatedAccount.password}
-                          className="flex-1 px-3 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono"
-                        />
-                        <button 
-                          onClick={() => {
-                            navigator.clipboard.writeText(generatedAccount.password);
-                            alert('Password copied!');
-                          }}
-                          className="p-2 bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-200"
-                        >
-                          Copy
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-4 bg-white dark:bg-slate-800 rounded-xl border border-emerald-100 dark:border-emerald-800/50">
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
-                      <FiLink className="w-4 h-4 text-blue-500" />
-                      Direct Access Link
-                    </h4>
-                    <p className="text-xs text-slate-500 mb-3">Share this link with the {generatedAccount.role} for direct login.</p>
-                    <div className="flex gap-2">
-                      <input
-                        readOnly
-                        value={`${baseUrl}/auth/staff-login?email=${encodeURIComponent(generatedAccount.email)}&role=${generatedAccount.role}`}
-                        className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 text-xs"
-                      />
-                      <button 
-                        onClick={() => {
-                          navigator.clipboard.writeText(`${baseUrl}/auth/staff-login?email=${encodeURIComponent(generatedAccount.email)}&role=${generatedAccount.role}`);
-                          alert('Login link copied!');
-                        }}
-                        className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs font-medium transition-colors"
-                      >
-                        Copy Link
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col items-center justify-center p-6 bg-white dark:bg-slate-800 rounded-2xl border border-emerald-100 dark:border-emerald-800/50 shadow-sm">
-                  <div className="mb-4 text-center">
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center justify-center gap-2">
-                      <FiSmartphone className="w-4 h-4 text-blue-500" />
-                      Scan to Login
-                    </h4>
-                    <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-bold">Fast Access for {generatedAccount.role}s</p>
-                  </div>
-                  
-                  <div className="p-4 bg-white rounded-2xl shadow-inner border border-slate-100">
-                    <QRCodeSVG 
-                      value={`${baseUrl}/auth/staff-login?email=${encodeURIComponent(generatedAccount.email)}&role=${generatedAccount.role}`}
-                      size={160}
-                      level="H"
-                      includeMargin={true}
-                    />
-                  </div>
-                  
-                  <p className="mt-4 text-[11px] text-slate-500 text-center max-w-[180px]">
-                    Instruct the staff member to scan this with their phone camera to open the login page.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showInviteForm && (
-          <motion.form
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            onSubmit={handleSendInvite}
-            className="border-b border-slate-100 dark:border-slate-700/50 p-6 bg-slate-50 dark:bg-slate-700/30 space-y-4"
-          >
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Full Name</label>
-                <input
-                  type="text"
-                  value={inviteName}
-                  onChange={(e) => setInviteName(e.target.value)}
-                  placeholder="John Doe"
-                  className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email (Optional)</label>
-                <input
-                  type="email"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  placeholder="member@example.com"
-                  className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Phone</label>
-                <input
-                  type="tel"
-                  value={invitePhone}
-                  onChange={(e) => setInvitePhone(e.target.value)}
-                  placeholder="+92 3107320707"
-                  className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400"
-                  required={!inviteEmail}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Role</label>
-                <select
-                  value={inviteRole}
-                  onChange={(e) => setInviteRole(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
-                >
-                  <option value="admin">Admin</option>
-                  <option value="manager">Manager</option>
-                  <option value="staff">Staff</option>
-                </select>
-              </div>
-              {inviteRole !== 'admin' && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Department</label>
-                  <select
-                    value={inviteDepartment}
-                    onChange={(e) => setInviteDepartment(e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
-                  >
-                    {departments.map(dept => (
-                      <option key={dept} value={dept}>
-                        {dept.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Language Preference</label>
-                <select
-                  value={inviteLanguage}
-                  onChange={(e) => setInviteLanguage(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
-                >
-                  <option value="en">English</option>
-                  <option value="es">Spanish</option>
-                  <option value="fr">French</option>
-                  <option value="de">German</option>
-                  <option value="it">Italian</option>
-                  <option value="ur">Urdu</option>
-                  <option value="hi">Hindi</option>
-                  <option value="ar">Arabic</option>
-                </select>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button type="submit" disabled={submitting}>
-                {submitting ? 'Creating...' : 'Create Member Account'}
-              </Button>
-              <Button
-                type="button"
-                onClick={() => setShowInviteForm(false)}
-                className="bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300"
-              >
-                Cancel
-              </Button>
-            </div>
-          </motion.form>
-        )}
-
         <div className="divide-y divide-slate-100 dark:divide-slate-700">
           {teamMembers.length === 0 ? (
             <div className="px-8 py-24 text-center">
@@ -501,33 +274,10 @@ export default function HotelAdminPage() {
                       <h4 className="font-bold text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">
                         {member.fullName || 'Unnamed User'}
                       </h4>
-                      <div className="flex items-center text-sm text-slate-500 dark:text-slate-400 mt-2">
-                        <div className="w-24 shrink-0">
-                          <span className="inline-block font-bold px-2.5 py-1 bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-700 dark:text-slate-200 uppercase tracking-tighter text-[11px] border border-slate-200 dark:border-slate-600 w-full text-center">
-                            {member.role}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 font-medium w-48 shrink-0 ml-4">
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-                          {member.department ? member.department.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'No Dept'}
-                        </div>
-                        <div className="flex items-center gap-2 font-medium ml-4">
-                          <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-                          {member.phone || 'No Phone'}
-                        </div>
-                      </div>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 capitalize">{member.role} • {member.department?.replace('-', ' ')}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      member.status === 'active'
-                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/30'
-                        : 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 border border-amber-100 dark:border-amber-800/30'
-                    }`}>
-                      {member.status}
-                    </span>
-                    <FiArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
-                  </div>
+                  <FiArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
                 </div>
               </motion.div>
             ))
@@ -535,130 +285,114 @@ export default function HotelAdminPage() {
         </div>
       </motion.div>
 
-      {/* Member Detail Dialog */}
-      {selectedMember && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden"
-          >
-            <div className="p-8 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-700/30">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-200 dark:shadow-none">
-                  <FiUser className="w-6 h-6 text-white" />
+      <AnimatePresence>
+        {selectedMember && (
+          <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-md flex justify-end">
+            <motion.div 
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="w-full max-w-4xl bg-[#1e2532] h-full shadow-2xl flex flex-col overflow-hidden text-white"
+            >
+              <div className="p-8 border-b border-slate-700/50 flex items-center justify-between">
+                <div className="flex items-center gap-5">
+                  <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center shadow-xl shadow-blue-500/20">
+                    <FiUser className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-black tracking-tight">{selectedMember.fullName}</h2>
+                    <p className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-1">
+                      {selectedMember.role} • {selectedMember.department || 'Management'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{selectedMember.fullName}</h3>
-                  <p className="text-slate-500 text-sm capitalize">{selectedMember.role} • {selectedMember.department?.replace('-', ' ')}</p>
-                </div>
+                <button 
+                  onClick={() => setSelectedMember(null)}
+                  className="p-3 hover:bg-slate-800 rounded-2xl transition-colors text-slate-400 hover:text-white"
+                >
+                  <FiX className="w-8 h-8" />
+                </button>
               </div>
-              <button 
-                onClick={() => setSelectedMember(null)}
-                className="p-3 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-2xl transition-colors text-slate-500"
-              >
-                <FiX className="w-6 h-6" />
-              </button>
-            </div>
 
-            <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
-              {/* Credentials Section */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Access Credentials</h4>
-                  <div className="space-y-4">
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-500">Staff ID / Email</label>
-                      <div className="flex gap-2">
-                        <input readOnly value={selectedMember.email} className="flex-1 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-medium" />
-                        <button onClick={() => { navigator.clipboard.writeText(selectedMember.email); alert('Copied!'); }} className="p-3 bg-slate-100 dark:bg-slate-700 rounded-xl hover:bg-slate-200 transition-colors">Copy</button>
-                      </div>
-                    </div>
-                    {selectedMember.password && (
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500">Password</label>
-                        <div className="flex gap-2">
-                          <input 
-                            readOnly 
-                            value={selectedMember.password || '••••••••'} 
-                            className="flex-1 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-mono font-bold text-blue-600 dark:text-blue-400" 
-                          />
-                          {selectedMember.password && (
-                            <button onClick={() => { navigator.clipboard.writeText(selectedMember.password!); alert('Password copied!'); }} className="p-3 bg-slate-100 dark:bg-slate-700 rounded-xl hover:bg-slate-200 transition-colors">Copy</button>
-                          )}
+              <div className="flex-1 overflow-y-auto">
+                <div className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-12">
+                  <div className="space-y-10">
+                    <div>
+                      <h3 className="text-slate-500 font-black text-xs uppercase tracking-[0.2em] mb-8">Access Credentials</h3>
+                      <div className="space-y-6">
+                        <div className="space-y-2">
+                          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Staff ID / Email</label>
+                          <div className="flex gap-3">
+                            <input readOnly value={selectedMember.email} className="flex-1 bg-slate-800/50 border border-slate-700 rounded-2xl px-5 py-4 font-bold text-slate-200 outline-none" />
+                            <button onClick={() => { navigator.clipboard.writeText(selectedMember.email); alert('Email copied!'); }} className="px-6 py-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-2xl font-bold transition-all">Copy</button>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Password</label>
+                          <div className="flex gap-3">
+                            <input readOnly type="password" value={selectedMember.password || '••••••••'} className="flex-1 bg-slate-800/50 border border-slate-700 rounded-2xl px-5 py-4 font-bold text-slate-200 outline-none" />
+                            <button onClick={() => { if (selectedMember.password) { navigator.clipboard.writeText(selectedMember.password); alert('Password copied!'); } }} className="px-6 py-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-2xl font-bold transition-all">Copy</button>
+                          </div>
+                        </div>
+                        <div className="p-6 bg-blue-600/10 border border-blue-500/20 rounded-3xl space-y-4">
+                          <div className="flex items-center gap-3 text-blue-400">
+                            <FiLink className="w-5 h-5" />
+                            <h4 className="font-black text-sm uppercase tracking-wider">Direct Access Link</h4>
+                          </div>
+                          <div className="flex gap-3">
+                            <input readOnly value={`${baseUrl}/auth/staff-login?email=${encodeURIComponent(selectedMember.email)}&role=${selectedMember.role}`} className="flex-1 bg-slate-900/50 border border-blue-500/10 rounded-xl px-4 py-3 text-xs text-blue-300 font-medium" />
+                            <button onClick={() => { navigator.clipboard.writeText(`${baseUrl}/auth/staff-login?email=${encodeURIComponent(selectedMember.email)}&role=${selectedMember.role}`); alert('Link copied!'); }} className="px-5 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl font-bold text-xs transition-all">Copy</button>
+                          </div>
                         </div>
                       </div>
-                    )}
-                  </div>
-
-                  <div className="p-5 bg-blue-50 dark:bg-blue-900/10 rounded-3xl border border-blue-100 dark:border-blue-800/30">
-                    <h5 className="text-sm font-bold text-blue-700 dark:text-blue-400 flex items-center gap-2 mb-3">
-                      <FiLink className="w-4 h-4" /> Direct Access Link
-                    </h5>
-                    <div className="flex gap-2">
-                      <input readOnly value={`${baseUrl}/auth/staff-login?email=${encodeURIComponent(selectedMember.email)}&role=${selectedMember.role}`} className="flex-1 px-3 py-2 bg-white dark:bg-slate-950 rounded-lg border border-blue-100 dark:border-blue-900 text-[10px] text-slate-500" />
-                      <button onClick={() => { navigator.clipboard.writeText(`${baseUrl}/auth/staff-login?email=${encodeURIComponent(selectedMember.email)}&role=${selectedMember.role}`); alert('Link copied!'); }} className="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold">Copy</button>
+                    </div>
+                    <div className="pt-8 border-t border-slate-700/50">
+                      <h3 className="text-slate-500 font-black text-xs uppercase tracking-[0.2em] mb-6">Management Actions</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                         <Button className="bg-slate-800 hover:bg-slate-700 border-none py-4 rounded-2xl">Reset Password</Button>
+                         <Button 
+                           onClick={async () => {
+                             if (confirm('Are you sure you want to remove this team member? This action cannot be undone.')) {
+                               try {
+                                 const idToken = await user?.getIdToken();
+                                 const response = await fetch(`/api/hotel/team/${selectedMember.id}?businessId=${businessId}`, {
+                                   method: 'DELETE',
+                                   headers: { Authorization: `Bearer ${idToken}` }
+                                 });
+                                 if (response.ok) {
+                                   setSelectedMember(null);
+                                   fetchTeamMembers(businessId!);
+                                 } else { alert('Failed to remove member'); }
+                               } catch (err) { alert('An error occurred'); }
+                             }
+                           }}
+                           className="bg-red-600/10 hover:bg-red-600/20 text-red-500 border-none py-4 rounded-2xl"
+                         >
+                           Remove Staff
+                         </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="flex flex-col items-center justify-center p-6 bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] border border-slate-100 dark:border-slate-800">
-                  <div className="mb-4 text-center">
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center justify-center gap-2">
-                      <FiSmartphone className="w-4 h-4 text-blue-500" /> Scan to Login
-                    </h4>
-                  </div>
-                  <div className="p-4 bg-white rounded-3xl shadow-xl">
-                    <QRCodeSVG 
-                      value={`${baseUrl}/auth/staff-login?email=${encodeURIComponent(selectedMember.email)}&role=${selectedMember.role}`}
-                      size={140}
-                      level="H"
-                      includeMargin={true}
-                    />
-                  </div>
-                  <p className="mt-4 text-[10px] text-slate-400 text-center uppercase tracking-widest font-bold">Quick Access QR</p>
-                </div>
-              </div>
-
-              {/* Danger Zone */}
-              <div className="pt-8 border-t border-slate-100 dark:border-slate-700">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">Management Actions</h4>
-                    <p className="text-xs text-slate-500">Deactivate or permanently remove this member</p>
-                  </div>
-                  <div className="flex gap-3 w-full sm:w-auto">
-                    <button 
-                      onClick={async () => {
-                        if (confirm('Are you sure you want to remove this team member? This action cannot be undone.')) {
-                          try {
-                            const idToken = await user?.getIdToken();
-                            const response = await fetch(`/api/hotel/team/${selectedMember.id}?businessId=${businessId}`, {
-                              method: 'DELETE',
-                              headers: { Authorization: `Bearer ${idToken}` }
-                            });
-                            if (response.ok) {
-                              setSelectedMember(null);
-                              fetchTeamMembers(businessId!);
-                            } else {
-                              alert('Failed to remove member');
-                            }
-                          } catch (err) {
-                            alert('An error occurred');
-                          }
-                        }
-                      }}
-                      className="flex-1 sm:flex-none px-6 py-3 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/10 dark:hover:bg-red-900/20 rounded-2xl text-sm font-bold transition-colors flex items-center justify-center gap-2"
-                    >
-                      Remove Member
-                    </button>
+                  <div className="flex flex-col items-center justify-center p-10 bg-slate-800/30 rounded-[3rem] border border-slate-700/50">
+                    <div className="mb-10 text-center">
+                      <div className="flex items-center justify-center gap-3 text-blue-400 mb-2">
+                        <FiSmartphone className="w-6 h-6" />
+                        <h4 className="text-xl font-black tracking-tight">Scan to Login</h4>
+                      </div>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black">Quick Access QR</p>
+                    </div>
+                    <div className="p-8 bg-white rounded-[3rem] shadow-2xl shadow-blue-500/10">
+                      <QRCodeSVG value={`${baseUrl}/auth/staff-login?email=${encodeURIComponent(selectedMember.email)}&role=${selectedMember.role}`} size={240} level="H" includeMargin={true} />
+                    </div>
+                    <p className="mt-10 text-xs text-slate-500 text-center max-w-[240px] leading-relaxed font-medium">Staff members can scan this code with their mobile device to instantly log in to their dashboard.</p>
                   </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
-        </div>
-      )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
