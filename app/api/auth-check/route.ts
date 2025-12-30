@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
       if (!businessSnapshot.empty) {
         return NextResponse.json({ 
-          redirect: `/dashboard/hotel-admin?businessId=${businessSnapshot.docs[0].id}`,
+          redirect: `/hotel/admin?businessId=${businessSnapshot.docs[0].id}`,
           businessId: businessSnapshot.docs[0].id,
           role: 'admin',
           industryType: 'hotel'
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
         const businessId = bizDoc.id;
         
         let redirect = `/hotel/staff?businessId=${businessId}`;
-        if (memberData.role === 'admin') redirect = `/dashboard/hotel-admin?businessId=${businessId}`;
+        if (memberData.role === 'admin') redirect = `/hotel/admin?businessId=${businessId}`;
         if (memberData.role === 'manager') redirect = `/hotel/manager?businessId=${businessId}&department=${encodeURIComponent(memberData.department || '')}`;
         
         return NextResponse.json({ 
