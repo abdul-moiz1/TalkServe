@@ -457,22 +457,20 @@ export default function HotelAdminPage() {
                       <h4 className="font-bold text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">
                         {member.fullName || 'Unnamed User'}
                       </h4>
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500 dark:text-slate-400 mt-2">
-                        <span className="font-bold px-2.5 py-1 bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-700 dark:text-slate-200 uppercase tracking-tighter text-[11px] border border-slate-200 dark:border-slate-600">
-                          {member.role}
-                        </span>
-                        {member.department && (
-                          <span className="flex items-center gap-2 font-medium">
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-                            {member.department.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                      <div className="flex items-center text-sm text-slate-500 dark:text-slate-400 mt-2">
+                        <div className="w-24 shrink-0">
+                          <span className="inline-block font-bold px-2.5 py-1 bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-700 dark:text-slate-200 uppercase tracking-tighter text-[11px] border border-slate-200 dark:border-slate-600 w-full text-center">
+                            {member.role}
                           </span>
-                        )}
-                        {member.phone && (
-                          <span className="flex items-center gap-2 font-medium">
-                            <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-                            {member.phone}
-                          </span>
-                        )}
+                        </div>
+                        <div className="flex items-center gap-2 font-medium w-48 shrink-0 ml-4">
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                          {member.department ? member.department.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'No Dept'}
+                        </div>
+                        <div className="flex items-center gap-2 font-medium ml-4">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                          {member.phone || 'No Phone'}
+                        </div>
                       </div>
                     </div>
                   </div>
