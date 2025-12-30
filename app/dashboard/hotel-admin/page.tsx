@@ -58,13 +58,35 @@ export default function HotelAdminPage() {
                 localStorage.getItem('currentBusinessId');
     
     if (!bid && !authLoading) {
-      router.push('/dashboard');
+      // Check if we have any business available before redirecting
+      const checkBusinesses = async () => {
+        try {
+          const idToken = await user?.getIdToken();
+          const response = await fetch('/api/hotel/user-businesses', {
+            headers: { Authorization: `Bearer ${idToken}` },
+          });
+          const data = await response.json();
+          if (data.success && data.businesses && data.businesses.length > 0) {
+            const firstBid = data.businesses[0].id;
+            localStorage.setItem('currentBusinessId', firstBid);
+            setBusinessId(firstBid);
+            fetchTeamMembers(firstBid);
+          } else {
+            router.push('/dashboard');
+          }
+        } catch (err) {
+          console.error('Error checking businesses:', err);
+          router.push('/dashboard');
+        }
+      };
+      checkBusinesses();
       return;
     }
 
-    if (bid) setBusinessId(bid);
-    
-    fetchTeamMembers(bid || '');
+    if (bid) {
+      setBusinessId(bid);
+      fetchTeamMembers(bid);
+    }
   }, [user, authLoading, router]);
 
   const fetchTeamMembers = async (bid: string) => {
