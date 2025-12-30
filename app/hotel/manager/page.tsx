@@ -382,6 +382,18 @@ export default function ManagerPortal() {
                   </div>
                 </div>
 
+                <div className="space-y-3 mt-8">
+                  <button 
+                    onClick={async () => {
+                      await logout();
+                      router.push('/auth/staff-login');
+                    }}
+                    className="w-full bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 py-4 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2"
+                  >
+                    <FiLogOut /> Logout
+                  </button>
+                </div>
+
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Preferences</h3>
                 <div className="space-y-4">
                   <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
