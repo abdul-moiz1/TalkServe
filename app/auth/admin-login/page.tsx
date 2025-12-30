@@ -133,12 +133,6 @@ function AdminLoginForm() {
               )}
             </button>
           </form>
-
-          <div className="mt-12 text-center">
-            <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-bold">
-              Powered by TalkServe AI
-            </p>
-          </div>
         </div>
       </div>
     </div>
