@@ -62,7 +62,7 @@ export default function DashboardSidebar({ onSignOut, userEmail, userName, isCol
     <>
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-[68px] left-4 z-40 p-2 rounded-lg bg-white dark:bg-slate-800 shadow-lg"
+        className="lg:hidden fixed top-2 left-4 z-[60] p-2 rounded-lg bg-white dark:bg-slate-800 shadow-lg"
       >
         {isMobileMenuOpen ? (
           <FiX className="w-6 h-6 text-gray-600 dark:text-gray-300" />
@@ -73,7 +73,7 @@ export default function DashboardSidebar({ onSignOut, userEmail, userName, isCol
 
       {isMobileMenuOpen && (
         <div
-          className="lg:hidden fixed top-[60px] left-0 right-0 bottom-0 bg-black/50 z-30"
+          className="lg:hidden fixed inset-0 bg-black/50 z-[55]"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -81,9 +81,9 @@ export default function DashboardSidebar({ onSignOut, userEmail, userName, isCol
       <button
         onClick={onToggleCollapse}
         className={`
-          hidden lg:flex fixed top-[100px] w-8 h-8 bg-blue-600 hover:bg-blue-700 
+          hidden lg:flex fixed top-[80px] w-8 h-8 bg-blue-600 hover:bg-blue-700 
           border-2 border-white dark:border-slate-700 rounded-full items-center justify-center 
-          shadow-lg transition-all duration-300 z-50
+          shadow-lg transition-all duration-300 z-[60]
           ${isCollapsed ? 'left-[64px]' : 'left-[248px]'}
         `}
         title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -97,28 +97,16 @@ export default function DashboardSidebar({ onSignOut, userEmail, userName, isCol
 
       <aside
         className={`
-          fixed top-0 left-0 z-40 h-screen
+          fixed top-0 left-0 z-40 h-screen pt-16
           bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700
           transform transition-all duration-300 ease-in-out
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0 lg:fixed lg:top-0 lg:left-0 lg:z-30
+          lg:translate-x-0
           ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}
           w-64 overflow-y-auto overflow-x-hidden
         `}
       >
         <div className="flex flex-col h-full relative min-h-0">
-
-          <div className={`p-6 border-b border-gray-200 dark:border-slate-700 ${isCollapsed ? 'lg:p-4 lg:text-center' : ''}`}>
-            <Link href="/" className="block">
-              <h1 className={`text-xl font-bold text-blue-600 dark:text-blue-400 ${isCollapsed ? 'lg:text-sm' : ''}`}>
-                {isCollapsed ? 'TS' : 'TalkServe'}
-              </h1>
-              {!isCollapsed && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 hidden lg:block">AI Voice Agent</p>
-              )}
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 lg:hidden">AI Voice Agent</p>
-            </Link>
-          </div>
 
           <nav className={`flex-1 p-4 space-y-1 overflow-y-auto ${isCollapsed ? 'lg:p-2' : ''}`}>
             {navItems.map((item) => {
