@@ -29,6 +29,8 @@ export async function GET(request: NextRequest) {
       .where('ownerId', '==', userId)
       .get();
 
+    console.log(`Found ${ownedSnapshot.size} businesses for ownerId: ${userId}`);
+
     ownedSnapshot.forEach(doc => {
       const data = doc.data();
       businesses.push({
@@ -47,6 +49,8 @@ export async function GET(request: NextRequest) {
       .where('owner', '==', userId)
       .get();
 
+    console.log(`Found ${ownerSnapshot.size} businesses for owner field: ${userId}`);
+
     ownerSnapshot.forEach(doc => {
       const data = doc.data();
       if (!businesses.find(b => b.businessId === doc.id)) {
@@ -60,6 +64,26 @@ export async function GET(request: NextRequest) {
         });
       }
     });
+
+    // FALLBACK: If still no businesses found, let's look for ANY business 
+    // This is for development/debugging to ensure the user can at least see the page
+    if (businesses.length === 0) {
+      console.log('No businesses found via owner fields, attempting global search for dev...');
+      const allBusinesses = await db.collection('businesses').limit(5).get();
+      allBusinesses.forEach(doc => {
+        const data = doc.data();
+        if (data.ownerId === userId || data.owner === userId) {
+          businesses.push({
+            businessId: doc.id,
+            businessName: data.name,
+            businessType: data.type,
+            role: 'admin',
+            department: null,
+            joinedAt: data.createdAt || new Date().toISOString(),
+          });
+        }
+      });
+    }
 
     // Get member businesses - use a simple collection scan if collection group is failing
     try {

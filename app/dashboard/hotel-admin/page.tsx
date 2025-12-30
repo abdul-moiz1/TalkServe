@@ -67,6 +67,8 @@ export default function HotelAdminPage() {
           });
           const data = await response.json();
           
+          console.log('User businesses check:', data);
+          
           if (data.success && data.businesses && data.businesses.length > 0) {
             const firstBid = data.businesses[0].businessId;
             localStorage.setItem('currentBusinessId', firstBid);
@@ -74,9 +76,8 @@ export default function HotelAdminPage() {
             fetchTeamMembers(firstBid);
           } else {
             console.warn('No businesses found for user:', user?.uid);
-            // DEBUG: Try to manually fetch if user is owner but query failed
-            // For now, let's keep the user on the page and show an "Add Business" option or error
-            setError('We couldn\'t find a hotel associated with your account. If you just created one, please refresh.');
+            // Instead of redirecting, let's show the "Add Business" UI or a friendly message
+            setError('No hotel found. Please make sure your business is registered as a "Hotel" in settings.');
             setLoading(false);
           }
         } catch (err) {
