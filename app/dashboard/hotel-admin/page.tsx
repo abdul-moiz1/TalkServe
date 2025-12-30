@@ -51,6 +51,11 @@ export default function HotelAdminPage() {
 
   const departments = ['front-desk', 'housekeeping', 'room-service', 'maintenance'];
 
+  const getLoginUrl = (email: string, role: string) => {
+    const loginPath = role === 'admin' ? '/auth/admin-login' : '/auth/staff-login';
+    return `${baseUrl}${loginPath}?email=${encodeURIComponent(email)}&role=${role}`;
+  };
+
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
@@ -326,12 +331,12 @@ export default function HotelAdminPage() {
                     <div className="flex gap-2">
                       <input
                         readOnly
-                        value={`${baseUrl}/auth/staff-login?email=${encodeURIComponent(generatedAccount.email)}&role=${generatedAccount.role}`}
+                        value={getLoginUrl(generatedAccount.email, generatedAccount.role)}
                         className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 text-xs"
                       />
                       <button 
                         onClick={() => {
-                          navigator.clipboard.writeText(`${baseUrl}/auth/staff-login?email=${encodeURIComponent(generatedAccount.email)}&role=${generatedAccount.role}`);
+                          navigator.clipboard.writeText(getLoginUrl(generatedAccount.email, generatedAccount.role));
                           alert('Login link copied!');
                         }}
                         className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs font-medium transition-colors"
@@ -353,7 +358,7 @@ export default function HotelAdminPage() {
                   
                   <div className="p-4 bg-white rounded-2xl shadow-inner border border-slate-100">
                     <QRCodeSVG 
-                      value={`${baseUrl}/auth/staff-login?email=${encodeURIComponent(generatedAccount.email)}&role=${generatedAccount.role}`}
+                      value={getLoginUrl(generatedAccount.email, generatedAccount.role)}
                       size={160}
                       level="H"
                       includeMargin={true}
@@ -596,8 +601,8 @@ export default function HotelAdminPage() {
                       <FiLink className="w-4 h-4" /> Direct Access Link
                     </h5>
                     <div className="flex gap-2">
-                      <input readOnly value={`${baseUrl}/auth/staff-login?email=${encodeURIComponent(selectedMember.email)}&role=${selectedMember.role}`} className="flex-1 px-3 py-2 bg-white dark:bg-slate-950 rounded-lg border border-blue-100 dark:border-blue-900 text-[10px] text-slate-500" />
-                      <button onClick={() => { navigator.clipboard.writeText(`${baseUrl}/auth/staff-login?email=${encodeURIComponent(selectedMember.email)}&role=${selectedMember.role}`); alert('Link copied!'); }} className="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold">Copy</button>
+                      <input readOnly value={getLoginUrl(selectedMember.email, selectedMember.role)} className="flex-1 px-3 py-2 bg-white dark:bg-slate-950 rounded-lg border border-blue-100 dark:border-blue-900 text-[10px] text-slate-500" />
+                      <button onClick={() => { navigator.clipboard.writeText(getLoginUrl(selectedMember.email, selectedMember.role)); alert('Link copied!'); }} className="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold">Copy</button>
                     </div>
                   </div>
                 </div>
@@ -610,7 +615,7 @@ export default function HotelAdminPage() {
                   </div>
                   <div className="p-4 bg-white rounded-3xl shadow-xl">
                     <QRCodeSVG 
-                      value={`${baseUrl}/auth/staff-login?email=${encodeURIComponent(selectedMember.email)}&role=${selectedMember.role}`}
+                      value={getLoginUrl(selectedMember.email, selectedMember.role)}
                       size={140}
                       level="H"
                       includeMargin={true}
