@@ -214,7 +214,7 @@ export default function HotelAdminPage() {
               className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-semibold shadow-lg shadow-blue-200 dark:shadow-none transition-all flex items-center justify-center gap-3"
             >
               <FiPlus className="w-5 h-5" />
-              {showInviteForm ? 'Cancel' : 'Generate Invite'}
+              {showInviteForm ? 'Cancel' : 'Add Member'}
             </Button>
           </div>
         </div>
