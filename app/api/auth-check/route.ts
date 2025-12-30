@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
         if (businessDoc.exists && businessDoc.data()?.type === 'hotel') {
           let redirect = `/hotel/staff?businessId=${businessId}`;
           if (memberData.role === 'admin') redirect = `/dashboard/hotel-admin?businessId=${businessId}`;
-          if (memberData.role === 'manager') redirect = `/hotel/manager?businessId=${businessId}`;
+          if (memberData.role === 'manager') redirect = `/hotel/manager?businessId=${businessId}&department=${encodeURIComponent(memberData.department || '')}`;
           
           return NextResponse.json({ 
             redirect, 
