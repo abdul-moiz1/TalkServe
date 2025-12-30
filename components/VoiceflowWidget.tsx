@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { HiPhone } from 'react-icons/hi';
 import Image from 'next/image';
 import { useVoiceAgent } from './VoiceAgentContext';
@@ -8,8 +9,17 @@ import { useVoiceAgent } from './VoiceAgentContext';
 export default function VoiceflowWidget() {
   const { openDialog } = useVoiceAgent();
   const [isVoiceflowReady, setIsVoiceflowReady] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
+    const isDashboard = pathname?.startsWith('/dashboard');
+    const isHotelPortal = pathname?.includes('/hotel/manager') || pathname?.includes('/hotel/staff');
+    const isAuthPortal = pathname?.startsWith('/auth/staff-login');
+
+    if (isDashboard || isHotelPortal || isAuthPortal) {
+      return;
+    }
+
     // Check if VoiceFlow is already loaded
     if (window.voiceflow) {
       setIsVoiceflowReady(true);
@@ -59,6 +69,10 @@ export default function VoiceflowWidget() {
     
     document.head.appendChild(script);
   }, []);
+
+  if (isDashboard || isHotelPortal || isAuthPortal) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-8 right-8 z-40">
