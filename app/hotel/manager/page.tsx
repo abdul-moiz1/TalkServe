@@ -262,63 +262,61 @@ export default function ManagerPortal() {
                         <div className="h-[2px] flex-1 bg-slate-100 dark:bg-slate-800"></div>
                       </div>
                       
-                      <div className="grid gap-5">
+                      <div className="space-y-3">
                         {deptTickets.map(ticket => (
                           <div 
                             key={ticket.id} 
                             onClick={() => setSelectedTicket(ticket)}
-                            className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group relative overflow-hidden"
+                            className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all cursor-pointer group flex items-center gap-4"
                           >
-                            <div className={`absolute top-0 left-0 w-2 h-full ${
+                            <div className={`w-1 h-10 rounded-full ${
                               ticket.priority === 'urgent' ? 'bg-red-500' : 
                               ticket.priority === 'normal' ? 'bg-blue-500' : 
-                              'bg-slate-400'
+                              'bg-slate-300'
                             }`} />
                             
-                            <div className="flex justify-between items-start mb-4">
-                              <div className="flex items-center gap-4">
-                                <div className="w-14 h-14 bg-slate-900 dark:bg-white rounded-2xl flex items-center justify-center shadow-lg">
-                                  <span className="text-2xl font-black text-white dark:text-slate-900">#{ticket.guestRoom}</span>
-                                </div>
-                                <div>
-                                  <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded tracking-tighter ${
-                                    ticket.priority === 'urgent' ? 'bg-red-500 text-white' : 
-                                    ticket.priority === 'normal' ? 'bg-blue-500 text-white' : 
-                                    'bg-slate-400 text-white'
-                                  }`}>
-                                    {ticket.priority}
-                                  </span>
-                                  <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px] uppercase tracking-wider mt-1">
-                                    <FiClock /> {new Date(ticket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                  </div>
-                                </div>
+                            <div className="w-12 h-12 bg-slate-900 dark:bg-white rounded-xl flex-shrink-0 flex items-center justify-center shadow-sm">
+                              <span className="text-lg font-black text-white dark:text-slate-900">#{ticket.guestRoom}</span>
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-0.5">
+                                <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded tracking-tighter ${
+                                  ticket.priority === 'urgent' ? 'bg-red-500/10 text-red-600' : 
+                                  ticket.priority === 'normal' ? 'bg-blue-500/10 text-blue-600' : 
+                                  'bg-slate-100 text-slate-500'
+                                }`}>
+                                  {ticket.priority}
+                                </span>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                  <FiClock className="w-3 h-3" /> {new Date(ticket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
                               </div>
-                              <span className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-full border-2 ${
+                              <p className="text-slate-900 dark:text-white font-bold text-sm truncate">
+                                {ticket.requestText}
+                              </p>
+                            </div>
+
+                            <div className="flex flex-col items-end gap-2 pr-2">
+                              <span className={`text-[9px] font-black uppercase px-2 py-1 rounded-full border ${
                                 ticket.status === 'completed' ? 'border-emerald-100 text-emerald-600 bg-emerald-50' : 
                                 ticket.status === 'in-progress' ? 'border-amber-100 text-amber-600 bg-amber-50' : 
                                 'border-slate-100 text-slate-500 bg-slate-50'
                               }`}>
                                 {ticket.status.replace('-', ' ')}
                               </span>
-                            </div>
-                            <p className="text-slate-900 dark:text-white font-black text-lg leading-tight mb-4 group-hover:text-blue-600 transition-colors">
-                              {ticket.requestText}
-                            </p>
-                            <div className="flex justify-between items-center pt-4 border-t border-slate-50 dark:border-slate-700/50">
-                              {ticket.assignedTo ? (
-                                <div className="flex items-center gap-2">
-                                  <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-black text-blue-600">
-                                    {ticket.assignedStaffName?.charAt(0) || 'S'}
+                              
+                              <div className="flex items-center gap-2">
+                                {ticket.assignedTo ? (
+                                  <div className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/10 px-2 py-0.5 rounded-lg border border-blue-100 dark:border-blue-900/20">
+                                    <div className="w-4 h-4 rounded-full bg-blue-600 text-white text-[8px] font-black flex items-center justify-center">
+                                      {ticket.assignedStaffName?.charAt(0) || 'S'}
+                                    </div>
+                                    <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest truncate max-w-[80px]">
+                                      {ticket.assignedStaffName || 'Staff'}
+                                    </span>
                                   </div>
-                                  <span className="text-[11px] font-black text-slate-600 uppercase tracking-widest italic">
-                                    {ticket.assignedStaffName || 'Assigned Staff'}
-                                  </span>
-                                </div>
-                              ) : (
-                                <div className="flex items-center gap-2">
-                                  <span className="text-[11px] font-black text-amber-500 uppercase tracking-widest animate-pulse">
-                                    Pending Assignment
-                                  </span>
+                                ) : (
                                   <div className="flex gap-1">
                                     {teamMembers.slice(0, 3).map(staff => (
                                       <button
@@ -327,17 +325,17 @@ export default function ManagerPortal() {
                                           e.stopPropagation();
                                           updateTicketStatus(ticket.id, 'assigned', staff.userId || staff.id);
                                         }}
-                                        className="w-6 h-6 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center hover:bg-blue-700 transition-colors"
+                                        className="w-7 h-7 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[10px] font-bold flex items-center justify-center hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all shadow-sm"
                                         title={`Assign to ${staff.fullName || staff.email}`}
                                       >
                                         {staff.fullName?.charAt(0) || staff.email.charAt(0).toUpperCase()}
                                       </button>
                                     ))}
                                   </div>
-                                </div>
-                              )}
-                              <FiChevronRight className="text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                                )}
+                              </div>
                             </div>
+                            <FiChevronRight className="text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all flex-shrink-0" />
                           </div>
                         ))}
                       </div>
