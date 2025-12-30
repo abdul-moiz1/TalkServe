@@ -48,7 +48,9 @@ export async function GET(request: NextRequest) {
 
     // Managers can only see their department
     if (userRole === 'manager' && userDepartment) {
-      query = query.where('department', '==', userDepartment);
+      // Use case-insensitive search or match both lower and capitalized
+      const deptNormalized = userDepartment.toLowerCase();
+      query = query.where('department', 'in', [deptNormalized, userDepartment.charAt(0).toUpperCase() + userDepartment.slice(1).toLowerCase(), userDepartment]);
     }
 
     // Filter by status if provided
