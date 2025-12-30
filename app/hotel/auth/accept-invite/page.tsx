@@ -123,14 +123,8 @@ export default function AcceptInvitePage() {
 
       setSuccess(true);
       setTimeout(() => {
-        // Redirect based on role
-        let redirectPath = `/hotel/staff?businessId=${businessId}`;
-        if (invite.role === 'admin') {
-          redirectPath = `/hotel/admin?businessId=${businessId}`;
-        } else if (invite.role === 'manager') {
-          redirectPath = `/hotel/manager?businessId=${businessId}&department=${encodeURIComponent(invite.department || '')}`;
-        }
-        router.push(redirectPath);
+        // Redirect to hotel dashboard if it's a hotel business
+        router.push(`/dashboard/hotel/manager?businessId=${businessId}`);
       }, 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create account');
