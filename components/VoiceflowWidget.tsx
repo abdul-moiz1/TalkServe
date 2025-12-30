@@ -12,8 +12,8 @@ export default function VoiceflowWidget() {
   const pathname = usePathname();
 
   const isDashboard = pathname?.startsWith('/dashboard');
-  const isHotelPortal = pathname?.includes('/hotel/manager') || pathname?.includes('/hotel/staff');
-  const isAuthPortal = pathname?.startsWith('/auth/staff-login');
+  const isHotelPortal = pathname?.includes('/hotel/manager') || pathname?.includes('/hotel/staff') || pathname?.includes('/hotel/admin');
+  const isAuthPortal = pathname?.startsWith('/auth/staff-login') || pathname?.startsWith('/auth/admin-login');
 
   useEffect(() => {
     if (isDashboard || isHotelPortal || isAuthPortal) {
