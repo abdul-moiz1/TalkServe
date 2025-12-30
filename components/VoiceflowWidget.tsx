@@ -11,11 +11,11 @@ export default function VoiceflowWidget() {
   const [isVoiceflowReady, setIsVoiceflowReady] = useState(false);
   const pathname = usePathname();
 
-  useEffect(() => {
-    const isDashboard = pathname?.startsWith('/dashboard');
-    const isHotelPortal = pathname?.includes('/hotel/manager') || pathname?.includes('/hotel/staff');
-    const isAuthPortal = pathname?.startsWith('/auth/staff-login');
+  const isDashboard = pathname?.startsWith('/dashboard');
+  const isHotelPortal = pathname?.includes('/hotel/manager') || pathname?.includes('/hotel/staff');
+  const isAuthPortal = pathname?.startsWith('/auth/staff-login');
 
+  useEffect(() => {
     if (isDashboard || isHotelPortal || isAuthPortal) {
       return;
     }
