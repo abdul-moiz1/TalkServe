@@ -176,43 +176,64 @@ export default function StaffPortal() {
                 </div>
               ) : (
                 activeTasks.map(task => (
-                  <div key={task.id} className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
-                    <div className={`absolute top-0 left-0 w-1.5 h-full ${priorityColors[task.priority]}`} />
+                  <motion.div 
+                    key={task.id}
+                    drag="x"
+                    dragConstraints={ { left: -100, right: 100 } }
+                    onDragEnd={(_, info) => {
+                      if (info.offset.x > 80) handleUpdateStatus(task.id, 'in-progress');
+                      if (info.offset.x < -80) handleUpdateStatus(task.id, 'completed');
+                    }}
+                    className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-lg relative overflow-hidden active:scale-95 transition-transform"
+                  >
+                    <div className={`absolute top-0 left-0 w-2 h-full ${priorityColors[task.priority]}`} />
                     
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl font-black text-slate-900 dark:text-white">#{task.guestRoom}</span>
-                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${priorityColors[task.priority]}`}>
-                          {task.priority}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px] uppercase tracking-wider">
-                        <FiClock /> {new Date(task.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 bg-slate-900 dark:bg-white rounded-2xl flex items-center justify-center shadow-xl">
+                          <span className="text-3xl font-black text-white dark:text-slate-900">#{task.guestRoom}</span>
+                        </div>
+                        <div>
+                          <span className={`text-[11px] font-black uppercase px-2 py-1 rounded tracking-tighter ${priorityColors[task.priority]}`}>
+                            {task.priority}
+                          </span>
+                          <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px] uppercase tracking-wider mt-1">
+                            <FiClock /> {new Date(task.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    <p className="text-slate-700 dark:text-slate-300 font-semibold text-lg leading-snug mb-6">
+                    <p className="text-slate-900 dark:text-white font-black text-xl leading-tight mb-6">
                       {task.requestText}
                     </p>
 
-                    <div className="flex gap-3">
+                    <div className="flex gap-4">
                       {task.status === 'in-progress' ? (
                         <button 
                           onClick={() => handleUpdateStatus(task.id, 'completed')}
-                          className="flex-1 bg-emerald-500 text-white py-4 rounded-xl font-black text-sm uppercase tracking-widest shadow-lg shadow-emerald-200 dark:shadow-none active:scale-95 transition-transform"
+                          className="flex-1 bg-emerald-500 text-white py-5 rounded-2xl font-black text-base uppercase tracking-widest shadow-xl shadow-emerald-200 dark:shadow-none flex items-center justify-center gap-2"
                         >
-                          Mark Done
+                          <FiCheckCircle className="w-6 h-6" /> Done
                         </button>
                       ) : (
                         <button 
                           onClick={() => handleUpdateStatus(task.id, 'in-progress')}
-                          className="flex-1 bg-blue-600 text-white py-4 rounded-xl font-black text-sm uppercase tracking-widest shadow-lg shadow-blue-200 dark:shadow-none active:scale-95 transition-transform flex items-center justify-center gap-2"
+                          className="flex-1 bg-blue-600 text-white py-5 rounded-2xl font-black text-base uppercase tracking-widest shadow-xl shadow-blue-200 dark:shadow-none flex items-center justify-center gap-2"
                         >
-                          <FiPlay className="fill-current" /> Start Task
+                          <FiPlay className="w-6 h-6 fill-current" /> Start
                         </button>
                       )}
                     </div>
-                  </div>
+
+                    {/* Swipe Hints */}
+                    <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center text-emerald-500 opacity-10">
+                      <FiChevronRight className="w-6 h-6" />
+                    </div>
+                    <div className="absolute inset-y-0 right-0 w-8 flex items-center justify-center text-red-500 opacity-10">
+                      <FiChevronRight className="w-6 h-6 rotate-180" />
+                    </div>
+                  </motion.div>
                 ))
               )}
             </motion.div>

@@ -194,61 +194,76 @@ export default function ManagerPortal() {
             {activeTab === 'tickets' && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">Active Tickets</h3>
-                  <button className="flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 transition-colors">
+                  <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Live Queue</h3>
+                  <button className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors bg-white dark:bg-slate-800 px-4 py-2 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
                     <FiFilter /> Filters
                   </button>
                 </div>
 
-                <div className="grid gap-4">
+                <div className="grid gap-5">
                   {tickets.length === 0 ? (
-                    <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
-                      <FiClipboard className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                      <p className="text-slate-500">No tickets found for your department</p>
+                    <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-3xl border-2 border-dashed border-slate-100 dark:border-slate-700">
+                      <FiClipboard className="w-16 h-16 text-slate-200 mx-auto mb-4" />
+                      <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">No active tickets</p>
                     </div>
                   ) : (
                     tickets.map(ticket => (
                       <div 
                         key={ticket.id} 
                         onClick={() => setSelectedTicket(ticket)}
-                        className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+                        className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group relative overflow-hidden"
                       >
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex items-center gap-3">
-                            <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-bold text-sm rounded-lg">
-                              Room {ticket.guestRoom}
-                            </span>
-                            <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-md ${
-                              ticket.priority === 'urgent' ? 'bg-red-50 text-red-600 dark:bg-red-900/20' : 
-                              ticket.priority === 'normal' ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20' : 
-                              'bg-slate-50 text-slate-600 dark:bg-slate-700'
-                            }`}>
-                              {ticket.priority}
-                            </span>
+                        <div className={`absolute top-0 left-0 w-2 h-full ${
+                          ticket.priority === 'urgent' ? 'bg-red-500' : 
+                          ticket.priority === 'normal' ? 'bg-blue-500' : 
+                          'bg-slate-400'
+                        }`} />
+                        
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 bg-slate-900 dark:bg-white rounded-2xl flex items-center justify-center shadow-lg">
+                              <span className="text-2xl font-black text-white dark:text-slate-900">#{ticket.guestRoom}</span>
+                            </div>
+                            <div>
+                              <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded tracking-tighter ${
+                                ticket.priority === 'urgent' ? 'bg-red-500 text-white' : 
+                                ticket.priority === 'normal' ? 'bg-blue-500 text-white' : 
+                                'bg-slate-400 text-white'
+                              }`}>
+                                {ticket.priority}
+                              </span>
+                              <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px] uppercase tracking-wider mt-1">
+                                <FiClock /> {new Date(ticket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            </div>
                           </div>
-                          <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-md ${
-                            ticket.status === 'completed' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20' : 
-                            ticket.status === 'in-progress' ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/20' : 
-                            'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
+                          <span className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-full border-2 ${
+                            ticket.status === 'completed' ? 'border-emerald-100 text-emerald-600 bg-emerald-50' : 
+                            ticket.status === 'in-progress' ? 'border-amber-100 text-amber-600 bg-amber-50' : 
+                            'border-slate-100 text-slate-500 bg-slate-50'
                           }`}>
                             {ticket.status.replace('-', ' ')}
                           </span>
                         </div>
-                        <p className="text-slate-700 dark:text-slate-300 font-medium mb-4 line-clamp-2">
+                        <p className="text-slate-900 dark:text-white font-black text-lg leading-tight mb-4 group-hover:text-blue-600 transition-colors">
                           {ticket.requestText}
                         </p>
-                        <div className="flex justify-between items-center text-xs text-slate-400">
-                          <div className="flex items-center gap-2">
-                            <FiClock className="w-4 h-4" />
-                            <span>{new Date(ticket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                          </div>
+                        <div className="flex justify-between items-center pt-4 border-t border-slate-50 dark:border-slate-700/50">
                           {ticket.assignedTo ? (
-                            <span className="text-blue-600 font-medium flex items-center gap-1">
-                              Assigned: {ticket.assignedStaffName || 'Staff'}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-black text-blue-600">
+                                {ticket.assignedStaffName?.charAt(0) || 'S'}
+                              </div>
+                              <span className="text-[11px] font-black text-slate-600 uppercase tracking-widest italic">
+                                {ticket.assignedStaffName || 'Assigned Staff'}
+                              </span>
+                            </div>
                           ) : (
-                            <span className="text-amber-500 font-medium">Unassigned</span>
+                            <span className="text-[11px] font-black text-amber-500 uppercase tracking-widest animate-pulse">
+                              Pending Assignment
+                            </span>
                           )}
+                          <FiChevronRight className="text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
                         </div>
                       </div>
                     ))
