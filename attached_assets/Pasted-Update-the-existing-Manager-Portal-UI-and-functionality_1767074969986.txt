@@ -1,0 +1,154 @@
+Update the existing Manager Portal UI and functionality for a hotel task management system.
+Do NOT change authentication logic or header layout.
+
+Goal:
+Create a clean, responsive Manager Dashboard that works well on BOTH desktop web and mobile web, with a mobile-first approach.
+
+========================
+ROLE RULES (IMPORTANT)
+========================
+- Manager manages ONLY their assigned department
+- Manager can see ONLY:
+  - Tickets from their department
+  - Staff from their department
+- Manager CANNOT:
+  - Access admin settings
+  - See other departments
+  - Invite/remove users
+  - Change roles or business settings
+
+========================
+HEADER (DO NOT REDESIGN)
+========================
+- Keep existing header style
+- Left: Logo + business name
+- Center: "Manager Portal"
+- Right: Profile + Logout
+
+========================
+MAIN SECTIONS (TABS / ROUTES)
+========================
+1. Tickets
+2. Team
+3. Stats
+4. Settings
+
+Use the same routes for desktop and mobile.
+Only layout should change responsively.
+
+========================
+1. TICKETS SECTION (PRIMARY)
+========================
+Show a list of tickets ONLY from the manager’s department.
+
+Each ticket row must show:
+- Room number
+- Guest request (short text)
+- Priority (Urgent / Normal / Low with color)
+- Status (New / Assigned / In Progress / Completed)
+- Assigned staff (if any)
+- Time created
+
+Manager actions:
+- Assign ticket to staff (same department only)
+- Reassign ticket
+- Change ticket status
+- Add internal note
+- Message assigned staff
+
+UX rules:
+- Mobile: tap ticket → open bottom sheet
+- Desktop: click ticket → open side panel
+- No long forms
+- Actions must be 1–2 clicks max
+
+Filters:
+- Status
+- Priority
+- Assigned / Unassigned
+
+========================
+2. TEAM SECTION
+========================
+Show a clean, compact list (NOT cards) of department staff.
+
+Each staff row:
+- Name
+- Role
+- Department
+- Online / Offline status
+- Active task count
+
+Manager actions:
+- Assign tickets to staff
+- Message staff
+- View workload
+
+Restrictions:
+- Cannot add/remove users
+- Cannot change roles
+
+========================
+3. STATS SECTION (SIMPLE ONLY)
+========================
+Show ONLY department-level stats:
+- Tickets today
+- Completed today
+- Pending tickets
+- Average completion time
+
+UI:
+- Simple numbers or small charts
+- No heavy analytics
+- No hotel-wide data
+
+========================
+4. SETTINGS SECTION
+========================
+Manager can:
+- Change language
+- Notification preferences
+
+Do NOT show:
+- Billing
+- Business settings
+- Integrations
+
+========================
+RESPONSIVE DESIGN RULES
+========================
+Mobile Web:
+- Single column layout
+- Bottom navigation bar:
+  - Tickets
+  - Team
+  - Stats
+  - Settings
+- Large touch targets (48px+)
+- Bottom sheets for actions
+- No tables
+
+Desktop Web:
+- Sidebar navigation instead of bottom nav
+- Wider ticket list
+- Side panel instead of bottom sheet
+
+Same logic, same routes, same data — layout only changes.
+
+========================
+UI STYLE RULES
+========================
+- No heavy cards
+- No dashboards clutter
+- No analytics graphs overload
+- Minimal, clean, professional
+- Fast loading
+- Touch-friendly
+
+========================
+DELIVERABLE
+========================
+- Updated Manager Dashboard UI
+- Fully responsive (desktop + mobile web)
+- Department-scoped data only
+- Clean layout with fast task handling
