@@ -23,7 +23,20 @@ function StaffLoginForm() {
     setLoading(true);
 
     try {
-      const userResult = await signIn(email, password);
+      // Standardize input for phone numbers if it looks like one
+      let loginIdentifier = email;
+      const digitsOnly = email.replace(/\D/g, '');
+      if (digitsOnly.length >= 10 && !email.includes('@')) {
+        if (digitsOnly.startsWith('0')) {
+          loginIdentifier = '+92' + digitsOnly.slice(1) + '@hotel.talkserve.ai';
+        } else if (digitsOnly.startsWith('92')) {
+          loginIdentifier = '+' + digitsOnly + '@hotel.talkserve.ai';
+        } else {
+          loginIdentifier = '+92' + digitsOnly + '@hotel.talkserve.ai';
+        }
+      }
+
+      const userResult = await signIn(loginIdentifier, password);
       const idToken = await userResult.getIdToken();
       const response = await fetch('/api/auth-check', {
         headers: { Authorization: `Bearer ${idToken}` }
@@ -73,19 +86,19 @@ function StaffLoginForm() {
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
               <label className="text-xs font-bold text-blue-400 uppercase tracking-widest ml-1">
-                Login ID
+                Staff ID (Phone or Email)
               </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-400">
                   <FiUser className="text-slate-500" />
                 </div>
                 <input
-                  type="email"
+                  type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full pl-11 pr-4 py-4 bg-slate-800/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all outline-none"
-                  placeholder="Enter staff ID"
+                  placeholder="e.g. 0310... or email@hotel"
                 />
               </div>
             </div>

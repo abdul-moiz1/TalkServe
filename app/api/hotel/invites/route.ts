@@ -55,10 +55,12 @@ export async function POST(request: NextRequest) {
     // Generate a secure temporary password
     const generatedPassword = crypto.randomBytes(6).toString('hex') + '!';
 
+    // Create user in Firebase Auth
     try {
-      // 1. Create User in Firebase Auth
+      const authEmail = email || `${formattedPhone}@hotel.talkserve.ai`;
+      
       const userRecord = await auth.createUser({
-        email: email || undefined,
+        email: authEmail,
         phoneNumber: formattedPhone || undefined,
         password: generatedPassword,
         displayName: fullName,
@@ -67,7 +69,8 @@ export async function POST(request: NextRequest) {
       // 2. Add Member to Firestore business members collection
       await db.collection('businesses').doc(businessId).collection('members').doc(userRecord.uid).set({
         userId: userRecord.uid,
-        email: email || null,
+        email: authEmail,
+        displayEmail: email || null,
         phone: formattedPhone || null,
         fullName,
         role,
@@ -75,13 +78,13 @@ export async function POST(request: NextRequest) {
         status: 'active',
         createdAt: new Date(),
         businessId,
-        password: generatedPassword // Store for display in admin panel later
+        password: generatedPassword 
       });
 
       return NextResponse.json({
         success: true,
         account: {
-          email: email || formattedPhone,
+          email: identifier, // Return the input identifier (phone or email)
           password: generatedPassword,
           uid: userRecord.uid
         }
