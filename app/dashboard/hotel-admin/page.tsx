@@ -427,6 +427,7 @@ export default function HotelAdminPage() {
                   <option value="it">Italian</option>
                   <option value="ur">Urdu</option>
                   <option value="hi">Hindi</option>
+                  <option value="ar">Arabic</option>
                 </select>
               </div>
             </div>

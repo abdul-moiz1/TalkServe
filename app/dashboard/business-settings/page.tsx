@@ -461,6 +461,7 @@ export default function BusinessSettingsPage() {
                     <option value="pt">Portuguese</option>
                     <option value="ur">Urdu</option>
                     <option value="hi">Hindi</option>
+                    <option value="ar">Arabic</option>
                   </select>
                   <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Choose the language your AI assistant will speak</p>
                 </div>
