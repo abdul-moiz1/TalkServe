@@ -67,16 +67,24 @@ export default function HotelAdminPage() {
           });
           const data = await response.json();
           if (data.success && data.businesses && data.businesses.length > 0) {
-            const firstBid = data.businesses[0].id;
+            const firstBid = data.businesses[0].businessId; // Note: API returns businessId
             localStorage.setItem('currentBusinessId', firstBid);
             setBusinessId(firstBid);
             fetchTeamMembers(firstBid);
           } else {
-            router.push('/dashboard');
+            console.warn('No businesses found for user');
+            // Don't redirect immediately if it's a 500 error, maybe show an error state
+            if (response.ok) {
+              router.push('/dashboard');
+            } else {
+              setError('Failed to load your hotel data. Please ensure your account is properly linked.');
+              setLoading(false);
+            }
           }
         } catch (err) {
           console.error('Error checking businesses:', err);
-          router.push('/dashboard');
+          setLoading(false);
+          setError('An unexpected error occurred while loading your profile.');
         }
       };
       checkBusinesses();

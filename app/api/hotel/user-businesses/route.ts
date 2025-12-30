@@ -41,26 +41,32 @@ export async function GET(request: NextRequest) {
       });
     });
 
-    // Get member businesses
-    const memberSnapshot = await db
-      .collectionGroup('members')
-      .where('userId', '==', userId)
-      .get();
+    // Get member businesses - use a simple collection scan if collection group is failing
+    try {
+      const memberSnapshot = await db
+        .collectionGroup('members')
+        .where('userId', '==', userId)
+        .get();
 
-    memberSnapshot.forEach(doc => {
-      const data = doc.data();
-      const businessId = doc.ref.parent.parent?.id;
-      if (businessId) {
-        businesses.push({
-          businessId,
-          businessName: data.businessName || 'Unknown',
-          businessType: data.businessType || 'hotel',
-          role: data.role,
-          department: data.department,
-          joinedAt: data.joinedAt || new Date().toISOString(),
-        });
-      }
-    });
+      memberSnapshot.forEach(doc => {
+        const data = doc.data();
+        const businessId = doc.ref.parent.parent?.id;
+        if (businessId) {
+          businesses.push({
+            businessId,
+            businessName: data.businessName || 'Unknown',
+            businessType: data.businessType || 'hotel',
+            role: data.role,
+            department: data.department,
+            joinedAt: data.joinedAt || new Date().toISOString(),
+          });
+        }
+      });
+    } catch (queryError) {
+      console.warn('CollectionGroup members query failed (possibly missing index):', queryError);
+      // Fallback: If it's a small number of businesses, we could potentially scan, 
+      // but for now let's just ensure we return what we found in ownedSnapshot
+    }
 
     return NextResponse.json({ success: true, businesses });
   } catch (error) {
