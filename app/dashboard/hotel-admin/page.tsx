@@ -65,6 +65,9 @@ export default function HotelAdminPage() {
           headers: { 'Authorization': `Bearer ${idToken}` },
         });
         const result = await response.json();
+        
+        console.log('Onboarding check result:', result);
+
         if (result.success && result.exists && result.data?.industryType === 'hotel') {
           setOnboardingData(result.data);
           
@@ -86,13 +89,18 @@ export default function HotelAdminPage() {
               fetchTeamMembers(bizData.businessId);
             } else {
               setError('No business found. Please complete onboarding.');
+              setLoading(false); // Stop main loading if error
             }
           }
         } else {
+          console.log('No hotel onboarding found');
           setOnboardingData(null);
+          setLoading(false); // Stop loading to show "Register" state
         }
       } catch (err) {
         console.error('Error checking onboarding:', err);
+        setError('Failed to verify onboarding status');
+        setLoading(false);
       } finally {
         setCheckingOnboarding(false);
       }
