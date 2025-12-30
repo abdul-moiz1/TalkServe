@@ -72,7 +72,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}
         `}
       >
-        <div className="p-4 sm:p-6 lg:p-8 pt-[144px]">
+        <div className="p-4 sm:p-6 lg:p-8 pt-32">
           {children}
         </div>
       </main>
