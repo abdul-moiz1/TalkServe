@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
       
       const userRecord = await auth.createUser({
         email: authEmail,
-        phoneNumber: formattedPhone || undefined,
+        // phoneNumber: formattedPhone || undefined, // Removed restriction
         password: generatedPassword,
         displayName: fullName,
       });
