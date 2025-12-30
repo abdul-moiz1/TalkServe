@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminDb, verifyAuthToken } from '@/lib/firebase-admin';
 
-export async function PUT(request: NextRequest, { params }: { params: { ticketId: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ ticketId: string }> }) {
   try {
+    const { ticketId } = await params;
     const authHeader = request.headers.get('Authorization');
     const userId = await verifyAuthToken(authHeader);
 
@@ -13,7 +14,7 @@ export async function PUT(request: NextRequest, { params }: { params: { ticketId
     const body = await request.json();
     const { businessId, status, assignedTo, priority, notes } = body;
 
-    if (!businessId || !params.ticketId) {
+    if (!businessId || !ticketId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -44,7 +45,7 @@ export async function PUT(request: NextRequest, { params }: { params: { ticketId
       .collection('businesses')
       .doc(businessId)
       .collection('tickets')
-      .doc(params.ticketId);
+      .doc(ticketId);
 
     const updateData: Record<string, any> = {
       updatedAt: new Date(),
@@ -75,8 +76,9 @@ export async function PUT(request: NextRequest, { params }: { params: { ticketId
   }
 }
 
-export async function GET(request: NextRequest, { params }: { params: { ticketId: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ ticketId: string }> }) {
   try {
+    const { ticketId } = await params;
     const authHeader = request.headers.get('Authorization');
     const userId = await verifyAuthToken(authHeader);
 
@@ -87,7 +89,7 @@ export async function GET(request: NextRequest, { params }: { params: { ticketId
     const { searchParams } = new URL(request.url);
     const businessId = searchParams.get('businessId');
 
-    if (!businessId || !params.ticketId) {
+    if (!businessId || !ticketId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -100,7 +102,7 @@ export async function GET(request: NextRequest, { params }: { params: { ticketId
       .collection('businesses')
       .doc(businessId)
       .collection('tickets')
-      .doc(params.ticketId)
+      .doc(ticketId)
       .get();
 
     if (!ticketDoc.exists) {

@@ -207,24 +207,25 @@ export default function StaffPortal() {
                   <motion.div 
                     key={task.id}
                     drag="x"
-                    dragConstraints={ { left: 0, right: 100 } }
-                    dragElastic={0.1}
+                    dragConstraints={ { left: 0, right: 150 } }
+                    dragElastic={0.05}
                     onDragEnd={(_, info) => {
-                      if (info.offset.x > 80) {
+                      if (info.offset.x > 100) {
                         if (task.status === 'created') handleUpdateStatus(task.id, 'in-progress');
                         else if (task.status === 'in-progress') handleUpdateStatus(task.id, 'completed');
                       }
                     }}
-                    whileDrag={ { scale: 1.02 } }
-                    dragTransition={ { bounceStiffness: 600, bounceDamping: 30 } }
+                    style={ { x: 0 } } // Ensure it snaps back automatically via Framer Motion
+                    whileDrag={ { scale: 1.01, zIndex: 50 } }
+                    transition={ { type: 'spring', stiffness: 500, damping: 40, mass: 0.5 } }
                     className="group bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 hover:border-blue-200 dark:hover:border-blue-900 hover:shadow-xl transition-all cursor-grab active:cursor-grabbing relative overflow-hidden touch-pan-y"
                   >
                     {/* Status Background Indicators for Swipe */}
                     <div className="absolute inset-y-0 left-0 w-full bg-emerald-500/10 flex items-center justify-start px-8 opacity-0 group-active:opacity-100 transition-opacity">
-                       <FiCheckCircle className="w-6 h-6 text-emerald-500 animate-pulse" />
+                       <FiCheckCircle className="w-6 h-6 text-emerald-500" />
                     </div>
 
-                    <div className="flex items-center gap-4 relative z-10 bg-white dark:bg-slate-900 transition-transform">
+                    <div className="flex items-center gap-4 relative z-10 bg-white dark:bg-slate-900 pointer-events-none">
                       <div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center border border-slate-100 dark:border-slate-700 shrink-0 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 group-hover:border-blue-100 dark:group-hover:border-blue-800 transition-colors">
                         <span className="text-xl font-black text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">#{task.guestRoom}</span>
                       </div>
@@ -244,7 +245,7 @@ export default function StaffPortal() {
                         </p>
                       </div>
                       <div className="flex flex-col items-end gap-1">
-                        <FiChevronRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                        <FiChevronRight className="w-5 h-5 text-slate-300" />
                       </div>
                     </div>
                   </motion.div>
