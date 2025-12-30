@@ -27,15 +27,21 @@ export async function POST(request: NextRequest) {
     // Standardize phone number for E.164 compliance if provided
     let formattedPhone = phone;
     if (phone) {
-      // Remove any non-numeric characters except for the leading +
-      formattedPhone = phone.trim().startsWith('+') 
-        ? '+' + phone.replace(/\D/g, '') 
-        : '+' + phone.replace(/\D/g, '');
+      // Clean up the phone number: remove all non-digit characters
+      const digitsOnly = phone.replace(/\D/g, '');
       
-      // If it doesn't look like it has a country code after stripping, we might need a default or more robust logic
-      // For now, ensure it starts with + as per E.164
-      if (!formattedPhone.startsWith('+')) {
-        formattedPhone = '+' + formattedPhone;
+      // If it doesn't already have a country code (assuming Pakistan +92 if it starts with 0 or is 10-11 digits)
+      if (digitsOnly.startsWith('0')) {
+        // Replace leading 0 with Pakistan country code 92
+        formattedPhone = '+92' + digitsOnly.slice(1);
+      } else if (digitsOnly.length === 10) {
+        // Likely a local number without leading 0, assume Pakistan
+        formattedPhone = '+92' + digitsOnly;
+      } else if (digitsOnly.startsWith('92') && digitsOnly.length === 12) {
+        formattedPhone = '+' + digitsOnly;
+      } else {
+        // Fallback: just ensure it has a +
+        formattedPhone = phone.trim().startsWith('+') ? phone.trim() : '+' + digitsOnly;
       }
     }
 
