@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     let query = db
       .collection('businesses')
       .doc(businessId)
-      .collection('tickets');
+      .collection('tickets') as any;
 
     // Managers can only see their department
     if (userRole === 'manager' && userDepartment) {
@@ -56,14 +56,21 @@ export async function GET(request: NextRequest) {
       query = query.where('status', '==', status);
     }
 
-    const snapshot = await query.orderBy('createdAt', 'desc').get();
+    const snapshot = await query.get();
 
-    const tickets = snapshot.docs.map(doc => ({
+    const tickets = snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate?.().toISOString(),
-      updatedAt: doc.data().updatedAt?.toDate?.().toISOString(),
+      createdAt: doc.data().createdAt?.toDate?.().toISOString() || doc.data().createdAt,
+      updatedAt: doc.data().updatedAt?.toDate?.().toISOString() || doc.data().updatedAt,
     }));
+
+    // Sort manually if index is missing
+    tickets.sort((a: any, b: any) => {
+      const dateA = new Date(a.createdAt || 0).getTime();
+      const dateB = new Date(b.createdAt || 0).getTime();
+      return dateB - dateA;
+    });
 
     return NextResponse.json({ success: true, tickets });
   } catch (error) {
