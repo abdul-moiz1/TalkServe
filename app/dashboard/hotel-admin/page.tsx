@@ -59,42 +59,8 @@ export default function HotelAdminPage() {
                 localStorage.getItem('currentBusinessId');
     
     if (!bid && !authLoading) {
-      // Check if we have any business available before redirecting
-      const checkBusinesses = async () => {
-        try {
-          const idToken = await user?.getIdToken();
-          const response = await fetch('/api/hotel/user-businesses', {
-            headers: { Authorization: `Bearer ${idToken}` },
-          });
-          const data = await response.json();
-          
-          console.log('User businesses check:', data);
-          
-          if (data.success && data.businesses && data.businesses.length > 0) {
-            const firstBid = data.businesses[0].businessId;
-            localStorage.setItem('currentBusinessId', firstBid);
-            setBusinessId(firstBid);
-            fetchTeamMembers(firstBid);
-          } else {
-            console.warn('No businesses found for user:', user?.uid);
-            // DEBUG: If no businesses found via API, let's try one last direct check for "5 Star"
-            if (user?.uid === 'CXx5sU9z6mTp0H2vR2mbptFyCG22') {
-               const directBid = '4RusRHxOJuhFOixzSoaS';
-               localStorage.setItem('currentBusinessId', directBid);
-               setBusinessId(directBid);
-               fetchTeamMembers(directBid);
-            } else {
-               setError('No hotel found. Please make sure your business is registered as a "Hotel" in settings.');
-               setLoading(false);
-            }
-          }
-        } catch (err) {
-          console.error('Error checking businesses:', err);
-          setLoading(false);
-          setError('An unexpected error occurred while loading your profile.');
-        }
-      };
-      checkBusinesses();
+      setError('Please select a business from the dashboard first.');
+      setLoading(false);
       return;
     }
 
