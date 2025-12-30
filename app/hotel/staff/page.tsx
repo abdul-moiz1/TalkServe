@@ -389,6 +389,3 @@ export default function StaffPortal() {
     </div>
   );
 }
-    </div>
-  );
-}
