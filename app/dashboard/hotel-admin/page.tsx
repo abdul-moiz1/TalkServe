@@ -32,6 +32,7 @@ export default function HotelAdminPage() {
   const [invitePhone, setInvitePhone] = useState('');
   const [inviteRole, setInviteRole] = useState('staff');
   const [inviteDepartment, setInviteDepartment] = useState('front-desk');
+  const [inviteLanguage, setInviteLanguage] = useState('en');
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   
@@ -145,7 +146,7 @@ export default function HotelAdminPage() {
           phone: invitePhone || null,
           role: inviteRole,
           department: inviteRole !== 'admin' ? inviteDepartment : null,
-          preferredLanguage: 'en',
+          preferredLanguage: inviteLanguage,
         }),
       });
 
@@ -154,6 +155,7 @@ export default function HotelAdminPage() {
         setInviteEmail('');
         setInviteName('');
         setInvitePhone('');
+        setInviteLanguage('en');
         setShowInviteForm(false);
         setGeneratedAccount({ ...data.account, role: inviteRole });
         setError(null);
@@ -411,6 +413,22 @@ export default function HotelAdminPage() {
                   </select>
                 </div>
               )}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Language Preference</label>
+                <select
+                  value={inviteLanguage}
+                  onChange={(e) => setInviteLanguage(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                >
+                  <option value="en">English</option>
+                  <option value="es">Spanish</option>
+                  <option value="fr">French</option>
+                  <option value="de">German</option>
+                  <option value="it">Italian</option>
+                  <option value="ur">Urdu</option>
+                  <option value="hi">Hindi</option>
+                </select>
+              </div>
             </div>
             <div className="flex gap-2">
               <Button type="submit" disabled={submitting}>
