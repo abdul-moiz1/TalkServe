@@ -4,8 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { FiUsers, FiPlus, FiLoader, FiAlertCircle, FiLogOut, FiCheckCircle, FiX } from 'react-icons/fi';
+import { FiUsers, FiPlus, FiLoader, FiAlertCircle, FiCheckCircle, FiX } from 'react-icons/fi';
 import Button from '@/components/Button';
+import DashboardLayout from '../components/DashboardLayout';
 
 interface TeamMember {
   id: string;
@@ -17,7 +18,7 @@ interface TeamMember {
 }
 
 export default function HotelAdminPage() {
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
@@ -28,11 +29,11 @@ export default function HotelAdminPage() {
   const [inviteDepartment, setInviteDepartment] = useState('front-desk');
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-
+  
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
-
+  
   const departments = ['front-desk', 'housekeeping', 'room-service', 'maintenance'];
-
+  
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
@@ -40,7 +41,6 @@ export default function HotelAdminPage() {
       return;
     }
     
-    // Get businessId from URL or localStorage
     const bid = new URLSearchParams(window.location.search).get('businessId') || 
                 localStorage.getItem('currentBusinessId');
     
@@ -99,7 +99,6 @@ export default function HotelAdminPage() {
       });
 
       const data = await response.json();
-      console.log('Invite response data:', data);
       if (data.success && data.invite) {
         setInviteEmail('');
         setShowInviteForm(false);
@@ -117,64 +116,29 @@ export default function HotelAdminPage() {
     }
   };
 
-  const handleLogout = async () => {
-    await logout();
-    router.push('/signin');
-  };
-
   if (loading || authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col items-center gap-4"
-        >
-          <FiLoader className="w-8 h-8 animate-spin text-blue-600" />
-          <p className="text-slate-600 dark:text-slate-400 font-medium">Loading admin panel...</p>
-        </motion.div>
-      </div>
-    );
-  }
-
-  if (error && !businessId) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-slate-800 rounded-3xl p-8 max-w-md w-full text-center shadow-2xl border border-slate-200 dark:border-slate-700"
-        >
-          <FiAlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Error</h2>
-          <p className="text-slate-600 dark:text-slate-400 mb-6">{error}</p>
-          <Button onClick={() => router.push('/dashboard')}>Go to Dashboard</Button>
-        </motion.div>
-      </div>
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex flex-col items-center gap-4">
+            <FiLoader className="w-8 h-8 animate-spin text-blue-600" />
+            <p className="text-slate-600 dark:text-slate-400 font-medium">Loading admin panel...</p>
+          </div>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <header className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <h1 className="text-xl font-bold text-slate-900 dark:text-white">TalkServe Hotel Admin</h1>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-slate-600 dark:text-slate-400">{user?.email}</span>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-lg transition-all"
-              >
-                <FiLogOut className="w-4 h-4" />
-                Logout
-              </button>
-            </div>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Hotel Administration</h1>
+            <p className="text-slate-600 dark:text-slate-400 mt-1">Manage your team and invitations</p>
           </div>
         </div>
-      </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -206,9 +170,7 @@ export default function HotelAdminPage() {
           )}
 
           {inviteUrl && (
-            <div
-              className="m-6 p-6 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl"
-            >
+            <div className="m-6 p-6 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-emerald-800 dark:text-emerald-300 font-semibold flex items-center gap-2">
                   <FiCheckCircle className="w-5 h-5" />
@@ -222,7 +184,7 @@ export default function HotelAdminPage() {
                 </button>
               </div>
               <p className="text-sm text-emerald-700 dark:text-emerald-400 mb-4">
-                Share this link with your team member. They can use it to join your hotel management system.
+                Share this link with your team member.
               </p>
               <div className="flex gap-2">
                 <input
@@ -230,13 +192,11 @@ export default function HotelAdminPage() {
                   value={inviteUrl}
                   className="flex-1 px-4 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
                 />
-                <Button
-                  onClick={() => {
-                    navigator.clipboard.writeText(inviteUrl);
-                    alert('Copied to clipboard!');
-                  }}
-                >
-                  Copy Link
+                <Button onClick={() => {
+                  navigator.clipboard.writeText(inviteUrl);
+                  alert('Copied to clipboard!');
+                }}>
+                  Copy
                 </Button>
               </div>
             </div>
@@ -252,9 +212,7 @@ export default function HotelAdminPage() {
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Email
-                  </label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email</label>
                   <input
                     type="email"
                     value={inviteEmail}
@@ -265,9 +223,7 @@ export default function HotelAdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Role
-                  </label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Role</label>
                   <select
                     value={inviteRole}
                     onChange={(e) => setInviteRole(e.target.value)}
@@ -280,9 +236,7 @@ export default function HotelAdminPage() {
                 </div>
                 {inviteRole !== 'admin' && (
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Department
-                    </label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Department</label>
                     <select
                       value={inviteDepartment}
                       onChange={(e) => setInviteDepartment(e.target.value)}
@@ -317,9 +271,6 @@ export default function HotelAdminPage() {
               <div className="px-6 py-16 text-center">
                 <FiUsers className="w-12 h-12 text-slate-400 mx-auto mb-4" />
                 <p className="text-slate-600 dark:text-slate-400 font-medium">No team members yet</p>
-                <p className="text-slate-500 dark:text-slate-500 text-sm mt-1">
-                  Invite your first team member to get started
-                </p>
               </div>
             ) : (
               teamMembers.map((member, index) => (
@@ -352,7 +303,7 @@ export default function HotelAdminPage() {
             )}
           </div>
         </motion.div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

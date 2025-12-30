@@ -15,6 +15,7 @@ interface SidebarProps {
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: FiHome },
+  { name: 'Hotel Team', href: '/dashboard/hotel-admin', icon: FiUsers },
   { name: 'Onboarding', href: '/dashboard/onboarding', icon: FiUserPlus },
   { name: 'Whatsapp', href: '/dashboard/whatsapp/customers', icon: FiUsers },
   { name: 'SMS', href: '/dashboard/sms/customers?type=SMS agent', icon: FiMessageSquare },

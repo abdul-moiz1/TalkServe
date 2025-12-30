@@ -156,10 +156,10 @@ export default function DashboardPage() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border-b-4 border-green-500">
           <div className="flex items-center justify-between">
-            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-              <FiMessageSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
+              <FiMessageSquare className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
             <span className={`flex items-center gap-1 text-sm font-medium ${
               analyticsData.change >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
@@ -172,39 +172,39 @@ export default function DashboardPage() {
             {analyticsData.totalChats.toLocaleString()}
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Total Chats ({timePeriod === 'day' ? 'Today' : timePeriod === 'week' ? 'This Week' : 'This Month'})
+            Total Messages
           </p>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border-b-4 border-green-500">
           <div className="flex items-center justify-between">
-            <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl">
-              <FiClock className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
+              <FiClock className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
           <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-4">
             {analyticsData.peakHour}
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Peak Hours for Messaging
+            Active Response Time
           </p>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border-b-4 border-green-500">
           <div className="flex items-center justify-between">
-            <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-xl">
-              <FiCalendar className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
+              <FiCalendar className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-4">
             {analyticsData.peakDay}
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Peak Day of the Week
+            Busiest Day
           </p>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border-b-4 border-green-500">
           <div className="flex items-center justify-between">
             <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
               <FiTrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -214,7 +214,7 @@ export default function DashboardPage() {
             {analyticsData.change >= 0 ? '+' : ''}{analyticsData.change}%
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Growth Trend ({timePeriod === 'day' ? 'vs Yesterday' : timePeriod === 'week' ? 'Week-over-Week' : 'Month-over-Month'})
+            User Engagement
           </p>
         </div>
       </div>
