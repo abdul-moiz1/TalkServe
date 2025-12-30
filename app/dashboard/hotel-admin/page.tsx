@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { FiUsers, FiPlus, FiLoader, FiAlertCircle, FiCheckCircle, FiX } from 'react-icons/fi';
+import { FiUsers, FiPlus, FiLoader, FiAlertCircle, FiCheckCircle, FiX, FiLink, FiSmartphone } from 'react-icons/fi';
+import { QRCodeSVG } from 'qrcode.react';
 import Button from '@/components/Button';
 
 interface TeamMember {
@@ -107,7 +108,7 @@ export default function HotelAdminPage() {
         setInviteName('');
         setInvitePhone('');
         setShowInviteForm(false);
-        setGeneratedAccount(data.account);
+        setGeneratedAccount({ ...data.account, role: inviteRole });
         setError(null);
         fetchTeamMembers(businessId);
       } else {
@@ -194,48 +195,100 @@ export default function HotelAdminPage() {
                 <FiX className="w-5 h-5" />
               </button>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-6">
               <p className="text-sm text-emerald-700 dark:text-emerald-400 font-medium">
                 IMPORTANT: Save these credentials and share them with the staff member. They will not be shown again.
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-xs text-emerald-600 dark:text-emerald-500 font-semibold uppercase tracking-wider">Email</label>
-                  <div className="flex gap-2">
-                    <input
-                      readOnly
-                      value={generatedAccount.email}
-                      className="flex-1 px-3 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
-                    />
-                    <button 
-                      onClick={() => {
-                        navigator.clipboard.writeText(generatedAccount.email);
-                        alert('Email copied!');
-                      }}
-                      className="p-2 bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-200"
-                    >
-                      Copy
-                    </button>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-xs text-emerald-600 dark:text-emerald-500 font-semibold uppercase tracking-wider">Email/Username</label>
+                      <div className="flex gap-2">
+                        <input
+                          readOnly
+                          value={generatedAccount.email}
+                          className="flex-1 px-3 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
+                        />
+                        <button 
+                          onClick={() => {
+                            navigator.clipboard.writeText(generatedAccount.email);
+                            alert('Email copied!');
+                          }}
+                          className="p-2 bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-200"
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-emerald-600 dark:text-emerald-500 font-semibold uppercase tracking-wider">Generated Password</label>
+                      <div className="flex gap-2">
+                        <input
+                          readOnly
+                          value={generatedAccount.password}
+                          className="flex-1 px-3 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono"
+                        />
+                        <button 
+                          onClick={() => {
+                            navigator.clipboard.writeText(generatedAccount.password);
+                            alert('Password copied!');
+                          }}
+                          className="p-2 bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-200"
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-white dark:bg-slate-800 rounded-xl border border-emerald-100 dark:border-emerald-800/50">
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
+                      <FiLink className="w-4 h-4 text-blue-500" />
+                      Direct Access Link
+                    </h4>
+                    <p className="text-xs text-slate-500 mb-3">Share this link with the {generatedAccount.role} for direct login.</p>
+                    <div className="flex gap-2">
+                      <input
+                        readOnly
+                        value={`${baseUrl}/signin?email=${encodeURIComponent(generatedAccount.email)}`}
+                        className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 text-xs"
+                      />
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(`${baseUrl}/signin?email=${encodeURIComponent(generatedAccount.email)}`);
+                          alert('Login link copied!');
+                        }}
+                        className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs font-medium transition-colors"
+                      >
+                        Copy Link
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs text-emerald-600 dark:text-emerald-500 font-semibold uppercase tracking-wider">Generated Password</label>
-                  <div className="flex gap-2">
-                    <input
-                      readOnly
-                      value={generatedAccount.password}
-                      className="flex-1 px-3 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono"
-                    />
-                    <button 
-                      onClick={() => {
-                        navigator.clipboard.writeText(generatedAccount.password);
-                        alert('Password copied!');
-                      }}
-                      className="p-2 bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-200"
-                    >
-                      Copy
-                    </button>
+
+                <div className="flex flex-col items-center justify-center p-6 bg-white dark:bg-slate-800 rounded-2xl border border-emerald-100 dark:border-emerald-800/50 shadow-sm">
+                  <div className="mb-4 text-center">
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center justify-center gap-2">
+                      <FiSmartphone className="w-4 h-4 text-blue-500" />
+                      Scan to Login
+                    </h4>
+                    <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-bold">Fast Access for {generatedAccount.role}s</p>
                   </div>
+                  
+                  <div className="p-4 bg-white rounded-2xl shadow-inner border border-slate-100">
+                    <QRCodeSVG 
+                      value={`${baseUrl}/signin?email=${encodeURIComponent(generatedAccount.email)}`}
+                      size={160}
+                      level="H"
+                      includeMargin={true}
+                    />
+                  </div>
+                  
+                  <p className="mt-4 text-[11px] text-slate-500 text-center max-w-[180px]">
+                    Instruct the staff member to scan this with their phone camera to open the login page.
+                  </p>
                 </div>
               </div>
             </div>
