@@ -55,11 +55,10 @@ export default function HotelAdminPage() {
       return;
     }
     
-    const bid = new URLSearchParams(window.location.search).get('businessId') || 
-                localStorage.getItem('currentBusinessId');
+    const bid = new URLSearchParams(window.location.search).get('businessId');
     
     if (!bid && !authLoading) {
-      setError('Please select a business from the dashboard first.');
+      setError('No business selected. Please select your hotel from the Dashboard first.');
       setLoading(false);
       return;
     }
