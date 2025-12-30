@@ -32,7 +32,14 @@ export default function HotelAdminPage() {
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   
-  const [generatedAccount, setGeneratedAccount] = useState<{email: string; password: string} | null>(null);
+  const [generatedAccount, setGeneratedAccount] = useState<{email: string; password: string; role: string} | null>(null);
+  const [baseUrl, setBaseUrl] = useState('');
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setBaseUrl(window.location.origin);
+    }
+  }, []);
   
   const departments = ['front-desk', 'housekeeping', 'room-service', 'maintenance'];
   
