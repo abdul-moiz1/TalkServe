@@ -57,7 +57,7 @@ export default function StaffPortal() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      router.push('/signin');
+      router.push('/auth/staff-login');
       return;
     }
     fetchData();
