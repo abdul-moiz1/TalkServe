@@ -28,6 +28,7 @@ interface Ticket {
   createdAt: string;
   department: string;
   assignedTo: string;
+  assignedByName?: string;
 }
 
 const statusColors: Record<string, string> = {
@@ -95,7 +96,7 @@ export default function StaffPortal() {
       const idToken = await user?.getIdToken();
       const headers = { Authorization: `Bearer ${idToken}` };
 
-      const response = await fetch(`/api/hotel/tickets?businessId=${businessId}&assignedTo=${user?.uid}`, { headers });
+      const response = await fetch(`/api/hotel/tickets?businessId=${businessId}&assignedTo=${user?.uid}&department=${staffInfo?.department || ''}`, { headers });
       const data = await response.json();
 
       if (data.success) {
@@ -243,6 +244,12 @@ export default function StaffPortal() {
                         <p className="text-slate-900 dark:text-white font-bold text-sm truncate leading-tight">
                           {task.requestText}
                         </p>
+                        {task.assignedByName && (
+                          <div className="mt-1.5 flex items-center gap-1">
+                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Assigned by</span>
+                            <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest italic">{task.assignedByName}</span>
+                          </div>
+                        )}
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <FiChevronRight className="w-5 h-5 text-slate-300" />

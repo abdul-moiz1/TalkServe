@@ -23,7 +23,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Database not available' }, { status: 500 });
     }
 
-    // Verify user is manager/admin of this business
+    // Verify user is member of this business
     const memberDoc = await db
       .collection('businesses')
       .doc(businessId)
@@ -35,7 +35,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Not a member of this business' }, { status: 403 });
     }
 
-    const memberRole = memberDoc.data()?.role;
+    const memberData = memberDoc.data();
+    const memberRole = memberData?.role;
+    
     if (memberRole === 'staff' && status === 'created') {
       return NextResponse.json({ error: 'Staff cannot create/reset tickets' }, { status: 403 });
     }
@@ -52,7 +54,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     };
 
     if (status) updateData.status = status;
-    if (assignedTo !== undefined) updateData.assignedTo = assignedTo;
+    if (assignedTo !== undefined) {
+      updateData.assignedTo = assignedTo;
+      // Track who assigned it
+      updateData.assignedBy = userId;
+      updateData.assignedByName = memberData?.fullName || memberData?.email || 'Manager';
+    }
     if (priority) updateData.priority = priority;
     if (notes) updateData.notes = notes;
 
