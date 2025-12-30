@@ -14,14 +14,29 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { businessId, email, fullName, phone, role, department } = body;
 
-    if (!businessId || !email || !role || !fullName) {
-      return NextResponse.json({ error: 'Missing required fields (Name, Email, and Role are mandatory)' }, { status: 400 });
+    if (!businessId || (!email && !phone) || !role || !fullName) {
+      return NextResponse.json({ error: 'Missing required fields (Name, Role, and either Email or Phone are mandatory)' }, { status: 400 });
     }
 
     const db = getAdminDb();
     const auth = getAdminAuth();
     if (!db || !auth) {
       return NextResponse.json({ error: 'Backend services not available' }, { status: 500 });
+    }
+
+    // Standardize phone number for E.164 compliance if provided
+    let formattedPhone = phone;
+    if (phone) {
+      // Remove any non-numeric characters except for the leading +
+      formattedPhone = phone.trim().startsWith('+') 
+        ? '+' + phone.replace(/\D/g, '') 
+        : '+' + phone.replace(/\D/g, '');
+      
+      // If it doesn't look like it has a country code after stripping, we might need a default or more robust logic
+      // For now, ensure it starts with + as per E.164
+      if (!formattedPhone.startsWith('+')) {
+        formattedPhone = '+' + formattedPhone;
+      }
     }
 
     // Verify user is owner or admin of this business
@@ -37,18 +52,18 @@ export async function POST(request: NextRequest) {
     try {
       // 1. Create User in Firebase Auth
       const userRecord = await auth.createUser({
-        email,
+        email: email || undefined,
+        phoneNumber: formattedPhone || undefined,
         password: generatedPassword,
         displayName: fullName,
-        phoneNumber: phone || undefined,
       });
 
       // 2. Add Member to Firestore business members collection
       await db.collection('businesses').doc(businessId).collection('members').doc(userRecord.uid).set({
         userId: userRecord.uid,
-        email,
+        email: email || null,
+        phone: formattedPhone || null,
         fullName,
-        phone: phone || null,
         role,
         department: role === 'staff' || role === 'manager' ? department : null,
         status: 'active',
@@ -59,7 +74,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         account: {
-          email,
+          email: email || formattedPhone,
           password: generatedPassword,
           uid: userRecord.uid
         }
