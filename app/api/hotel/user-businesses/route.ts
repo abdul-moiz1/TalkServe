@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     const businesses = [];
 
-    // Get owned businesses
+    // Get owned businesses - Ensure we match the ownerId from the document
     const ownedSnapshot = await db
       .collection('businesses')
       .where('ownerId', '==', userId)
@@ -40,6 +40,22 @@ export async function GET(request: NextRequest) {
         joinedAt: data.createdAt || new Date().toISOString(),
       });
     });
+
+    // Also check if the businessId itself is the userId (sometimes used for single-owner setups)
+    const directDoc = await db.collection('businesses').doc(userId).get();
+    if (directDoc.exists) {
+      const data = directDoc.data()!;
+      if (!businesses.find(b => b.businessId === userId)) {
+        businesses.push({
+          businessId: userId,
+          businessName: data.name,
+          businessType: data.type,
+          role: 'admin',
+          department: null,
+          joinedAt: data.createdAt || new Date().toISOString(),
+        });
+      }
+    }
 
     // Get member businesses - use a simple collection scan if collection group is failing
     try {
