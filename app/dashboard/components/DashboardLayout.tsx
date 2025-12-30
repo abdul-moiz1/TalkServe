@@ -72,26 +72,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}
         `}
       >
-        <header className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-slate-200 dark:border-slate-800 transition-all duration-300">
-          <nav className="px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">T</span>
-                </div>
-                <span className="text-2xl font-display font-bold text-blue-600">
-                  TalkServe
-                </span>
-              </div>
-              <div className="flex items-center gap-4">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:block">
-                  Dashboard
-                </span>
-              </div>
-            </div>
-          </nav>
-        </header>
-        <div className="p-4 sm:p-6 lg:p-8">
+        <div className="p-4 sm:p-6 lg:p-8 pt-20">
           {children}
         </div>
       </main>
