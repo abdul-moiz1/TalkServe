@@ -316,7 +316,10 @@ export default function StaffPortal() {
                   </div>
                 </div>
                 <button 
-                  onClick={() => logout()}
+                  onClick={async () => {
+                    await logout();
+                    router.push('/auth/staff-login');
+                  }}
                   className="w-full bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 py-4 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2"
                 >
                   <FiLogOut /> Logout
