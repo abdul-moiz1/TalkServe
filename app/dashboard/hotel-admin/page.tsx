@@ -24,12 +24,14 @@ export default function HotelAdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteName, setInviteName] = useState('');
+  const [invitePhone, setInvitePhone] = useState('');
   const [inviteRole, setInviteRole] = useState('staff');
   const [inviteDepartment, setInviteDepartment] = useState('front-desk');
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   
-  const [inviteUrl, setInviteUrl] = useState<string | null>(null);
+  const [generatedAccount, setGeneratedAccount] = useState<{email: string; password: string} | null>(null);
   
   const departments = ['front-desk', 'housekeeping', 'room-service', 'maintenance'];
   
@@ -91,6 +93,8 @@ export default function HotelAdminPage() {
         body: JSON.stringify({
           businessId,
           email: inviteEmail,
+          fullName: inviteName,
+          phone: invitePhone,
           role: inviteRole,
           department: inviteRole !== 'admin' ? inviteDepartment : null,
           preferredLanguage: 'en',
@@ -98,17 +102,19 @@ export default function HotelAdminPage() {
       });
 
       const data = await response.json();
-      if (data.success && data.invite) {
+      if (data.success && data.account) {
         setInviteEmail('');
+        setInviteName('');
+        setInvitePhone('');
         setShowInviteForm(false);
-        const url = `${window.location.origin}/auth/accept-invite?code=${data.invite.code}&businessId=${businessId}`;
-        setInviteUrl(url);
+        setGeneratedAccount(data.account);
         setError(null);
+        fetchTeamMembers(businessId);
       } else {
-        setError(data.error || 'Failed to generate invite');
+        setError(data.error || 'Failed to create account');
       }
     } catch (err) {
-      setError('Failed to send invite');
+      setError('Failed to create account');
       console.error(err);
     } finally {
       setSubmitting(false);
@@ -174,35 +180,64 @@ export default function HotelAdminPage() {
           </div>
         )}
 
-        {inviteUrl && (
+        {generatedAccount && (
           <div className="m-6 p-6 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-emerald-800 dark:text-emerald-300 font-semibold flex items-center gap-2">
                 <FiCheckCircle className="w-5 h-5" />
-                Invite Link Generated
+                Account Created Successfully
               </h3>
               <button 
-                onClick={() => setInviteUrl(null)}
+                onClick={() => setGeneratedAccount(null)}
                 className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700"
               >
                 <FiX className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-sm text-emerald-700 dark:text-emerald-400 mb-4">
-              Share this link with your team member.
-            </p>
-            <div className="flex gap-2">
-              <input
-                readOnly
-                value={inviteUrl}
-                className="flex-1 px-4 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
-              />
-              <Button onClick={() => {
-                navigator.clipboard.writeText(inviteUrl);
-                alert('Copied to clipboard!');
-              }}>
-                Copy
-              </Button>
+            <div className="space-y-4">
+              <p className="text-sm text-emerald-700 dark:text-emerald-400 font-medium">
+                IMPORTANT: Save these credentials and share them with the staff member. They will not be shown again.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs text-emerald-600 dark:text-emerald-500 font-semibold uppercase tracking-wider">Email</label>
+                  <div className="flex gap-2">
+                    <input
+                      readOnly
+                      value={generatedAccount.email}
+                      className="flex-1 px-3 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
+                    />
+                    <button 
+                      onClick={() => {
+                        navigator.clipboard.writeText(generatedAccount.email);
+                        alert('Email copied!');
+                      }}
+                      className="p-2 bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-200"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-emerald-600 dark:text-emerald-500 font-semibold uppercase tracking-wider">Generated Password</label>
+                  <div className="flex gap-2">
+                    <input
+                      readOnly
+                      value={generatedAccount.password}
+                      className="flex-1 px-3 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono"
+                    />
+                    <button 
+                      onClick={() => {
+                        navigator.clipboard.writeText(generatedAccount.password);
+                        alert('Password copied!');
+                      }}
+                      className="p-2 bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-200"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -215,7 +250,18 @@ export default function HotelAdminPage() {
             onSubmit={handleSendInvite}
             className="border-b border-slate-100 dark:border-slate-700/50 p-6 bg-slate-50 dark:bg-slate-700/30 space-y-4"
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Full Name</label>
+                <input
+                  type="text"
+                  value={inviteName}
+                  onChange={(e) => setInviteName(e.target.value)}
+                  placeholder="John Doe"
+                  className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400"
+                  required
+                />
+              </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email</label>
                 <input
@@ -225,6 +271,16 @@ export default function HotelAdminPage() {
                   placeholder="member@example.com"
                   className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400"
                   required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Phone (Optional)</label>
+                <input
+                  type="tel"
+                  value={invitePhone}
+                  onChange={(e) => setInvitePhone(e.target.value)}
+                  placeholder="+1 (555) 000-0000"
+                  className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400"
                 />
               </div>
               <div>
@@ -258,7 +314,7 @@ export default function HotelAdminPage() {
             </div>
             <div className="flex gap-2">
               <Button type="submit" disabled={submitting}>
-                {submitting ? 'Generating...' : 'Generate Invite'}
+                {submitting ? 'Creating...' : 'Create Member Account'}
               </Button>
               <Button
                 type="button"

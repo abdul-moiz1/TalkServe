@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminDb, getAdminAuth, verifyAuthToken } from '@/lib/firebase-admin';
-import { sendInviteEmail } from '@/lib/email';
 import crypto from 'crypto';
 
 export async function POST(request: NextRequest) {
@@ -13,15 +12,16 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { businessId, email, role, department, preferredLanguage } = body;
+    const { businessId, email, fullName, phone, role, department } = body;
 
-    if (!businessId || !email || !role) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!businessId || !email || !role || !fullName) {
+      return NextResponse.json({ error: 'Missing required fields (Name, Email, and Role are mandatory)' }, { status: 400 });
     }
 
     const db = getAdminDb();
-    if (!db) {
-      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    const auth = getAdminAuth();
+    if (!db || !auth) {
+      return NextResponse.json({ error: 'Backend services not available' }, { status: 500 });
     }
 
     // Verify user is admin of this business
@@ -33,103 +33,54 @@ export async function POST(request: NextRequest) {
     }
 
     const businessData = businessDoc.data();
-    console.log('Invite Debug - userId:', userId, 'ownerId:', businessData?.ownerId);
     if (businessData?.ownerId !== userId) {
-      return NextResponse.json({ error: 'Forbidden - not business owner' }, { status: 403 });
+      return NextResponse.json({ error: 'Forbidden - only business owners can create team members' }, { status: 403 });
     }
 
-    // Generate invite code
-    const inviteCode = crypto.randomBytes(16).toString('hex');
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
+    // Generate a secure temporary password
+    const generatedPassword = crypto.randomBytes(6).toString('hex') + '!';
 
-    // Create invite document
-    const inviteData = {
-      businessId,
-      email,
-      role,
-      department: role === 'staff' || role === 'manager' ? department : null,
-      preferredLanguage: preferredLanguage || 'en',
-      code: inviteCode,
-      createdAt: new Date(),
-      expiresAt,
-      used: false,
-      usedAt: null,
-      usedBy: null,
-      createdBy: userId,
-    };
-
-    const inviteRef = await db.collection('invites').add(inviteData);
-
-    const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000'}/auth/accept-invite?code=${inviteCode}&businessId=${businessId}`;
-
-    // Send email with invite link
-    await sendInviteEmail(email, inviteLink, businessData.name, role);
-
-    return NextResponse.json({
-      success: true,
-      invite: {
-        id: inviteRef.id,
-        code: inviteCode,
-        link: inviteLink,
+    try {
+      // 1. Create User in Firebase Auth
+      const userRecord = await auth.createUser({
         email,
+        password: generatedPassword,
+        displayName: fullName,
+        phoneNumber: phone || undefined,
+      });
+
+      // 2. Add Member to Firestore business members collection
+      await db.collection('businesses').doc(businessId).collection('members').doc(userRecord.uid).set({
+        userId: userRecord.uid,
+        email,
+        fullName,
+        phone: phone || null,
         role,
-        department,
-        expiresAt: expiresAt.toISOString(),
-      },
-    });
+        department: role === 'staff' || role === 'manager' ? department : null,
+        status: 'active',
+        createdAt: new Date(),
+        businessId
+      });
+
+      return NextResponse.json({
+        success: true,
+        account: {
+          email,
+          password: generatedPassword,
+          uid: userRecord.uid
+        }
+      });
+    } catch (authError: any) {
+      console.error('Auth Error:', authError);
+      if (authError.code === 'auth/email-already-exists') {
+        return NextResponse.json({ error: 'This email is already registered in the system.' }, { status: 400 });
+      }
+      throw authError;
+    }
   } catch (error) {
-    console.error('Error creating invite:', error);
+    console.error('Error creating staff account:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to create invite' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function GET(request: NextRequest) {
-  try {
-    const authHeader = request.headers.get('Authorization');
-    const userId = await verifyAuthToken(authHeader);
-
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { searchParams } = new URL(request.url);
-    const businessId = searchParams.get('businessId');
-
-    if (!businessId) {
-      return NextResponse.json({ error: 'Business ID required' }, { status: 400 });
-    }
-
-    const db = getAdminDb();
-    if (!db) {
-      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
-    }
-
-    // Verify user is admin
-    const businessRef = db.collection('businesses').doc(businessId);
-    const businessDoc = await businessRef.get();
-
-    if (!businessDoc.exists || businessDoc.data()?.ownerId !== userId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
-    // Get all invites for this business
-    const invitesRef = db.collection('invites');
-    const snapshot = await invitesRef.where('businessId', '==', businessId).get();
-
-    const invites = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    return NextResponse.json({ success: true, invites });
-  } catch (error) {
-    console.error('Error fetching invites:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to fetch invites' },
+      { error: error instanceof Error ? error.message : 'Failed to create staff account' },
       { status: 500 }
     );
   }
