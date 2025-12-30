@@ -46,25 +46,22 @@ export async function GET(request: NextRequest) {
       .doc(businessId)
       .collection('tickets') as any;
 
-    // Admins see all tickets, staff/managers see only their department
-    if (userRole !== 'admin') {
-      // Filter by department if provided (Staff/Managers)
-      if (department) {
-        const deptNormalized = department.toLowerCase();
-        query = query.where('department', 'in', [
-          deptNormalized, 
-          department.charAt(0).toUpperCase() + department.slice(1).toLowerCase(), 
-          department
-        ]);
-      } else if (userRole === 'manager' && userDepartment) {
-        // Managers fallback if no department in query
-        const deptNormalized = userDepartment.toLowerCase();
-        query = query.where('department', 'in', [
-          deptNormalized, 
-          userDepartment.charAt(0).toUpperCase() + userDepartment.slice(1).toLowerCase(), 
-          userDepartment
-        ]);
-      }
+    // Filter by department if provided (Staff/Managers)
+    if (department) {
+      const deptNormalized = department.toLowerCase();
+      query = query.where('department', 'in', [
+        deptNormalized, 
+        department.charAt(0).toUpperCase() + department.slice(1).toLowerCase(), 
+        department
+      ]);
+    } else if (userRole === 'manager' && userDepartment) {
+      // Managers fallback if no department in query
+      const deptNormalized = userDepartment.toLowerCase();
+      query = query.where('department', 'in', [
+        deptNormalized, 
+        userDepartment.charAt(0).toUpperCase() + userDepartment.slice(1).toLowerCase(), 
+        userDepartment
+      ]);
     }
 
     // Filter by status if provided

@@ -129,44 +129,92 @@ export default function AdminPortal() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col font-sans">
-      {/* Header */}
-      <header className="px-4 py-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 flex justify-between items-center sticky top-0 z-50">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200 dark:shadow-none">
-            <LogoIcon className="w-6 h-6 text-white" />
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col lg:flex-row">
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex flex-col w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 sticky top-0 h-screen">
+        <div className="p-6 border-b border-slate-100 dark:border-slate-700">
+          <div className="flex items-center gap-2 mb-2">
+            <LogoIcon className="w-8 h-8 text-purple-600" />
+            <span className="font-bold text-slate-900 dark:text-white">TalkServe</span>
           </div>
-          <div>
-            <h1 className="text-base font-bold text-slate-900 dark:text-white leading-tight">Admin Portal</h1>
-            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-              {activeTab === 'tickets' ? 'All Tickets' : activeTab === 'managers' ? 'Managers' : activeTab === 'staff' ? 'Staff' : activeTab === 'stats' ? 'Analytics' : 'Settings'}
-            </p>
-          </div>
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">System Admin</p>
         </div>
-        <div className="flex items-center gap-2">
-           <button 
-            onClick={() => setActiveTab('settings')}
-            className={`p-2.5 rounded-xl transition-all ${
-              activeTab === 'settings' ? 'bg-purple-600 text-white shadow-lg' : 'bg-slate-50 dark:bg-slate-800 text-slate-400'
-            }`}
+        
+        <nav className="flex-1 p-4 space-y-2">
+          <button 
+            onClick={() => setActiveTab('tickets')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'tickets' ? 'bg-purple-50 text-purple-600 dark:bg-purple-900/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
           >
-            <FiUser className="w-5 h-5" />
+            <FiClipboard className="w-5 h-5" /> All Tickets
+          </button>
+          <button 
+            onClick={() => setActiveTab('managers')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'managers' ? 'bg-purple-50 text-purple-600 dark:bg-purple-900/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+          >
+            <FiUsers className="w-5 h-5" /> Managers ({managers.length})
+          </button>
+          <button 
+            onClick={() => setActiveTab('staff')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'staff' ? 'bg-purple-50 text-purple-600 dark:bg-purple-900/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+          >
+            <FiUser className="w-5 h-5" /> Staff ({staff.length})
+          </button>
+          <button 
+            onClick={() => setActiveTab('stats')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'stats' ? 'bg-purple-50 text-purple-600 dark:bg-purple-900/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+          >
+            <FiBarChart2 className="w-5 h-5" /> Analytics
+          </button>
+          <button 
+            onClick={() => setActiveTab('settings')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'settings' ? 'bg-purple-50 text-purple-600 dark:bg-purple-900/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+          >
+            <FiSettings className="w-5 h-5" /> Settings
+          </button>
+        </nav>
+
+        <div className="p-4 border-t border-slate-100 dark:border-slate-700">
+          <button 
+            onClick={async () => {
+              await logout();
+              router.push('/auth/admin-login');
+            }} 
+            className="w-full flex items-center gap-3 px-4 py-3 text-red-500 font-medium hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors"
+          >
+            <FiLogOut className="w-5 h-5" /> Logout
           </button>
         </div>
-      </header>
+      </aside>
 
       {/* Main Content */}
-      <main className="flex-1 px-4 py-6 max-w-6xl mx-auto w-full">
-        <AnimatePresence mode="wait">
-          {/* All Tickets Tab */}
-          {activeTab === 'tickets' && (
-            <motion.div 
-              key="tickets"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="space-y-6"
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="px-6 py-4 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center sticky top-0 z-40">
+          <div className="flex items-center gap-2 lg:hidden">
+            <LogoIcon className="w-7 h-7 text-purple-600" />
+            <span className="font-bold text-slate-900 dark:text-white">TalkServe</span>
+          </div>
+          <h2 className="hidden lg:block text-lg font-bold text-slate-900 dark:text-white">
+            {activeTab === 'tickets' ? 'All Tickets' : activeTab === 'managers' ? 'Managers' : activeTab === 'staff' ? 'Staff' : activeTab === 'stats' ? 'Analytics' : 'Settings'}
+          </h2>
+          <div className="flex items-center gap-4">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest hidden sm:block">
+              Admin
+            </span>
+            <div 
+              onClick={() => setActiveTab('settings')}
+              className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-colors ${
+                activeTab === 'settings' ? 'bg-purple-600 text-white' : 'bg-purple-100 dark:bg-purple-900/30 text-purple-600'
+              }`}
             >
+              <FiUser className="w-5 h-5" />
+            </div>
+          </div>
+        </header>
+
+        <main className="flex-1 overflow-y-auto p-4 lg:p-8 pb-24 lg:pb-8">
+          <div className="max-w-7xl mx-auto">
+            {/* All Tickets Tab */}
+            {activeTab === 'tickets' && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center mb-2">
                   <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">All Tickets</h3>
@@ -252,18 +300,10 @@ export default function AdminPortal() {
                   )}
                 </div>
               </div>
-            </motion.div>
-          )}
+            )}
 
-          {/* Managers Tab */}
-          {activeTab === 'managers' && (
-            <motion.div 
-              key="managers"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="space-y-6"
-            >
+            {/* Managers Tab */}
+            {activeTab === 'managers' && (
               <div className="space-y-6">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Hotel Managers</h3>
                 <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
@@ -300,18 +340,10 @@ export default function AdminPortal() {
                   </div>
                 </div>
               </div>
-            </motion.div>
-          )}
+            )}
 
-          {/* Staff Tab */}
-          {activeTab === 'staff' && (
-            <motion.div 
-              key="staff"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="space-y-6"
-            >
+            {/* Staff Tab */}
+            {activeTab === 'staff' && (
               <div className="space-y-6">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Hotel Staff</h3>
                 <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
@@ -348,18 +380,10 @@ export default function AdminPortal() {
                   </div>
                 </div>
               </div>
-            </motion.div>
-          )}
+            )}
 
-          {/* Analytics Tab */}
-          {activeTab === 'stats' && (
-            <motion.div 
-              key="stats"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="space-y-6"
-            >
+            {/* Analytics Tab */}
+            {activeTab === 'stats' && (
               <div className="space-y-6">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">System Analytics</h3>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -409,18 +433,10 @@ export default function AdminPortal() {
                   </div>
                 </div>
               </div>
-            </motion.div>
-          )}
+            )}
 
-          {/* Settings Tab */}
-          {activeTab === 'settings' && (
-            <motion.div 
-              key="settings"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="space-y-6"
-            >
+            {/* Settings Tab */}
+            {activeTab === 'settings' && (
               <div className="space-y-6">
                 <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 text-center border border-slate-100 dark:border-slate-700 shadow-sm mb-8">
                   <div className="w-20 h-20 bg-purple-600 rounded-[2rem] flex items-center justify-center mx-auto mb-4 shadow-xl shadow-purple-200 dark:shadow-none">
@@ -457,47 +473,39 @@ export default function AdminPortal() {
                   </div>
                 </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </main>
+            )}
+          </div>
+        </main>
+      </div>
 
-      {/* Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-t border-slate-100 dark:border-slate-900 px-4 py-4 flex justify-around items-center z-50">
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-t border-slate-100 dark:border-slate-900 px-4 py-3 flex justify-around items-center z-50 lg:hidden">
         <button 
           onClick={() => setActiveTab('tickets')}
-          className={`flex flex-col items-center gap-1.5 transition-all ${activeTab === 'tickets' ? 'text-purple-600' : 'text-slate-400'}`}
+          className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'tickets' ? 'text-purple-600' : 'text-slate-400'}`}
         >
-          <div className={`p-2 rounded-xl transition-all ${activeTab === 'tickets' ? 'bg-purple-50 dark:bg-purple-900/20' : ''}`}>
-            <FiClipboard className="w-5 h-5" />
-          </div>
+          <FiClipboard className="w-5 h-5" />
           <span className="text-[9px] font-black uppercase tracking-widest">Tickets</span>
         </button>
         <button 
           onClick={() => setActiveTab('managers')}
-          className={`flex flex-col items-center gap-1.5 transition-all ${activeTab === 'managers' ? 'text-purple-600' : 'text-slate-400'}`}
+          className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'managers' ? 'text-purple-600' : 'text-slate-400'}`}
         >
-          <div className={`p-2 rounded-xl transition-all ${activeTab === 'managers' ? 'bg-purple-50 dark:bg-purple-900/20' : ''}`}>
-            <FiUsers className="w-5 h-5" />
-          </div>
+          <FiUsers className="w-5 h-5" />
           <span className="text-[9px] font-black uppercase tracking-widest">Managers</span>
         </button>
         <button 
           onClick={() => setActiveTab('staff')}
-          className={`flex flex-col items-center gap-1.5 transition-all ${activeTab === 'staff' ? 'text-purple-600' : 'text-slate-400'}`}
+          className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'staff' ? 'text-purple-600' : 'text-slate-400'}`}
         >
-          <div className={`p-2 rounded-xl transition-all ${activeTab === 'staff' ? 'bg-purple-50 dark:bg-purple-900/20' : ''}`}>
-            <FiUser className="w-5 h-5" />
-          </div>
+          <FiUser className="w-5 h-5" />
           <span className="text-[9px] font-black uppercase tracking-widest">Staff</span>
         </button>
         <button 
           onClick={() => setActiveTab('stats')}
-          className={`flex flex-col items-center gap-1.5 transition-all ${activeTab === 'stats' ? 'text-purple-600' : 'text-slate-400'}`}
+          className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'stats' ? 'text-purple-600' : 'text-slate-400'}`}
         >
-          <div className={`p-2 rounded-xl transition-all ${activeTab === 'stats' ? 'bg-purple-50 dark:bg-purple-900/20' : ''}`}>
-            <FiBarChart2 className="w-5 h-5" />
-          </div>
+          <FiBarChart2 className="w-5 h-5" />
           <span className="text-[9px] font-black uppercase tracking-widest">Stats</span>
         </button>
       </nav>
