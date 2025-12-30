@@ -357,26 +357,33 @@ export default function ManagerPortal() {
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Department Staff</h3>
                 <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                   <div className="divide-y divide-slate-100 dark:divide-slate-700">
-                    {teamMembers.map(member => (
-                      <div key={member.id} className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                        <div className="flex items-center gap-4">
-                          <div className="relative">
-                            <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center font-bold text-white shadow-sm">
-                              {member.email.charAt(0).toUpperCase()}
+                    {teamMembers.map(member => {
+                      const activeTaskCount = tickets.filter(t => 
+                        t.assignedTo === (member.userId || member.id) && 
+                        t.status !== 'completed'
+                      ).length;
+
+                      return (
+                        <div key={member.id} className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                          <div className="flex items-center gap-4">
+                            <div className="relative">
+                              <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center font-bold text-white shadow-sm">
+                                {member.email.charAt(0).toUpperCase()}
+                              </div>
+                              <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 border-2 border-white dark:border-slate-800 rounded-full ${member.status === 'active' ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
                             </div>
-                            <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 border-2 border-white dark:border-slate-800 rounded-full ${member.status === 'active' ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 dark:text-white">{member.fullName || member.email}</p>
+                              <p className="text-[11px] text-slate-500 font-medium uppercase tracking-wider">{member.role}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-bold text-slate-900 dark:text-white">{member.fullName || member.email}</p>
-                            <p className="text-[11px] text-slate-500 font-medium uppercase tracking-wider">{member.role}</p>
+                          <div className="text-right">
+                            <p className="text-xs font-bold text-slate-900 dark:text-white">{activeTaskCount} tasks</p>
+                            <button className="text-[11px] font-bold text-blue-600 uppercase tracking-widest mt-1">Assign</button>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-xs font-bold text-slate-900 dark:text-white">{member.activeTaskCount || 0} tasks</p>
-                          <button className="text-[11px] font-bold text-blue-600 uppercase tracking-widest mt-1">Assign</button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                     {teamMembers.length === 0 && (
                       <div className="p-8 text-center text-slate-500">No staff found in this department.</div>
                     )}
