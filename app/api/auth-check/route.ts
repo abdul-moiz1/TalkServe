@@ -19,7 +19,6 @@ export async function GET(request: NextRequest) {
     const onboardingSnapshot = await db.collection('onboarding')
       .where('user_id', '==', userId)
       .where('industryType', '==', 'hotel')
-      .limit(1)
       .get();
 
     if (!onboardingSnapshot.empty) {
@@ -27,12 +26,11 @@ export async function GET(request: NextRequest) {
       const businessSnapshot = await db.collection('businesses')
         .where('ownerId', '==', userId)
         .where('type', '==', 'hotel')
-        .limit(1)
         .get();
 
       if (!businessSnapshot.empty) {
         return NextResponse.json({ 
-          redirect: `/hotel/manager?businessId=${businessSnapshot.docs[0].id}`,
+          redirect: `/dashboard/hotel-admin?businessId=${businessSnapshot.docs[0].id}`,
           businessId: businessSnapshot.docs[0].id,
           role: 'admin',
           industryType: 'hotel'
@@ -41,30 +39,30 @@ export async function GET(request: NextRequest) {
     }
 
     // Also check if the user is a member of a hotel business (Staff/Manager)
-    const membersRef = db.collectionGroup('members');
-    const membersSnapshot = await membersRef
-      .where('userId', '==', userId)
-      .limit(1)
+    const businessesSnapshot = await db.collection('businesses')
+      .where('type', '==', 'hotel')
       .get();
 
-    if (!membersSnapshot.empty) {
-      const memberData = membersSnapshot.docs[0].data();
-      const businessId = membersSnapshot.docs[0].ref.parent.parent?.id;
-      
-      if (businessId) {
-        const businessDoc = await db.collection('businesses').doc(businessId).get();
-        if (businessDoc.exists && businessDoc.data()?.type === 'hotel') {
-          let redirect = `/hotel/staff?businessId=${businessId}`;
-          if (memberData.role === 'admin') redirect = `/dashboard/hotel-admin?businessId=${businessId}`;
-          if (memberData.role === 'manager') redirect = `/hotel/manager?businessId=${businessId}&department=${encodeURIComponent(memberData.department || '')}`;
-          
-          return NextResponse.json({ 
-            redirect, 
-            businessId,
-            role: memberData.role,
-            industryType: 'hotel'
-          });
-        }
+    for (const bizDoc of businessesSnapshot.docs) {
+      const memberSnapshot = await bizDoc.ref.collection('members')
+        .where('userId', '==', userId)
+        .limit(1)
+        .get();
+
+      if (!memberSnapshot.empty) {
+        const memberData = memberSnapshot.docs[0].data();
+        const businessId = bizDoc.id;
+        
+        let redirect = `/hotel/staff?businessId=${businessId}`;
+        if (memberData.role === 'admin') redirect = `/dashboard/hotel-admin?businessId=${businessId}`;
+        if (memberData.role === 'manager') redirect = `/hotel/manager?businessId=${businessId}&department=${encodeURIComponent(memberData.department || '')}`;
+        
+        return NextResponse.json({ 
+          redirect, 
+          businessId,
+          role: memberData.role,
+          industryType: 'hotel'
+        });
       }
     }
 

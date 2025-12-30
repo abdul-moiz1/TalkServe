@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         account: {
-          email: identifier, // Return the input identifier (phone or email)
+          email: email || `${formattedPhone}@hotel.talkserve.ai`,
           password: generatedPassword,
           uid: userRecord.uid
         }
