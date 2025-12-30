@@ -51,6 +51,7 @@ export default function StaffPortal() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [staffInfo, setStaffInfo] = useState<{ fullName: string; phone?: string; createdAt: string; department?: string } | null>(null);
 
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
@@ -70,7 +71,24 @@ export default function StaffPortal() {
     }
 
     fetchData();
+    fetchStaffInfo();
   }, [user, authLoading, businessId]);
+
+  const fetchStaffInfo = async () => {
+    try {
+      const idToken = await user?.getIdToken();
+      const response = await fetch(`/api/hotel/team?businessId=${businessId}`, {
+        headers: { Authorization: `Bearer ${idToken}` }
+      });
+      const data = await response.json();
+      if (data.success && data.members) {
+        const info = data.members.find((m: any) => m.userId === user?.uid);
+        if (info) setStaffInfo(info);
+      }
+    } catch (err) {
+      console.error('Error fetching staff info:', err);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -272,11 +290,29 @@ export default function StaffPortal() {
             >
               <div className="bg-slate-50 dark:bg-slate-900 rounded-[2rem] p-8 text-center border border-slate-100 dark:border-slate-800">
                 <div className="w-24 h-24 bg-blue-600 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-blue-200 dark:shadow-none">
-                  <span className="text-white text-4xl font-black">{user?.displayName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}</span>
+                  <span className="text-white text-4xl font-black">{staffInfo?.fullName?.charAt(0) || user?.displayName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}</span>
                 </div>
-                <h2 className="text-2xl font-black text-slate-900 dark:text-white">{user?.displayName || 'Staff Member'}</h2>
-                <p className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em] mt-2">Team Member</p>
-                <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800 space-y-4 max-w-xs mx-auto">
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white">{staffInfo?.fullName || user?.displayName || 'Staff Member'}</h2>
+                <p className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em] mt-2">{staffInfo?.department || 'Team Member'}</p>
+                
+                <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800 space-y-4 max-w-xs mx-auto text-left">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Phone</span>
+                    <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{staffInfo?.phone || 'Not provided'}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Joined</span>
+                    <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                      {staffInfo?.createdAt ? new Date(staffInfo.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'Recently'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</span>
+                    <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest">Active</span>
+                  </div>
+                </div>
+
+                <div className="mt-8 space-y-4 max-w-xs mx-auto">
                    <button 
                     onClick={async () => {
                       await logout();
