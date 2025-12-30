@@ -537,155 +537,122 @@ export default function HotelAdminPage() {
 
       {/* Member Detail Dialog */}
       {selectedMember && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xl animate-in fade-in duration-500">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
           <motion.div 
-            initial={{ opacity: 0, scale: 0.95, y: 30 }}
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="bg-slate-900 w-full max-w-2xl rounded-[3rem] shadow-[0_0_50px_-12px_rgba(37,99,235,0.2)] border border-slate-800 overflow-hidden relative"
+            className="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden"
           >
-            {/* Close Button */}
-            <button 
-              onClick={() => setSelectedMember(null)}
-              className="absolute top-8 right-8 p-3 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-2xl transition-all z-10 active:scale-95"
-            >
-              <FiX className="w-6 h-6" />
-            </button>
-
-            {/* Header Section */}
-            <div className="p-10 pb-6 bg-gradient-to-b from-blue-600/10 to-transparent">
-              <div className="flex items-center gap-8">
-                <div className="w-20 h-20 bg-blue-600 rounded-[2rem] shadow-2xl shadow-blue-900/40 flex items-center justify-center rotate-[-5deg]">
-                  <FiUser className="w-10 h-10 text-white" />
+            <div className="p-8 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-700/30">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-200 dark:shadow-none">
+                  <FiUser className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-black text-white tracking-tight mb-1">
-                    {selectedMember.fullName}
-                  </h2>
-                  <div className="flex items-center gap-3">
-                    <span className="px-3 py-1 bg-slate-800 text-slate-300 rounded-lg text-[10px] font-black uppercase tracking-widest border border-slate-700">
-                      {selectedMember.role}
-                    </span>
-                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
-                    <span className="text-slate-400 font-bold text-xs uppercase tracking-wider">
-                      {selectedMember.department?.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'General'}
-                    </span>
-                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{selectedMember.fullName}</h3>
+                  <p className="text-slate-500 text-sm capitalize">{selectedMember.role} • {selectedMember.department?.replace('-', ' ')}</p>
                 </div>
               </div>
+              <button 
+                onClick={() => setSelectedMember(null)}
+                className="p-3 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-2xl transition-colors text-slate-500"
+              >
+                <FiX className="w-6 h-6" />
+              </button>
             </div>
 
-            {/* Content Section */}
-            <div className="px-10 pb-10 max-h-[70vh] overflow-y-auto custom-scrollbar space-y-10 pt-4">
-              {/* Access Credentials Section */}
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                   <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em]">Access Credentials</h3>
-                   <div className="h-px flex-1 bg-slate-800 ml-6"></div>
+            <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
+              {/* Credentials Section */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Access Credentials</h4>
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-500">Staff ID / Email</label>
+                      <div className="flex gap-2">
+                        <input readOnly value={selectedMember.email} className="flex-1 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-medium" />
+                        <button onClick={() => { navigator.clipboard.writeText(selectedMember.email); alert('Copied!'); }} className="p-3 bg-slate-100 dark:bg-slate-700 rounded-xl hover:bg-slate-200 transition-colors">Copy</button>
+                      </div>
+                    </div>
+                    {selectedMember.password && (
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500">Password</label>
+                        <div className="flex gap-2">
+                          <input 
+                            readOnly 
+                            value={selectedMember.password || '••••••••'} 
+                            className="flex-1 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-mono font-bold text-blue-600 dark:text-blue-400" 
+                          />
+                          {selectedMember.password && (
+                            <button onClick={() => { navigator.clipboard.writeText(selectedMember.password!); alert('Password copied!'); }} className="p-3 bg-slate-100 dark:bg-slate-700 rounded-xl hover:bg-slate-200 transition-colors">Copy</button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-5 bg-blue-50 dark:bg-blue-900/10 rounded-3xl border border-blue-100 dark:border-blue-800/30">
+                    <h5 className="text-sm font-bold text-blue-700 dark:text-blue-400 flex items-center gap-2 mb-3">
+                      <FiLink className="w-4 h-4" /> Direct Access Link
+                    </h5>
+                    <div className="flex gap-2">
+                      <input readOnly value={`${baseUrl}/auth/staff-login?email=${encodeURIComponent(selectedMember.email)}&role=${selectedMember.role}`} className="flex-1 px-3 py-2 bg-white dark:bg-slate-950 rounded-lg border border-blue-100 dark:border-blue-900 text-[10px] text-slate-500" />
+                      <button onClick={() => { navigator.clipboard.writeText(`${baseUrl}/auth/staff-login?email=${encodeURIComponent(selectedMember.email)}&role=${selectedMember.role}`); alert('Link copied!'); }} className="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold">Copy</button>
+                    </div>
+                  </div>
                 </div>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* Text Credentials */}
-                  <div className="space-y-6">
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Staff ID / Email</label>
-                      <div className="flex gap-3">
-                        <div className="flex-1 px-5 py-4 bg-slate-800/50 border border-slate-700 rounded-2xl text-white text-sm font-bold truncate">
-                          {selectedMember.email}
-                        </div>
-                        <button 
-                          onClick={() => {
-                            navigator.clipboard.writeText(selectedMember.email);
-                            alert('Copied to clipboard!');
-                          }}
-                          className="px-6 bg-slate-800 hover:bg-slate-700 text-white font-black text-[11px] uppercase tracking-widest rounded-2xl transition-all border border-slate-700 active:scale-95 shadow-lg"
-                        >
-                          Copy
-                        </button>
-                      </div>
-                    </div>
 
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Temporary Password</label>
-                      <div className="flex gap-3">
-                        <div className="flex-1 px-5 py-4 bg-slate-800/50 border border-slate-700 rounded-2xl text-blue-400 text-sm font-mono font-black tracking-[0.2em]">
-                          {selectedMember.password || '••••••••'}
-                        </div>
-                        <button 
-                          onClick={() => {
-                            if (selectedMember.password) {
-                              navigator.clipboard.writeText(selectedMember.password);
-                              alert('Password copied!');
-                            }
-                          }}
-                          className="px-6 bg-slate-800 hover:bg-slate-700 text-white font-black text-[11px] uppercase tracking-widest rounded-2xl transition-all border border-slate-700 active:scale-95 shadow-lg"
-                        >
-                          Copy
-                        </button>
-                      </div>
-                    </div>
+                <div className="flex flex-col items-center justify-center p-6 bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] border border-slate-100 dark:border-slate-800">
+                  <div className="mb-4 text-center">
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center justify-center gap-2">
+                      <FiSmartphone className="w-4 h-4 text-blue-500" /> Scan to Login
+                    </h4>
                   </div>
-
-                  {/* QR Code Section */}
-                  <div className="p-8 bg-slate-800/30 rounded-[2.5rem] border border-slate-800/50 flex flex-col items-center justify-center text-center group">
-                    <div className="flex items-center gap-2 mb-6 text-blue-400 font-black text-[10px] uppercase tracking-[0.2em]">
-                      <FiSmartphone className="w-4 h-4" />
-                      Scan to Login
-                    </div>
-                    
-                    <div className="p-5 bg-white rounded-3xl shadow-[0_0_40px_rgba(0,0,0,0.5)] group-hover:scale-105 transition-transform duration-500">
-                      <QRCodeSVG 
-                        value={`${baseUrl}/auth/staff-login?email=${encodeURIComponent(selectedMember.email)}&role=${selectedMember.role}`}
-                        size={140}
-                        level="H"
-                        includeMargin={false}
-                      />
-                    </div>
-                    
-                    <p className="mt-6 text-[10px] text-slate-500 font-bold max-w-[180px] leading-relaxed uppercase tracking-widest opacity-60">
-                      Instant Mobile Access
-                    </p>
+                  <div className="p-4 bg-white rounded-3xl shadow-xl">
+                    <QRCodeSVG 
+                      value={`${baseUrl}/auth/staff-login?email=${encodeURIComponent(selectedMember.email)}&role=${selectedMember.role}`}
+                      size={140}
+                      level="H"
+                      includeMargin={true}
+                    />
                   </div>
+                  <p className="mt-4 text-[10px] text-slate-400 text-center uppercase tracking-widest font-bold">Quick Access QR</p>
                 </div>
               </div>
 
-              {/* Management Actions */}
-              <div className="pt-10 border-t border-slate-800">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <button 
-                    onClick={() => {
-                      const loginLink = `${baseUrl}/auth/staff-login?email=${encodeURIComponent(selectedMember.email)}&role=${selectedMember.role}`;
-                      navigator.clipboard.writeText(loginLink);
-                      alert('Direct login link copied!');
-                    }}
-                    className="flex-[2] px-8 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-[0_10px_30px_-10px_rgba(37,99,235,0.5)] flex items-center justify-center gap-3 active:scale-95"
-                  >
-                    <FiLink className="w-5 h-5" />
-                    Copy Login Link
-                  </button>
-                  <button 
-                    onClick={async () => {
-                      if (confirm('Are you sure you want to remove this team member? This action cannot be undone.')) {
-                        try {
-                          const idToken = await user?.getIdToken();
-                          const response = await fetch(`/api/hotel/team/${selectedMember.id}?businessId=${businessId}`, {
-                            method: 'DELETE',
-                            headers: { Authorization: `Bearer ${idToken}` }
-                          });
-                          if (response.ok) {
-                            setSelectedMember(null);
-                            fetchTeamMembers(businessId!);
-                          } else {
-                            alert('Failed to remove member');
+              {/* Danger Zone */}
+              <div className="pt-8 border-t border-slate-100 dark:border-slate-700">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">Management Actions</h4>
+                    <p className="text-xs text-slate-500">Deactivate or permanently remove this member</p>
+                  </div>
+                  <div className="flex gap-3 w-full sm:w-auto">
+                    <button 
+                      onClick={async () => {
+                        if (confirm('Are you sure you want to remove this team member? This action cannot be undone.')) {
+                          try {
+                            const idToken = await user?.getIdToken();
+                            const response = await fetch(`/api/hotel/team/${selectedMember.id}?businessId=${businessId}`, {
+                              method: 'DELETE',
+                              headers: { Authorization: `Bearer ${idToken}` }
+                            });
+                            if (response.ok) {
+                              setSelectedMember(null);
+                              fetchTeamMembers(businessId!);
+                            } else {
+                              alert('Failed to remove member');
+                            }
+                          } catch (err) {
+                            alert('An error occurred');
                           }
-                        } catch (err) {
-                          alert('An error occurred');
                         }
-                      }
-                    }}
-                    className="flex-1 px-8 py-5 bg-red-900/20 hover:bg-red-900/40 text-red-500 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all border border-red-900/30 active:scale-95"
-                  >
-                    Remove
-                  </button>
+                      }}
+                      className="flex-1 sm:flex-none px-6 py-3 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/10 dark:hover:bg-red-900/20 rounded-2xl text-sm font-bold transition-colors flex items-center justify-center gap-2"
+                    >
+                      Remove Member
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
