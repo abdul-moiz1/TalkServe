@@ -79,7 +79,7 @@ export default function HotelAdminPage() {
 
   const handleSendInvite = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!businessId || !inviteEmail) return;
+    if (!businessId || (!inviteEmail && !invitePhone)) return;
 
     setSubmitting(true);
     try {
@@ -92,9 +92,9 @@ export default function HotelAdminPage() {
         },
         body: JSON.stringify({
           businessId,
-          email: inviteEmail,
+          email: inviteEmail || null,
           fullName: inviteName,
-          phone: invitePhone,
+          phone: invitePhone || null,
           role: inviteRole,
           department: inviteRole !== 'admin' ? inviteDepartment : null,
           preferredLanguage: 'en',
