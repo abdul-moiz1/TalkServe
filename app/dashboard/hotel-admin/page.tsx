@@ -131,41 +131,50 @@ export default function HotelAdminPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
+      <div className="space-y-8 p-4 sm:p-6 lg:p-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Hotel Administration</h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-1">Manage your team and invitations</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Hotel Team</h1>
+            <p className="text-slate-600 dark:text-slate-400 mt-1">Manage your staff roles and invitations</p>
           </div>
         </div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/50 dark:border-slate-700/50 overflow-hidden"
+          className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden"
         >
-          <div className="p-6 border-b border-slate-100 dark:border-slate-700/50">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <FiUsers className="w-6 h-6 text-blue-600" />
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-                  Team Members
-                  <span className="ml-2 px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded-full text-sm font-normal text-slate-500 dark:text-slate-400">
-                    {teamMembers.length}
-                  </span>
-                </h2>
+          <div className="p-8 border-b border-slate-100 dark:border-slate-700">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-5">
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-2xl">
+                  <FiUsers className="w-8 h-8 text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                    Team Members
+                  </h2>
+                  <p className="text-slate-500 text-sm">
+                    {teamMembers.length} active member{teamMembers.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
               </div>
-              <Button onClick={() => setShowInviteForm(!showInviteForm)}>
-                <FiPlus className="w-4 h-4" />
+              <Button 
+                onClick={() => setShowInviteForm(!showInviteForm)}
+                className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-semibold shadow-lg shadow-blue-200 dark:shadow-none transition-all flex items-center justify-center gap-3"
+              >
+                <FiPlus className="w-5 h-5" />
                 {showInviteForm ? 'Cancel' : 'Generate Invite'}
               </Button>
             </div>
           </div>
 
           {error && (
-            <div className="m-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-center gap-3 text-red-600 dark:text-red-400 text-sm">
-              <FiAlertCircle className="w-5 h-5 shrink-0" />
-              {error}
+            <div className="mx-8 mt-8 p-5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl flex items-center gap-4 text-red-600 dark:text-red-400">
+              <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-full">
+                <FiAlertCircle className="w-5 h-5" />
+              </div>
+              <span className="font-medium">{error}</span>
             </div>
           )}
 
@@ -266,11 +275,16 @@ export default function HotelAdminPage() {
             </motion.form>
           )}
 
-          <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
+          <div className="divide-y divide-slate-100 dark:divide-slate-700">
             {teamMembers.length === 0 ? (
-              <div className="px-6 py-16 text-center">
-                <FiUsers className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                <p className="text-slate-600 dark:text-slate-400 font-medium">No team members yet</p>
+              <div className="px-8 py-24 text-center">
+                <div className="w-24 h-24 bg-slate-50 dark:bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <FiUsers className="w-12 h-12 text-slate-300" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No team members yet</h3>
+                <p className="text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
+                  Start building your team by generating an invite link for your staff.
+                </p>
               </div>
             ) : (
               teamMembers.map((member, index) => (
