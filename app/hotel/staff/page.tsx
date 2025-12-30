@@ -289,6 +289,20 @@ export default function StaffPortal() {
                 </div>
                 <h2 className="text-xl font-black text-slate-900 dark:text-white">{user?.displayName || 'Staff Member'}</h2>
                 <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">Staff • Housekeeping</p>
+                <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700 space-y-4">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-slate-500 font-bold uppercase tracking-tighter text-[11px]">Phone</span>
+                    <span className="text-slate-900 dark:text-white font-black">{user?.phoneNumber || 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-slate-500 font-bold uppercase tracking-tighter text-[11px]">Joined</span>
+                    <span className="text-slate-900 dark:text-white font-black">{user?.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-slate-500 font-bold uppercase tracking-tighter text-[11px]">Language</span>
+                    <span className="text-blue-600 font-black uppercase tracking-widest text-[10px] bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">English</span>
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-3">

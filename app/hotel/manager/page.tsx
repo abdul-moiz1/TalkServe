@@ -353,6 +353,29 @@ export default function ManagerPortal() {
 
             {activeTab === 'settings' && (
               <div className="space-y-6">
+                <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 text-center border border-slate-100 dark:border-slate-700 shadow-sm mb-8">
+                  <div className="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center mx-auto mb-4 shadow-xl shadow-blue-200 dark:shadow-none">
+                    <span className="text-white text-3xl font-black">{user?.displayName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}</span>
+                  </div>
+                  <h2 className="text-xl font-black text-slate-900 dark:text-white">{user?.displayName || 'Manager'}</h2>
+                  <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">{department} Manager</p>
+                  
+                  <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700 space-y-4 max-w-sm mx-auto">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-slate-500 font-bold uppercase tracking-tighter text-[11px]">Phone</span>
+                      <span className="text-slate-900 dark:text-white font-black">{user?.phoneNumber || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-slate-500 font-bold uppercase tracking-tighter text-[11px]">Joined</span>
+                      <span className="text-slate-900 dark:text-white font-black">{user?.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-slate-500 font-bold uppercase tracking-tighter text-[11px]">Language</span>
+                      <span className="text-blue-600 font-black uppercase tracking-widest text-[10px] bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">English</span>
+                    </div>
+                  </div>
+                </div>
+
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Preferences</h3>
                 <div className="space-y-4">
                   <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
