@@ -47,9 +47,9 @@ function StaffLoginForm() {
         if (data.businessId) localStorage.setItem('currentBusinessId', data.businessId);
         if (data.role) localStorage.setItem('userRole', data.role);
         if (data.department) localStorage.setItem('userDepartment', data.department);
-        router.push(data.redirect);
+        window.location.href = data.redirect;
       } else {
-        router.push('/dashboard');
+        window.location.href = '/dashboard';
       }
     } catch (err: any) {
       setError('Invalid ID or password. Please contact your manager.');

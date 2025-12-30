@@ -41,7 +41,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Also check if the user is a member of a hotel business (Staff/Manager)
-    const membersSnapshot = await db.collectionGroup('members')
+    const membersRef = db.collectionGroup('members');
+    const membersSnapshot = await membersRef
       .where('userId', '==', userId)
       .limit(1)
       .get();
