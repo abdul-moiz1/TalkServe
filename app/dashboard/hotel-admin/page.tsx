@@ -259,12 +259,12 @@ export default function HotelAdminPage() {
                     <div className="flex gap-2">
                       <input
                         readOnly
-                        value={`${baseUrl}/signin?email=${encodeURIComponent(generatedAccount.email)}`}
+                        value={`${baseUrl}/auth/staff-login?email=${encodeURIComponent(generatedAccount.email)}&role=${generatedAccount.role}`}
                         className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 text-xs"
                       />
                       <button 
                         onClick={() => {
-                          navigator.clipboard.writeText(`${baseUrl}/signin?email=${encodeURIComponent(generatedAccount.email)}`);
+                          navigator.clipboard.writeText(`${baseUrl}/auth/staff-login?email=${encodeURIComponent(generatedAccount.email)}&role=${generatedAccount.role}`);
                           alert('Login link copied!');
                         }}
                         className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs font-medium transition-colors"
@@ -286,7 +286,7 @@ export default function HotelAdminPage() {
                   
                   <div className="p-4 bg-white rounded-2xl shadow-inner border border-slate-100">
                     <QRCodeSVG 
-                      value={`${baseUrl}/signin?email=${encodeURIComponent(generatedAccount.email)}`}
+                      value={`${baseUrl}/auth/staff-login?email=${encodeURIComponent(generatedAccount.email)}&role=${generatedAccount.role}`}
                       size={160}
                       level="H"
                       includeMargin={true}
