@@ -183,7 +183,12 @@ export default function ManagerPortal() {
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest hidden sm:block">
               {department} Dept
             </span>
-            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+            <div 
+              onClick={() => setActiveTab('settings')}
+              className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-colors ${
+                activeTab === 'settings' ? 'bg-blue-600 text-white' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600'
+              }`}
+            >
               <FiUser className="w-5 h-5" />
             </div>
           </div>

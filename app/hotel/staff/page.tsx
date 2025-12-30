@@ -144,7 +144,12 @@ export default function StaffPortal() {
         </h1>
         <div className="flex items-center gap-3">
           <FiGlobe className="w-5 h-5 text-slate-400 cursor-pointer" />
-          <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+          <div 
+            onClick={() => setActiveTab('profile')}
+            className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-colors ${
+              activeTab === 'profile' ? 'bg-blue-600 text-white' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600'
+            }`}
+          >
             <FiUser className="w-5 h-5" />
           </div>
         </div>
