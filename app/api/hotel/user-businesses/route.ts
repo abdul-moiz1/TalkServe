@@ -41,13 +41,17 @@ export async function GET(request: NextRequest) {
       });
     });
 
-    // Also check if the businessId itself is the userId (sometimes used for single-owner setups)
-    const directDoc = await db.collection('businesses').doc(userId).get();
-    if (directDoc.exists) {
-      const data = directDoc.data()!;
-      if (!businesses.find(b => b.businessId === userId)) {
+    // Also check for common owner field name variants
+    const ownerSnapshot = await db
+      .collection('businesses')
+      .where('owner', '==', userId)
+      .get();
+
+    ownerSnapshot.forEach(doc => {
+      const data = doc.data();
+      if (!businesses.find(b => b.businessId === doc.id)) {
         businesses.push({
-          businessId: userId,
+          businessId: doc.id,
           businessName: data.name,
           businessType: data.type,
           role: 'admin',
@@ -55,7 +59,7 @@ export async function GET(request: NextRequest) {
           joinedAt: data.createdAt || new Date().toISOString(),
         });
       }
-    }
+    });
 
     // Get member businesses - use a simple collection scan if collection group is failing
     try {

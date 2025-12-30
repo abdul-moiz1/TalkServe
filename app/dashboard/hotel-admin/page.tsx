@@ -66,20 +66,18 @@ export default function HotelAdminPage() {
             headers: { Authorization: `Bearer ${idToken}` },
           });
           const data = await response.json();
+          
           if (data.success && data.businesses && data.businesses.length > 0) {
-            const firstBid = data.businesses[0].businessId; // Note: API returns businessId
+            const firstBid = data.businesses[0].businessId;
             localStorage.setItem('currentBusinessId', firstBid);
             setBusinessId(firstBid);
             fetchTeamMembers(firstBid);
           } else {
-            console.warn('No businesses found for user');
-            // Don't redirect immediately if it's a 500 error, maybe show an error state
-            if (response.ok) {
-              router.push('/dashboard');
-            } else {
-              setError('Failed to load your hotel data. Please ensure your account is properly linked.');
-              setLoading(false);
-            }
+            console.warn('No businesses found for user:', user?.uid);
+            // DEBUG: Try to manually fetch if user is owner but query failed
+            // For now, let's keep the user on the page and show an "Add Business" option or error
+            setError('We couldn\'t find a hotel associated with your account. If you just created one, please refresh.');
+            setLoading(false);
           }
         } catch (err) {
           console.error('Error checking businesses:', err);
