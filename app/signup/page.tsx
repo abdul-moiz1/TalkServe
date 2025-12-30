@@ -114,7 +114,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 px-4 py-12 pt-24 lg:pt-32">
       <div className="w-full max-w-md">
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
