@@ -186,12 +186,26 @@ export default function StaffPortal() {
                 </div>
               ) : (
                 activeTasks.map(task => (
-                  <div 
+                  <motion.div 
                     key={task.id}
-                    onClick={() => setSelectedTicket(task)}
-                    className="group bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 hover:border-blue-200 dark:hover:border-blue-900 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all cursor-pointer active:scale-[0.98]"
+                    drag="x"
+                    dragConstraints={ { left: -100, right: 100 } }
+                    onDragEnd={(_, info) => {
+                      if (info.offset.x > 80) {
+                        // Swipe Right: Advance status
+                        if (task.status === 'created') handleUpdateStatus(task.id, 'in-progress');
+                        else if (task.status === 'in-progress') handleUpdateStatus(task.id, 'completed');
+                      }
+                      // Re-center on release
+                    }}
+                    className="group bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 hover:border-blue-200 dark:hover:border-blue-900 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all cursor-pointer active:scale-[0.98] relative overflow-hidden touch-pan-y"
                   >
-                    <div className="flex items-center gap-4">
+                    {/* Status Background Indicators for Swipe */}
+                    <div className="absolute inset-y-0 left-0 w-20 bg-emerald-500/10 flex items-center justify-center opacity-0 group-active:opacity-100 transition-opacity">
+                       <FiChevronRight className="w-6 h-6 text-emerald-500" />
+                    </div>
+
+                    <div className="flex items-center gap-4 relative z-10 bg-white dark:bg-slate-900">
                       <div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center border border-slate-100 dark:border-slate-700 shrink-0 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 group-hover:border-blue-100 dark:group-hover:border-blue-800 transition-colors">
                         <span className="text-xl font-black text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">#{task.guestRoom}</span>
                       </div>
@@ -210,9 +224,12 @@ export default function StaffPortal() {
                           {task.requestText}
                         </p>
                       </div>
-                      <FiChevronRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                      <div className="flex flex-col items-end gap-1">
+                        <span className="text-[8px] font-black text-slate-300 uppercase tracking-tighter">Swipe to Start/Done</span>
+                        <FiChevronRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                      </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))
               )}
             </motion.div>
@@ -275,95 +292,6 @@ export default function StaffPortal() {
           )}
         </AnimatePresence>
       </main>
-
-      {/* Ticket Detail Modal */}
-      <AnimatePresence>
-        {selectedTicket && (
-          <motion.div 
-            initial={ { opacity: 0 } }
-            animate={ { opacity: 1 } }
-            exit={ { opacity: 0 } }
-            className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-md"
-          >
-            <motion.div 
-              initial={ { y: '100%' } }
-              animate={ { y: 0 } }
-              exit={ { y: '100%' } }
-              transition={ { type: 'spring', damping: 25, stiffness: 300 } }
-              className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-t-[2.5rem] sm:rounded-[2.5rem] overflow-hidden flex flex-col max-h-[90vh]"
-            >
-              <div className="p-8 pb-4 flex justify-between items-center">
-                <div className="w-16 h-16 bg-slate-900 dark:bg-white rounded-2xl flex items-center justify-center shadow-2xl">
-                  <span className="text-3xl font-black text-white dark:text-slate-900">#{selectedTicket.guestRoom}</span>
-                </div>
-                <button 
-                  onClick={() => setSelectedTicket(null)}
-                  className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors"
-                >
-                  <FiX className="w-6 h-6" />
-                </button>
-              </div>
-
-              <div className="px-8 pb-8 space-y-6 overflow-y-auto">
-                <div>
-                   <div className="flex items-center gap-2 mb-3">
-                    <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-lg tracking-wider ${
-                      selectedTicket.priority === 'urgent' ? 'bg-red-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
-                    }`}>
-                      {selectedTicket.priority}
-                    </span>
-                    <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-lg tracking-wider ${statusColors[selectedTicket.status]} text-white`}>
-                      {selectedTicket.status.replace('-', ' ')}
-                    </span>
-                  </div>
-                  <h2 className="text-3xl font-black text-slate-900 dark:text-white leading-[1.1]">
-                    {selectedTicket.requestText}
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl">
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Received</p>
-                    <p className="text-sm font-black text-slate-900 dark:text-white">{new Date(selectedTicket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                  </div>
-                  <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl">
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Department</p>
-                    <p className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tighter">{selectedTicket.department}</p>
-                  </div>
-                </div>
-
-                <div className="pt-4 space-y-3">
-                  {selectedTicket.status === 'created' && (
-                    <button 
-                      onClick={() => handleUpdateStatus(selectedTicket.id, 'in-progress')}
-                      className="w-full bg-blue-600 text-white py-6 rounded-[1.5rem] font-black text-lg uppercase tracking-widest shadow-2xl shadow-blue-200 dark:shadow-none flex items-center justify-center gap-3 transition-all active:scale-95"
-                    >
-                      <FiPlay className="w-7 h-7 fill-current" /> Start Task
-                    </button>
-                  )}
-                  {selectedTicket.status === 'in-progress' && (
-                    <button 
-                      onClick={() => {
-                        handleUpdateStatus(selectedTicket.id, 'completed');
-                        setSelectedTicket(null);
-                      }}
-                      className="w-full bg-emerald-500 text-white py-6 rounded-[1.5rem] font-black text-lg uppercase tracking-widest shadow-2xl shadow-emerald-200 dark:shadow-none flex items-center justify-center gap-3 transition-all active:scale-95"
-                    >
-                      <FiCheckCircle className="w-7 h-7" /> Mark Completed
-                    </button>
-                  )}
-                  {selectedTicket.status === 'completed' && (
-                    <div className="p-6 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl flex flex-col items-center gap-2">
-                       <FiCheckCircle className="w-10 h-10 text-emerald-500" />
-                       <p className="text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs">Task Completed</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-t border-slate-100 dark:border-slate-900 px-4 py-4 flex justify-around items-center z-50">
