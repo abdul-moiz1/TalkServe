@@ -60,6 +60,7 @@ export default function StaffPortal() {
       router.push('/auth/staff-login');
       return;
     }
+    console.log('Current Business ID:', businessId);
     fetchData();
   }, [user, authLoading, businessId]);
 
