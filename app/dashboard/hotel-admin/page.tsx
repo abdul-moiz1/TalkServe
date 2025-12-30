@@ -58,6 +58,9 @@ export default function HotelAdminPage() {
     const bid = new URLSearchParams(window.location.search).get('businessId');
     
     if (!bid && !authLoading) {
+      // Clear team if no business is selected to prevent crossover
+      setTeamMembers([]);
+      setBusinessId(null);
       setError('No business selected. Please select your hotel from the Dashboard first.');
       setLoading(false);
       return;
