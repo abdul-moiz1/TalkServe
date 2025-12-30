@@ -8,7 +8,7 @@ export default function ConditionalHeader() {
   const isDashboard = pathname?.startsWith('/dashboard');
   const isHotelPortal = pathname?.includes('/hotel/manager') || pathname?.includes('/hotel/staff');
   
-  if (isHotelPortal) {
+  if (isHotelPortal || isDashboard) {
     return null;
   }
   
