@@ -35,13 +35,14 @@ export default function Header() {
   const { user, loading } = useAuth();
 
   const isDashboard = pathname?.startsWith('/dashboard');
+  const isHotelPortal = pathname?.startsWith('/hotel/manager') || pathname?.startsWith('/hotel/staff');
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       setScrolled(currentScrollY > 10);
       
-      if (isDashboard) {
+      if (isDashboard || isHotelPortal) {
         setVisible(true);
       } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setVisible(false);
@@ -53,7 +54,40 @@ export default function Header() {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY, isDashboard]);
+  }, [lastScrollY, isDashboard, isHotelPortal]);
+
+  if (isHotelPortal) {
+    return (
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-slate-200 dark:border-slate-800 transition-all duration-300">
+        <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between">
+            <div className="flex items-center gap-3">
+              <LogoIcon className="w-8 h-8 text-primary" />
+              <span className="text-xl font-display font-bold text-primary">
+                TalkServe
+              </span>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                Powered by TalkServe
+              </span>
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                aria-label="Toggle dark mode"
+              >
+                {theme === 'dark' ? (
+                  <HiSun className="h-5 w-5 text-slate-300" />
+                ) : (
+                  <HiMoon className="h-5 w-5 text-slate-700" />
+                )}
+              </button>
+            </div>
+          </div>
+        </nav>
+      </header>
+    );
+  }
 
   return (
     <header
