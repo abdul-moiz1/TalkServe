@@ -19,16 +19,9 @@ const navItems: any[] = [
     name: 'Hotel Team', 
     href: '/dashboard/hotel-admin', 
     icon: FiUsers,
-    onClick: (e: React.MouseEvent, router: any) => {
+    onClick: async (e: React.MouseEvent, router: any) => {
       e.preventDefault();
-      // Only navigate if we have a business ID, otherwise staying on dashboard prevents showing empty/old data
-      const bid = new URLSearchParams(window.location.search).get('businessId') || localStorage.getItem('currentBusinessId');
-      if (bid) {
-        router.push(`/dashboard/hotel-admin?businessId=${bid}`);
-      } else {
-        // Find a way to notify user or just do nothing
-        console.warn('No business selected for Hotel Team view');
-      }
+      router.push('/dashboard/hotel-admin');
     }
   },
   { name: 'Onboarding', href: '/dashboard/onboarding', icon: FiUserPlus },

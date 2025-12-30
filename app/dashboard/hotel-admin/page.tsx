@@ -40,36 +40,65 @@ export default function HotelAdminPage() {
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [baseUrl, setBaseUrl] = useState('');
 
+  const [onboardingData, setOnboardingData] = useState<any>(null);
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setBaseUrl(window.location.origin);
     }
   }, []);
-  
+
   const departments = ['front-desk', 'housekeeping', 'room-service', 'maintenance'];
-  
+
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
       router.push('/signin');
       return;
     }
-    
-    const bid = new URLSearchParams(window.location.search).get('businessId');
-    
-    if (!bid && !authLoading) {
-      // Clear team if no business is selected to prevent crossover
-      setTeamMembers([]);
-      setBusinessId(null);
-      setError('No business selected. Please select your hotel from the Dashboard first.');
-      setLoading(false);
-      return;
-    }
 
-    if (bid) {
-      setBusinessId(bid);
-      fetchTeamMembers(bid);
-    }
+    const checkOnboarding = async () => {
+      try {
+        const idToken = await user.getIdToken();
+        const response = await fetch('/api/onboarding', {
+          headers: { 'Authorization': `Bearer ${idToken}` },
+        });
+        const result = await response.json();
+        if (result.success && result.exists && result.data?.industryType === 'hotel') {
+          setOnboardingData(result.data);
+          
+          // If we have onboarding but no businessId in URL, try to get it
+          const urlParams = new URLSearchParams(window.location.search);
+          const bid = urlParams.get('businessId') || localStorage.getItem('currentBusinessId');
+          
+          if (bid) {
+            setBusinessId(bid);
+            fetchTeamMembers(bid);
+          } else {
+            // Fetch business ID if not in URL/localStorage
+            const bizRes = await fetch('/api/auth-check', {
+              headers: { 'Authorization': `Bearer ${idToken}` },
+            });
+            const bizData = await bizRes.json();
+            if (bizData.businessId) {
+              setBusinessId(bizData.businessId);
+              fetchTeamMembers(bizData.businessId);
+            } else {
+              setError('No business found. Please complete onboarding.');
+            }
+          }
+        } else {
+          setOnboardingData(null);
+        }
+      } catch (err) {
+        console.error('Error checking onboarding:', err);
+      } finally {
+        setCheckingOnboarding(false);
+      }
+    };
+
+    checkOnboarding();
   }, [user, authLoading, router]);
 
   const fetchTeamMembers = async (bid: string) => {
@@ -139,13 +168,33 @@ export default function HotelAdminPage() {
     }
   };
 
-  if (loading || authLoading) {
+  if (loading || authLoading || checkingOnboarding) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-4">
           <FiLoader className="w-8 h-8 animate-spin text-blue-600" />
           <p className="text-slate-600 dark:text-slate-400 font-medium">Loading admin panel...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (!onboardingData) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-8 bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700">
+        <div className="p-6 bg-amber-50 dark:bg-amber-900/30 rounded-full mb-6">
+          <FiAlertCircle className="w-12 h-12 text-amber-600" />
+        </div>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Register Your Hotel</h2>
+        <p className="text-slate-600 dark:text-slate-400 mb-8 max-w-md">
+          To manage your team, you first need to complete the onboarding process for your hotel.
+        </p>
+        <Button 
+          onClick={() => router.push('/dashboard/onboarding')}
+          className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-semibold shadow-lg shadow-blue-200"
+        >
+          Go to Onboarding
+        </Button>
       </div>
     );
   }
