@@ -15,9 +15,11 @@ import {
   FiMenu,
   FiX,
   FiChevronRight,
-  FiUser
+  FiUser,
+  FiClipboard
 } from 'react-icons/fi';
 import Button from '@/components/Button';
+import LogoIcon from '@/components/LogoIcon';
 
 interface Ticket {
   id: string;
@@ -47,7 +49,6 @@ export default function ManagerPortal() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState('all');
 
   const businessId = searchParams.get('businessId') || localStorage.getItem('currentBusinessId') || '';
   const department = searchParams.get('department') || localStorage.getItem('userDepartment') || '';
@@ -59,7 +60,7 @@ export default function ManagerPortal() {
       return;
     }
     fetchData();
-  }, [user, authLoading, businessId, department, filterStatus]);
+  }, [user, authLoading, businessId, department]);
 
   const fetchData = async () => {
     try {
@@ -96,8 +97,16 @@ export default function ManagerPortal() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-24">
-      <div className="px-6 pt-8 max-w-md mx-auto">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col">
+      <header className="px-6 py-4 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center sticky top-0 z-50">
+        <div className="flex items-center gap-2">
+          <LogoIcon className="w-8 h-8 text-blue-600" />
+          <span className="font-bold text-slate-900 dark:text-white">TalkServe</span>
+        </div>
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Powered by TalkServe</span>
+      </header>
+
+      <main className="flex-1 overflow-y-auto px-6 pt-8 pb-32 max-w-md mx-auto w-full">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Manager Portal</h1>
         
         <div className="flex gap-4 mb-8">
@@ -139,7 +148,7 @@ export default function ManagerPortal() {
             ))}
           </div>
         )}
-      </div>
+      </main>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-6 py-4 flex justify-between items-center z-50">
         <button onClick={() => setActiveTab('tickets')} className={`flex flex-col items-center gap-1 ${activeTab === 'tickets' ? 'text-blue-600' : 'text-slate-400'}`}>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { ReactNode } from "react";
 import "./globals.css";
-import Header from "@/components/Header";
+import ConditionalHeader from "@/components/ConditionalHeader";
 import ConditionalFooter from "@/components/ConditionalFooter";
 import CookieConsent from "@/components/CookieConsent";
 import { DarkModeProvider } from "@/components/DarkModeProvider";
@@ -52,8 +52,8 @@ export default function RootLayout({
         <DarkModeProvider>
           <AuthProvider>
             <VoiceAgentProvider>
-              <Header />
-              <main className="min-h-screen pt-16">{children}</main>
+              <ConditionalHeader />
+              <main className="min-h-screen">{children}</main>
               <ConditionalFooter />
               <CookieConsent />
               <VoiceflowWidget />

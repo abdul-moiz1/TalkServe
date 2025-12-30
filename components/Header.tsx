@@ -35,7 +35,7 @@ export default function Header() {
   const { user, loading } = useAuth();
 
   const isDashboard = pathname?.startsWith('/dashboard');
-  const isHotelPortal = pathname?.startsWith('/hotel/manager') || pathname?.startsWith('/hotel/staff');
+  const isHotelPortal = pathname?.includes('/hotel/manager') || pathname?.includes('/hotel/staff');
 
   useEffect(() => {
     const handleScroll = () => {
