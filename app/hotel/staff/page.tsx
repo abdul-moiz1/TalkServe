@@ -30,16 +30,16 @@ interface Ticket {
   assignedTo: string;
 }
 
-const priorityColors: Record<string, string> = {
-  urgent: 'bg-red-500 text-white',
-  normal: 'bg-blue-500 text-white',
-  low: 'bg-slate-400 text-white',
+const statusColors: Record<string, string> = {
+  created: 'bg-blue-600 shadow-blue-200',
+  'in-progress': 'bg-amber-500 shadow-amber-200',
+  completed: 'bg-emerald-500 shadow-emerald-200',
 };
 
-const priorityTextColors: Record<string, string> = {
-  urgent: 'text-red-600 dark:text-red-400',
-  normal: 'text-blue-600 dark:text-blue-400',
-  low: 'text-slate-500 dark:text-slate-400',
+const statusBorderColors: Record<string, string> = {
+  created: 'bg-blue-600',
+  'in-progress': 'bg-amber-500',
+  completed: 'bg-emerald-500',
 };
 
 export default function StaffPortal() {
@@ -194,30 +194,42 @@ export default function StaffPortal() {
                     drag="x"
                     dragConstraints={ { left: -100, right: 100 } }
                     onDragEnd={(_, info) => {
-                      if (info.offset.x > 80) handleUpdateStatus(task.id, 'in-progress');
-                      if (info.offset.x < -80) handleUpdateStatus(task.id, 'completed');
+                      if (info.offset.x > 80) {
+                        if (task.status === 'created') handleUpdateStatus(task.id, 'in-progress');
+                        else if (task.status === 'in-progress') handleUpdateStatus(task.id, 'completed');
+                      }
+                      if (info.offset.x < -80) {
+                        // Optional: Reset or special action on left swipe
+                      }
                     }}
-                    className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-lg relative overflow-hidden active:scale-95 transition-transform"
+                    className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-100 dark:border-slate-700 shadow-xl relative overflow-hidden active:scale-[0.98] transition-all"
                   >
-                    <div className={`absolute top-0 left-0 w-2 h-full ${priorityColors[task.priority]}`} />
+                    <div className={`absolute top-0 left-0 w-2.5 h-full ${statusBorderColors[task.status] || 'bg-slate-200'}`} />
                     
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-slate-900 dark:bg-white rounded-2xl flex items-center justify-center shadow-xl">
-                          <span className="text-3xl font-black text-white dark:text-slate-900">#{task.guestRoom}</span>
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="flex items-center gap-5">
+                        <div className="w-20 h-20 bg-slate-900 dark:bg-white rounded-[2rem] flex items-center justify-center shadow-2xl rotate-[-5deg]">
+                          <span className="text-4xl font-black text-white dark:text-slate-900">#{task.guestRoom}</span>
                         </div>
                         <div>
-                          <span className={`text-[11px] font-black uppercase px-2 py-1 rounded tracking-tighter ${priorityColors[task.priority]}`}>
-                            {task.priority}
-                          </span>
-                          <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px] uppercase tracking-wider mt-1">
-                            <FiClock /> {new Date(task.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-lg tracking-wider ${
+                              task.priority === 'urgent' ? 'bg-red-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                            }`}>
+                              {task.priority}
+                            </span>
+                            <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-lg tracking-wider ${statusColors[task.status]} text-white`}>
+                              {task.status.replace('-', ' ')}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-2">
+                            <FiClock className="w-3 h-3" /> {new Date(task.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <p className="text-slate-900 dark:text-white font-black text-xl leading-tight mb-6">
+                    <p className="text-slate-900 dark:text-white font-black text-2xl leading-tight mb-8">
                       {task.requestText}
                     </p>
 
@@ -225,26 +237,24 @@ export default function StaffPortal() {
                       {task.status === 'in-progress' ? (
                         <button 
                           onClick={() => handleUpdateStatus(task.id, 'completed')}
-                          className="flex-1 bg-emerald-500 text-white py-5 rounded-2xl font-black text-base uppercase tracking-widest shadow-xl shadow-emerald-200 dark:shadow-none flex items-center justify-center gap-2"
+                          className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-6 rounded-[1.5rem] font-black text-lg uppercase tracking-widest shadow-2xl shadow-emerald-200 dark:shadow-none flex items-center justify-center gap-3 transition-all transform active:scale-95"
                         >
-                          <FiCheckCircle className="w-6 h-6" /> Done
+                          <FiCheckCircle className="w-7 h-7" /> Complete
                         </button>
                       ) : (
                         <button 
                           onClick={() => handleUpdateStatus(task.id, 'in-progress')}
-                          className="flex-1 bg-blue-600 text-white py-5 rounded-2xl font-black text-base uppercase tracking-widest shadow-xl shadow-blue-200 dark:shadow-none flex items-center justify-center gap-2"
+                          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-6 rounded-[1.5rem] font-black text-lg uppercase tracking-widest shadow-2xl shadow-blue-200 dark:shadow-none flex items-center justify-center gap-3 transition-all transform active:scale-95"
                         >
-                          <FiPlay className="w-6 h-6 fill-current" /> Start
+                          <FiPlay className="w-7 h-7 fill-current" /> Start Task
                         </button>
                       )}
                     </div>
 
-                    {/* Swipe Hints */}
-                    <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center text-emerald-500 opacity-10">
-                      <FiChevronRight className="w-6 h-6" />
-                    </div>
-                    <div className="absolute inset-y-0 right-0 w-8 flex items-center justify-center text-red-500 opacity-10">
-                      <FiChevronRight className="w-6 h-6 rotate-180" />
+                    {/* Swipe Visual Feedback Overlay (Progressive) */}
+                    <div className="absolute inset-0 pointer-events-none flex items-center justify-between px-4 opacity-0 hover:opacity-10 transition-opacity">
+                       <FiChevronRight className="w-8 h-8 text-emerald-500 animate-pulse" />
+                       <FiChevronRight className="w-8 h-8 text-red-500 rotate-180 animate-pulse" />
                     </div>
                   </motion.div>
                 ))
