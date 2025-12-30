@@ -22,11 +22,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Database not available' }, { status: 500 });
     }
 
-    // Verify user is admin of this business
+    // Verify user is admin or member of this business
     const businessRef = db.collection('businesses').doc(businessId);
     const businessDoc = await businessRef.get();
 
-    if (!businessDoc.exists || businessDoc.data()?.ownerId !== userId) {
+    if (!businessDoc.exists) {
+      return NextResponse.json({ error: 'Business not found' }, { status: 404 });
+    }
+
+    const businessData = businessDoc.data();
+    const requesterMemberDoc = await businessRef.collection('members').doc(userId).get();
+    const isOwner = businessData?.ownerId === userId;
+    const isMember = requesterMemberDoc.exists;
+
+    if (!isOwner && !isMember) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Backend services not available' }, { status: 500 });
     }
 
-    // Verify user is admin of this business
+    // Verify user is owner or admin of this business
     const businessRef = db.collection('businesses').doc(businessId);
     const businessDoc = await businessRef.get();
 
@@ -33,8 +33,15 @@ export async function POST(request: NextRequest) {
     }
 
     const businessData = businessDoc.data();
-    if (businessData?.ownerId !== userId) {
-      return NextResponse.json({ error: 'Forbidden - only business owners can create team members' }, { status: 403 });
+    
+    // Check if requester is owner OR is already a member with admin role
+    const requesterMemberDoc = await businessRef.collection('members').doc(userId).get();
+    const requesterData = requesterMemberDoc.data();
+    const isOwner = businessData?.ownerId === userId;
+    const isAdmin = requesterData?.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json({ error: 'Forbidden - only business owners or admins can create team members' }, { status: 403 });
     }
 
     // Generate a secure temporary password
