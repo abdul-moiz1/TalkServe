@@ -97,11 +97,11 @@ export default function DashboardSidebar({ onSignOut, userEmail, userName, isCol
 
       <aside
         className={`
-          fixed top-0 left-0 z-40 h-screen
+          fixed top-16 left-0 z-40 h-[calc(100vh-64px)]
           bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700
           transform transition-all duration-300 ease-in-out
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0 lg:fixed lg:top-0 lg:left-0 lg:z-30
+          lg:translate-x-0
           ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}
           w-64 overflow-y-auto overflow-x-hidden
         `}
