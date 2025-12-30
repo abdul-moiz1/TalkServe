@@ -81,24 +81,31 @@ export default function ManagerPortal() {
       const idToken = await user?.getIdToken();
       const headers = { Authorization: `Bearer ${idToken}` };
 
-      const [ticketsRes, teamRes] = await Promise.all([
-        fetch(`/api/hotel/tickets?businessId=${businessId}&department=${department}`, { headers }),
-        fetch(`/api/hotel/team?businessId=${businessId}`, { headers })
-      ]);
-
-      const ticketsData = await ticketsRes.json();
+      // Get user's department from team members list if not provided
+      const teamRes = await fetch(`/api/hotel/team?businessId=${businessId}`, { headers });
       const teamData = await teamRes.json();
+      
+      let userDept = department;
+      if (teamData.success) {
+        const currentMember = (teamData.members || []).find((m: any) => m.userId === user?.uid);
+        if (currentMember?.department) {
+          userDept = currentMember.department;
+          localStorage.setItem('userDepartment', userDept);
+        }
+        
+        // Filter team by department
+        const filteredTeam = (teamData.members || []).filter((m: TeamMember) => 
+          m.department?.toLowerCase() === userDept?.toLowerCase()
+        );
+        setTeamMembers(filteredTeam);
+      }
+
+      const ticketsRes = await fetch(`/api/hotel/tickets?businessId=${businessId}&department=${userDept}`, { headers });
+      const ticketsData = await ticketsRes.json();
 
       if (ticketsData.success) {
-        // Filter tickets by manager's department
-        const filteredTickets = (ticketsData.tickets || []).filter((t: Ticket) => t.department === department);
-        setTickets(filteredTickets);
-      }
-      
-      if (teamData.success) {
-        // Filter team by manager's department
-        const filteredTeam = (teamData.members || []).filter((m: TeamMember) => m.department === department);
-        setTeamMembers(filteredTeam);
+        // The API already filters by department for managers, but we'll ensure it here too
+        setTickets(ticketsData.tickets || []);
       }
       
       setError(null);
@@ -110,10 +117,28 @@ export default function ManagerPortal() {
     }
   };
 
-  const updateTicketStatus = async (ticketId: string, newStatus: string) => {
-    // API implementation would go here
-    setTickets(prev => prev.map(t => t.id === ticketId ? { ...t, status: newStatus as any } : t));
-    if (selectedTicket?.id === ticketId) setSelectedTicket(prev => prev ? { ...prev, status: newStatus as any } : null);
+  const updateTicketStatus = async (ticketId: string, newStatus: string, assignedTo?: string) => {
+    try {
+      const idToken = await user?.getIdToken();
+      const response = await fetch(`/api/hotel/tickets/${ticketId}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          businessId, 
+          status: newStatus,
+          assignedTo: assignedTo !== undefined ? assignedTo : undefined
+        }),
+      });
+
+      if (response.ok) {
+        fetchData(); // Refresh list
+      }
+    } catch (err) {
+      console.error('Error updating ticket:', err);
+    }
   };
 
   if (loading || authLoading) {
@@ -278,9 +303,26 @@ export default function ManagerPortal() {
                               </span>
                             </div>
                           ) : (
-                            <span className="text-[11px] font-black text-amber-500 uppercase tracking-widest animate-pulse">
-                              Pending Assignment
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[11px] font-black text-amber-500 uppercase tracking-widest animate-pulse">
+                                Pending Assignment
+                              </span>
+                              <div className="flex gap-1">
+                                {teamMembers.slice(0, 3).map(staff => (
+                                  <button
+                                    key={staff.id}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      updateTicketStatus(ticket.id, 'assigned', staff.userId || staff.id);
+                                    }}
+                                    className="w-6 h-6 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center hover:bg-blue-700 transition-colors"
+                                    title={`Assign to ${staff.fullName || staff.email}`}
+                                  >
+                                    {staff.fullName?.charAt(0) || staff.email.charAt(0).toUpperCase()}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
                           )}
                           <FiChevronRight className="text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
                         </div>

@@ -36,8 +36,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     const memberRole = memberDoc.data()?.role;
-    if (memberRole === 'staff') {
-      return NextResponse.json({ error: 'Staff cannot update tickets' }, { status: 403 });
+    if (memberRole === 'staff' && status === 'created') {
+      return NextResponse.json({ error: 'Staff cannot create/reset tickets' }, { status: 403 });
     }
 
     // Update ticket
