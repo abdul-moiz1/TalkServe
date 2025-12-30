@@ -285,9 +285,9 @@ export default function OnboardingForm() {
         const result = await response.json();
         
         // If it's a hotel, redirect to the admin panel
-        if (formData.industryType === 'hotel' && result.data?.businessId) {
-          localStorage.setItem('currentBusinessId', result.data.businessId);
-          router.push(`/hotel/admin?businessId=${result.data.businessId}`);
+        if (formData.industryType === 'hotel' && result.businessId) {
+          localStorage.setItem('currentBusinessId', result.businessId);
+          window.location.href = `/dashboard/hotel-admin?businessId=${result.businessId}`;
           return;
         }
 
