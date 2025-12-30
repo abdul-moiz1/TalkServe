@@ -13,22 +13,23 @@ interface SidebarProps {
   onToggleCollapse: () => void;
 }
 
-    { name: 'Dashboard', href: '/dashboard', icon: FiHome },
-    { 
-      name: 'Hotel Team', 
-      href: '/dashboard/hotel-admin', 
-      icon: FiUsers,
-      onClick: (e: React.MouseEvent, router: any) => {
-        e.preventDefault();
-        const bid = localStorage.getItem('currentBusinessId');
-        if (bid) {
-          router.push(`/dashboard/hotel-admin?businessId=${bid}`);
-        } else {
-          router.push('/dashboard');
-        }
+const navItems: any[] = [
+  { name: 'Dashboard', href: '/dashboard', icon: FiHome },
+  { 
+    name: 'Hotel Team', 
+    href: '/dashboard/hotel-admin', 
+    icon: FiUsers,
+    onClick: (e: React.MouseEvent, router: any) => {
+      e.preventDefault();
+      const bid = localStorage.getItem('currentBusinessId');
+      if (bid) {
+        router.push(`/dashboard/hotel-admin?businessId=${bid}`);
+      } else {
+        router.push('/dashboard');
       }
-    },
-    { name: 'Onboarding', href: '/dashboard/onboarding', icon: FiUserPlus },
+    }
+  },
+  { name: 'Onboarding', href: '/dashboard/onboarding', icon: FiUserPlus },
   { name: 'Whatsapp', href: '/dashboard/whatsapp/customers', icon: FiUsers },
   { name: 'SMS', href: '/dashboard/sms/customers?type=SMS agent', icon: FiMessageSquare },
 ];
