@@ -4,17 +4,20 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { FiUsers, FiPlus, FiLoader, FiAlertCircle, FiCheckCircle, FiX, FiLink, FiSmartphone } from 'react-icons/fi';
+import { FiUsers, FiPlus, FiLoader, FiAlertCircle, FiCheckCircle, FiX, FiLink, FiSmartphone, FiArrowRight } from 'react-icons/fi';
 import { QRCodeSVG } from 'qrcode.react';
 import Button from '@/components/Button';
 
 interface TeamMember {
   id: string;
   email: string;
+  fullName: string;
+  phone?: string;
   role: string;
   department?: string;
   joinedAt: string;
   status: string;
+  password?: string;
 }
 
 export default function HotelAdminPage() {
@@ -33,8 +36,9 @@ export default function HotelAdminPage() {
   const [submitting, setSubmitting] = useState(false);
   
   const [generatedAccount, setGeneratedAccount] = useState<{email: string; password: string; role: string} | null>(null);
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [baseUrl, setBaseUrl] = useState('');
-  
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setBaseUrl(window.location.origin);
@@ -405,30 +409,176 @@ export default function HotelAdminPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: index * 0.05 }}
-                className="px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
+                className="px-6 py-5 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-all cursor-pointer group border-b border-slate-100 dark:border-slate-700/50"
+                onClick={() => setSelectedMember(member)}
               >
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-slate-900 dark:text-white">{member.email}</p>
-                    <div className="flex gap-3 text-sm text-slate-500 dark:text-slate-400 mt-1">
-                      <span className="capitalize">{member.role}</span>
-                      {member.department && <span>•</span>}
-                      {member.department && <span className="capitalize">{member.department}</span>}
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-lg border border-blue-100 dark:border-blue-800/50">
+                      {member.fullName?.charAt(0) || 'U'}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">
+                        {member.fullName || 'Unnamed User'}
+                      </h4>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        <span className="font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-slate-600 dark:text-slate-300 uppercase tracking-tighter">
+                          {member.role}
+                        </span>
+                        {member.department && (
+                          <span className="flex items-center gap-1">
+                            <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                            {member.department.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                          </span>
+                        )}
+                        {member.phone && (
+                          <span className="flex items-center gap-1">
+                            <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                            {member.phone}
+                          </span>
+                        )}
+                        <span className="flex items-center gap-1">
+                          <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                          ID: {member.email || 'N/A'}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    member.status === 'active'
-                      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
-                      : 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
-                  }`}>
-                    {member.status}
-                  </span>
+                  <div className="flex items-center gap-4">
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      member.status === 'active'
+                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/30'
+                        : 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 border border-amber-100 dark:border-amber-800/30'
+                    }`}>
+                      {member.status}
+                    </span>
+                    <FiArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                  </div>
                 </div>
               </motion.div>
             ))
           )}
         </div>
       </motion.div>
+
+      {/* Member Detail Dialog */}
+      {selectedMember && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden"
+          >
+            <div className="p-8 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-700/30">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-200 dark:shadow-none">
+                  <FiUser className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{selectedMember.fullName}</h3>
+                  <p className="text-slate-500 text-sm capitalize">{selectedMember.role} • {selectedMember.department?.replace('-', ' ')}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSelectedMember(null)}
+                className="p-3 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-2xl transition-colors text-slate-500"
+              >
+                <FiX className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
+              {/* Credentials Section */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Access Credentials</h4>
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-500">Staff ID / Email</label>
+                      <div className="flex gap-2">
+                        <input readOnly value={selectedMember.email} className="flex-1 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-medium" />
+                        <button onClick={() => { navigator.clipboard.writeText(selectedMember.email); alert('Copied!'); }} className="p-3 bg-slate-100 dark:bg-slate-700 rounded-xl hover:bg-slate-200 transition-colors">Copy</button>
+                      </div>
+                    </div>
+                    {selectedMember.password && (
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500">Password</label>
+                        <div className="flex gap-2">
+                          <input readOnly value={selectedMember.password} className="flex-1 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-mono font-bold text-blue-600 dark:text-blue-400" />
+                          <button onClick={() => { navigator.clipboard.writeText(selectedMember.password!); alert('Password copied!'); }} className="p-3 bg-slate-100 dark:bg-slate-700 rounded-xl hover:bg-slate-200 transition-colors">Copy</button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-5 bg-blue-50 dark:bg-blue-900/10 rounded-3xl border border-blue-100 dark:border-blue-800/30">
+                    <h5 className="text-sm font-bold text-blue-700 dark:text-blue-400 flex items-center gap-2 mb-3">
+                      <FiLink className="w-4 h-4" /> Direct Access Link
+                    </h5>
+                    <div className="flex gap-2">
+                      <input readOnly value={`${baseUrl}/auth/staff-login?email=${encodeURIComponent(selectedMember.email)}&role=${selectedMember.role}`} className="flex-1 px-3 py-2 bg-white dark:bg-slate-950 rounded-lg border border-blue-100 dark:border-blue-900 text-[10px] text-slate-500" />
+                      <button onClick={() => { navigator.clipboard.writeText(`${baseUrl}/auth/staff-login?email=${encodeURIComponent(selectedMember.email)}&role=${selectedMember.role}`); alert('Link copied!'); }} className="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold">Copy</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center justify-center p-6 bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] border border-slate-100 dark:border-slate-800">
+                  <div className="mb-4 text-center">
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center justify-center gap-2">
+                      <FiSmartphone className="w-4 h-4 text-blue-500" /> Scan to Login
+                    </h4>
+                  </div>
+                  <div className="p-4 bg-white rounded-3xl shadow-xl">
+                    <QRCodeSVG 
+                      value={`${baseUrl}/auth/staff-login?email=${encodeURIComponent(selectedMember.email)}&role=${selectedMember.role}`}
+                      size={140}
+                      level="H"
+                      includeMargin={true}
+                    />
+                  </div>
+                  <p className="mt-4 text-[10px] text-slate-400 text-center uppercase tracking-widest font-bold">Quick Access QR</p>
+                </div>
+              </div>
+
+              {/* Danger Zone */}
+              <div className="pt-8 border-t border-slate-100 dark:border-slate-700">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">Management Actions</h4>
+                    <p className="text-xs text-slate-500">Deactivate or permanently remove this member</p>
+                  </div>
+                  <div className="flex gap-3 w-full sm:w-auto">
+                    <button 
+                      onClick={async () => {
+                        if (confirm('Are you sure you want to remove this team member? This action cannot be undone.')) {
+                          try {
+                            const idToken = await user?.getIdToken();
+                            const response = await fetch(`/api/hotel/team/${selectedMember.id}?businessId=${businessId}`, {
+                              method: 'DELETE',
+                              headers: { Authorization: `Bearer ${idToken}` }
+                            });
+                            if (response.ok) {
+                              setSelectedMember(null);
+                              fetchTeamMembers(businessId!);
+                            } else {
+                              alert('Failed to remove member');
+                            }
+                          } catch (err) {
+                            alert('An error occurred');
+                          }
+                        }
+                      }}
+                      className="flex-1 sm:flex-none px-6 py-3 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/10 dark:hover:bg-red-900/20 rounded-2xl text-sm font-bold transition-colors flex items-center justify-center gap-2"
+                    >
+                      Remove Member
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

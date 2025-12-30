@@ -74,7 +74,8 @@ export async function POST(request: NextRequest) {
         department: role === 'staff' || role === 'manager' ? department : null,
         status: 'active',
         createdAt: new Date(),
-        businessId
+        businessId,
+        password: generatedPassword // Store for display in admin panel later
       });
 
       return NextResponse.json({
