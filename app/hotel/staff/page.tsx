@@ -52,7 +52,7 @@ export default function StaffPortal() {
   const [error, setError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
 
-  const businessId = searchParams.get('businessId') || localStorage.getItem('currentBusinessId') || '';
+  const businessId = searchParams.get('businessId');
 
   useEffect(() => {
     if (authLoading) return;
@@ -60,6 +60,13 @@ export default function StaffPortal() {
       router.push('/auth/staff-login');
       return;
     }
+    
+    if (!businessId) {
+      setError('No business selected. Please use the direct link provided by your manager.');
+      setLoading(false);
+      return;
+    }
+
     console.log('Current Business ID:', businessId);
     fetchData();
   }, [user, authLoading, businessId]);

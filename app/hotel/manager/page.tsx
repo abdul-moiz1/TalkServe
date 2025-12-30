@@ -55,7 +55,7 @@ export default function ManagerPortal() {
   const [error, setError] = useState<string | null>(null);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
-  const businessId = searchParams.get('businessId') || localStorage.getItem('currentBusinessId') || '';
+  const businessId = searchParams.get('businessId');
   const department = searchParams.get('department') || localStorage.getItem('userDepartment') || '';
 
   useEffect(() => {
@@ -64,6 +64,13 @@ export default function ManagerPortal() {
       router.push('/auth/staff-login');
       return;
     }
+
+    if (!businessId) {
+      setError('No business selected. Please use the direct link provided by your administrator.');
+      setLoading(false);
+      return;
+    }
+
     console.log('Current Business ID:', businessId);
     fetchData();
   }, [user, authLoading, businessId, department]);
