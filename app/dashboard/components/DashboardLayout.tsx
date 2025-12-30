@@ -58,7 +58,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 overflow-x-hidden">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-900 overflow-x-hidden">
       <DashboardSidebar
         onSignOut={handleSignOut}
         userEmail={user.email}
@@ -72,7 +72,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}
         `}
       >
-        <div className="p-4 sm:p-6 lg:p-8 pt-32">
+        <div className="p-4 sm:p-6 lg:p-8">
           {children}
         </div>
       </main>
