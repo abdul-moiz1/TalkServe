@@ -6,17 +6,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FiClipboard, 
-  FiTrendingUp, 
+  FiCheckCircle, 
   FiUser, 
-  FiSettings, 
   FiLogOut, 
   FiClock, 
-  FiMessageCircle, 
-  FiCheckCircle, 
   FiPlay,
-  FiChevronRight,
   FiLoader,
-  FiAlertCircle
+  FiChevronRight,
+  FiGlobe,
+  FiBell
 } from 'react-icons/fi';
 import Button from '@/components/Button';
 import LogoIcon from '@/components/LogoIcon';
@@ -29,36 +27,30 @@ interface Ticket {
   status: 'created' | 'assigned' | 'in-progress' | 'completed';
   createdAt: string;
   department: string;
-}
-
-interface StaffMetrics {
-  completedToday: number;
-  avgCompletionTime: number;
-  rating: number;
-  totalCompleted: number;
+  assignedTo: string;
 }
 
 const priorityColors: Record<string, string> = {
-  urgent: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800',
-  normal: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800',
-  low: 'bg-slate-100 dark:bg-slate-800 dark:text-slate-400 border-slate-700',
+  urgent: 'bg-red-500 text-white',
+  normal: 'bg-blue-500 text-white',
+  low: 'bg-slate-400 text-white',
+};
+
+const priorityTextColors: Record<string, string> = {
+  urgent: 'text-red-600 dark:text-red-400',
+  normal: 'text-blue-600 dark:text-blue-400',
+  low: 'text-slate-500 dark:text-slate-400',
 };
 
 export default function StaffPortal() {
   const { user, logout, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState<'tasks' | 'performance' | 'profile'>('tasks');
+  const [activeTab, setActiveTab] = useState<'tasks' | 'completed' | 'profile'>('tasks');
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [metrics, setMetrics] = useState<StaffMetrics>({
-    completedToday: 0,
-    avgCompletionTime: 0,
-    rating: 0,
-    totalCompleted: 0,
-  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expandedTicket, setExpandedTicket] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
 
   const businessId = searchParams.get('businessId') || localStorage.getItem('currentBusinessId') || '';
 
@@ -66,11 +58,6 @@ export default function StaffPortal() {
     if (authLoading) return;
     if (!user) {
       router.push('/signin');
-      return;
-    }
-    if (!businessId) {
-      setError('Missing business information');
-      setLoading(false);
       return;
     }
     fetchData();
@@ -82,16 +69,12 @@ export default function StaffPortal() {
       const idToken = await user?.getIdToken();
       const headers = { Authorization: `Bearer ${idToken}` };
 
-      const [ticketsRes, metricsRes] = await Promise.all([
-        fetch(`/api/hotel/tickets?businessId=${businessId}&assignedTo=${user?.uid}`, { headers }),
-        fetch(`/api/hotel/staff-metrics?businessId=${businessId}`, { headers })
-      ]);
+      const response = await fetch(`/api/hotel/tickets?businessId=${businessId}&assignedTo=${user?.uid}`, { headers });
+      const data = await response.json();
 
-      const ticketsData = await ticketsRes.json();
-      const metricsData = await metricsRes.json();
-
-      if (ticketsData.success) setTickets(ticketsData.tickets || []);
-      if (metricsData.success) setMetrics(metricsData.metrics);
+      if (data.success) {
+        setTickets(data.tickets || []);
+      }
       
       setError(null);
     } catch (err) {
@@ -103,7 +86,11 @@ export default function StaffPortal() {
   };
 
   const handleUpdateStatus = async (ticketId: string, status: string) => {
+    setSyncing(true);
     try {
+      // Optimistic update
+      setTickets(prev => prev.map(t => t.id === ticketId ? { ...t, status: status as any } : t));
+      
       const idToken = await user?.getIdToken();
       const response = await fetch(`/api/hotel/tickets/${ticketId}`, {
         method: 'PUT',
@@ -114,111 +101,14 @@ export default function StaffPortal() {
         body: JSON.stringify({ businessId, status }),
       });
 
-      if (response.ok) {
-        setTickets(tickets.map(t => t.id === ticketId ? { ...t, status: status as any } : t));
-        if (status === 'completed') {
-          setMetrics(prev => ({
-            ...prev,
-            completedToday: prev.completedToday + 1,
-            totalCompleted: prev.totalCompleted + 1,
-          }));
-        }
-      }
+      if (!response.ok) throw new Error('Failed to sync');
     } catch (err) {
       console.error('Error updating ticket:', err);
+      // Revert on error
+      fetchData();
+    } finally {
+      setSyncing(false);
     }
-  };
-
-  const renderTasks = () => {
-    const activeTickets = tickets.filter(t => t.status !== 'completed');
-    return (
-      <div className="space-y-4 pb-24">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">My Tasks</h2>
-          <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm font-bold">
-            {activeTickets.length} Active
-          </span>
-        </div>
-
-        {['urgent', 'normal', 'low'].map((priority) => {
-          const priorityTasks = activeTickets.filter(t => t.priority === priority);
-          if (priorityTasks.length === 0) return null;
-
-          return (
-            <div key={priority} className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2 flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${priority === 'urgent' ? 'bg-red-500' : priority === 'normal' ? 'bg-blue-500' : 'bg-slate-400'}`}></span>
-                {priority} Priority
-              </h3>
-              {priorityTasks.map((ticket) => (
-                <motion.div
-                  key={ticket.id}
-                  layout
-                  onClick={() => setExpandedTicket(expandedTicket === ticket.id ? null : ticket.id)}
-                  className={`bg-white dark:bg-slate-800 rounded-2xl p-4 border shadow-sm transition-all ${expandedTicket === ticket.id ? 'ring-2 ring-blue-500' : 'border-slate-100 dark:border-slate-700'}`}
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-slate-100 dark:bg-slate-700 w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg text-slate-900 dark:text-white">
-                        {ticket.guestRoom}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-tight">Room Number</p>
-                        <p className="text-xs text-slate-400">{new Date(ticket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                      </div>
-                    </div>
-                    <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase border ${priorityColors[ticket.priority]}`}>
-                      {ticket.status.replace('-', ' ')}
-                    </span>
-                  </div>
-                  
-                  <p className="text-slate-700 dark:text-slate-300 font-medium line-clamp-2 my-3">
-                    {ticket.requestText}
-                  </p>
-
-                  <AnimatePresence>
-                    {expandedTicket === ticket.id && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-4">
-                          <div className="grid grid-cols-3 gap-2">
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); handleUpdateStatus(ticket.id, 'in-progress'); }}
-                              className="flex flex-col items-center justify-center p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 transition-colors"
-                            >
-                              <FiPlay className="w-5 h-5 mb-1" />
-                              <span className="text-[10px] font-bold uppercase">Start</span>
-                            </button>
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); handleUpdateStatus(ticket.id, 'completed'); }}
-                              className="flex flex-col items-center justify-center p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 transition-colors"
-                            >
-                              <FiCheckCircle className="w-5 h-5 mb-1" />
-                              <span className="text-[10px] font-bold uppercase">Done</span>
-                            </button>
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); }}
-                              className="flex flex-col items-center justify-center p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 hover:bg-amber-100 transition-colors"
-                            >
-                              <FiMessageCircle className="w-5 h-5 mb-1" />
-                              <span className="text-[10px] font-bold uppercase">Chat</span>
-                            </button>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              ))}
-            </div>
-          );
-        })}
-      </div>
-    );
   };
 
   if (loading || authLoading) {
@@ -229,57 +119,196 @@ export default function StaffPortal() {
     );
   }
 
+  const activeTasks = tickets
+    .filter(t => t.status !== 'completed')
+    .sort((a, b) => {
+      const priorityOrder = { urgent: 0, normal: 1, low: 2 };
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    });
+
+  const completedToday = tickets.filter(t => {
+    const isCompleted = t.status === 'completed';
+    const isToday = new Date(t.createdAt).toDateString() === new Date().toDateString();
+    return isCompleted && isToday;
+  });
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col">
+      {/* Header */}
       <header className="px-6 py-4 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center sticky top-0 z-50">
         <div className="flex items-center gap-2">
           <LogoIcon className="w-8 h-8 text-blue-600" />
-          <span className="font-bold text-slate-900 dark:text-white">TalkServe</span>
         </div>
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Powered by TalkServe</span>
+        <h1 className="text-lg font-bold text-slate-900 dark:text-white">
+          {activeTab === 'tasks' ? 'My Tasks' : activeTab === 'completed' ? 'Completed' : 'Profile'}
+        </h1>
+        <div className="flex items-center gap-3">
+          <FiGlobe className="w-5 h-5 text-slate-400 cursor-pointer" />
+          <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+            <FiUser className="w-5 h-5" />
+          </div>
+        </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto px-6 pt-8 pb-32 max-w-md mx-auto w-full">
-        {activeTab === 'tasks' && renderTasks()}
-        {activeTab === 'performance' && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">My Performance</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700 text-center">
-                <p className="text-3xl font-bold text-blue-600 mb-1">{metrics.completedToday}</p>
-                <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Today</p>
+      {/* Sync Indicator */}
+      {syncing && (
+        <div className="bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest py-1 text-center animate-pulse">
+          Syncing changes...
+        </div>
+      )}
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto px-4 pt-6 pb-24 max-w-2xl mx-auto w-full">
+        <AnimatePresence mode="wait">
+          {activeTab === 'tasks' && (
+            <motion.div 
+              key="tasks"
+              initial={ { opacity: 0, y: 10 } }
+              animate={ { opacity: 1, y: 0 } }
+              exit={ { opacity: 0, y: -10 } }
+              className="space-y-4"
+            >
+              {activeTasks.length === 0 ? (
+                <div className="text-center py-20">
+                  <FiCheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-4 opacity-20" />
+                  <p className="text-slate-500 font-medium">All caught up!</p>
+                  <p className="text-xs text-slate-400 mt-1">New tasks will appear here.</p>
+                </div>
+              ) : (
+                activeTasks.map(task => (
+                  <div key={task.id} className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+                    <div className={`absolute top-0 left-0 w-1.5 h-full ${priorityColors[task.priority]}`} />
+                    
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl font-black text-slate-900 dark:text-white">#{task.guestRoom}</span>
+                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${priorityColors[task.priority]}`}>
+                          {task.priority}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px] uppercase tracking-wider">
+                        <FiClock /> {new Date(task.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    </div>
+
+                    <p className="text-slate-700 dark:text-slate-300 font-semibold text-lg leading-snug mb-6">
+                      {task.requestText}
+                    </p>
+
+                    <div className="flex gap-3">
+                      {task.status === 'in-progress' ? (
+                        <button 
+                          onClick={() => handleUpdateStatus(task.id, 'completed')}
+                          className="flex-1 bg-emerald-500 text-white py-4 rounded-xl font-black text-sm uppercase tracking-widest shadow-lg shadow-emerald-200 dark:shadow-none active:scale-95 transition-transform"
+                        >
+                          Mark Done
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={() => handleUpdateStatus(task.id, 'in-progress')}
+                          className="flex-1 bg-blue-600 text-white py-4 rounded-xl font-black text-sm uppercase tracking-widest shadow-lg shadow-blue-200 dark:shadow-none active:scale-95 transition-transform flex items-center justify-center gap-2"
+                        >
+                          <FiPlay className="fill-current" /> Start Task
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </motion.div>
+          )}
+
+          {activeTab === 'completed' && (
+            <motion.div 
+              key="completed"
+              initial={ { opacity: 0, y: 10 } }
+              animate={ { opacity: 1, y: 0 } }
+              exit={ { opacity: 0, y: -10 } }
+              className="space-y-4"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">Finished Today</h2>
+                <span className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-3 py-1 rounded-full text-xs font-black">
+                  {completedToday.length} Tasks
+                </span>
               </div>
-              <div className="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700 text-center">
-                <p className="text-3xl font-bold text-emerald-600 mb-1">{metrics.avgCompletionTime}m</p>
-                <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Avg Time</p>
+              {completedToday.map(task => (
+                <div key={task.id} className="bg-white/50 dark:bg-slate-800/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 flex items-center justify-between opacity-80">
+                  <div className="flex items-center gap-4">
+                    <span className="font-black text-slate-400">#{task.guestRoom}</span>
+                    <p className="text-slate-600 dark:text-slate-400 text-sm font-medium line-clamp-1">{task.requestText}</p>
+                  </div>
+                  <FiCheckCircle className="text-emerald-500 shrink-0" />
+                </div>
+              ))}
+              {completedToday.length === 0 && (
+                <div className="text-center py-20 text-slate-400 font-bold uppercase tracking-widest text-xs">
+                  No tasks completed yet today
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {activeTab === 'profile' && (
+            <motion.div 
+              key="profile"
+              initial={ { opacity: 0, y: 10 } }
+              animate={ { opacity: 1, y: 0 } }
+              exit={ { opacity: 0, y: -10 } }
+              className="space-y-6"
+            >
+              <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 text-center border border-slate-100 dark:border-slate-700 shadow-sm">
+                <div className="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center mx-auto mb-4 shadow-xl shadow-blue-200 dark:shadow-none">
+                  <span className="text-white text-3xl font-black">{user?.displayName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}</span>
+                </div>
+                <h2 className="text-xl font-black text-slate-900 dark:text-white">{user?.displayName || 'Staff Member'}</h2>
+                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">Staff • Housekeeping</p>
               </div>
-            </div>
-          </div>
-        )}
-        {activeTab === 'profile' && (
-          <div className="space-y-8 text-center">
-            <div className="w-24 h-24 bg-blue-100 dark:bg-blue-900/30 rounded-[2.5rem] flex items-center justify-center mx-auto mb-4 border-4 border-white dark:border-slate-800 shadow-xl">
-              <FiUser className="w-10 h-10 text-blue-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{user?.displayName || 'Staff Member'}</h2>
-            <p className="text-slate-500 text-sm">{user?.email}</p>
-            <Button onClick={() => logout()} className="w-full bg-red-50 text-red-600 hover:bg-red-100">Logout</Button>
-          </div>
-        )}
+
+              <div className="space-y-3">
+                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 flex items-center justify-between border border-slate-100 dark:border-slate-700">
+                  <div className="flex items-center gap-3">
+                    <FiBell className="text-blue-600" />
+                    <span className="font-bold text-slate-700 dark:text-slate-300">Push Notifications</span>
+                  </div>
+                  <div className="w-12 h-6 bg-blue-600 rounded-full relative">
+                    <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm" />
+                  </div>
+                </div>
+                <button 
+                  onClick={() => logout()}
+                  className="w-full bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 py-4 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2"
+                >
+                  <FiLogOut /> Logout
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-6 py-4 flex justify-between items-center z-50">
-        <button onClick={() => setActiveTab('tasks')} className={`flex flex-col items-center gap-1 ${activeTab === 'tasks' ? 'text-blue-600' : 'text-slate-400'}`}>
+      {/* Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-2 py-4 flex justify-around items-center z-50">
+        <button 
+          onClick={() => setActiveTab('tasks')}
+          className={`flex flex-col items-center gap-1 px-6 transition-colors ${activeTab === 'tasks' ? 'text-blue-600' : 'text-slate-400'}`}
+        >
           <FiClipboard className="w-6 h-6" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Tasks</span>
+          <span className="text-[10px] font-black uppercase tracking-tighter">My Tasks</span>
         </button>
-        <button onClick={() => setActiveTab('performance')} className={`flex flex-col items-center gap-1 ${activeTab === 'performance' ? 'text-blue-600' : 'text-slate-400'}`}>
-          <FiTrendingUp className="w-6 h-6" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Stats</span>
+        <button 
+          onClick={() => setActiveTab('completed')}
+          className={`flex flex-col items-center gap-1 px-6 transition-colors ${activeTab === 'completed' ? 'text-blue-600' : 'text-slate-400'}`}
+        >
+          <FiCheckCircle className="w-6 h-6" />
+          <span className="text-[10px] font-black uppercase tracking-tighter">Done</span>
         </button>
-        <button onClick={() => setActiveTab('profile')} className={`flex flex-col items-center gap-1 ${activeTab === 'profile' ? 'text-blue-600' : 'text-slate-400'}`}>
+        <button 
+          onClick={() => setActiveTab('profile')}
+          className={`flex flex-col items-center gap-1 px-6 transition-colors ${activeTab === 'profile' ? 'text-blue-600' : 'text-slate-400'}`}
+        >
           <FiUser className="w-6 h-6" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Me</span>
+          <span className="text-[10px] font-black uppercase tracking-tighter">Profile</span>
         </button>
       </nav>
     </div>

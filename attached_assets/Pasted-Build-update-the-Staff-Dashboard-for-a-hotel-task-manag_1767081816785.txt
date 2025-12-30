@@ -1,0 +1,147 @@
+Build / update the Staff Dashboard for a hotel task management system.
+This dashboard is used by staff on mobile and desktop web.
+Do NOT change authentication or business logic outside staff scope.
+
+Goal:
+Create a fast, distraction-free interface where staff can view and complete their assigned tasks with minimal interaction.
+
+========================
+ROLE RULES (STRICT)
+========================
+- Staff sees ONLY tasks assigned to them
+- Staff sees ONLY their own department
+- Staff CANNOT:
+  - Assign tasks
+  - Reassign tasks
+  - View other staff
+  - Access stats or admin pages
+  - Change task priority
+  - See business settings
+
+========================
+HEADER (KEEP SIMPLE)
+========================
+- Keep existing header style
+- Left: Logo
+- Center: "My Tasks"
+- Right: Profile + Logout
+- Optional: Language switch icon (🌐)
+
+========================
+MAIN SECTIONS
+========================
+1. My Tasks
+2. Completed (Today)
+3. Profile
+
+Mobile: Bottom navigation  
+Desktop: Top or side navigation
+
+========================
+1. MY TASKS (PRIMARY SCREEN)
+========================
+Show ONLY tasks assigned to the logged-in staff user.
+
+Each task item shows:
+- Room number
+- Task title / request
+- Priority (Urgent / Normal / Low with colors)
+- Status (Pending / In Progress)
+- Time assigned
+
+Sort order:
+1. Urgent
+2. Normal
+3. Low
+
+========================
+TASK INTERACTIONS (VERY IMPORTANT)
+========================
+NO long forms.
+
+Actions allowed:
+- Start task → status = In Progress
+- Mark task done → status = Completed
+- Message manager (optional)
+
+UX rules:
+- Mobile:
+  - Swipe right → Start task
+  - Swipe left → Mark Done
+  - Tap → expand with 2–3 big buttons
+- Desktop:
+  - Click → inline action buttons
+
+Max interactions:
+✅ 1–2 actions per task
+
+========================
+2. COMPLETED (TODAY)
+========================
+Show tasks completed by the staff today.
+
+Display:
+- Room number
+- Task title
+- Completion time
+
+Read-only.
+No editing allowed.
+
+========================
+3. PROFILE
+========================
+Staff can:
+- View name, role, department
+- Change language
+- Notification preferences
+- Logout
+
+Staff cannot:
+- Change department
+- Change role
+- View system settings
+
+========================
+OFFLINE SUPPORT (IMPORTANT)
+========================
+- Cache assigned tasks locally
+- Allow marking task done while offline
+- Show "Syncing..." indicator
+- Auto-sync when internet returns
+
+========================
+RESPONSIVE DESIGN RULES
+========================
+Mobile Web (Primary):
+- Single-column layout
+- Bottom navigation:
+  - Tasks
+  - Completed
+  - Profile
+- Large buttons (48px+)
+- Vertical scrolling only
+- Swipe gestures enabled
+
+Desktop Web:
+- Wider task list
+- Inline buttons instead of swipe
+- Same routes & logic
+
+========================
+UI STYLE RULES
+========================
+- No dashboards
+- No charts
+- No tables
+- No clutter
+- Minimal, clean, fast
+- Easy to use with one hand
+
+========================
+DELIVERABLE
+========================
+- Fully responsive Staff Dashboard
+- Staff-only data visibility
+- Fast task actions
+- Mobile-first UX
