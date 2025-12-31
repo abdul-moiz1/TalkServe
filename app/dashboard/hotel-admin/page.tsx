@@ -527,73 +527,34 @@ export default function HotelAdminPage() {
 
         {/* QR Codes Section */}
         {onboardingData && (
-          <div className="p-6 bg-gradient-to-r from-blue-50 to-slate-50 dark:from-blue-900/20 dark:to-slate-900/20 border-b border-blue-100 dark:border-blue-900/30">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Printable QR Codes</h3>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="px-6 py-8 bg-white dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-8">Printable QR Codes</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl">
               {/* Guest QR Code */}
-              <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-blue-100 dark:border-blue-900/30 flex flex-col items-center">
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Guest WhatsApp Contact</h4>
+              <div className="flex flex-col items-center">
                 <div 
                   id="guest-qr" 
-                  className="p-4 bg-white rounded-xl border border-slate-200 mb-4"
-                  ref={(el) => {
-                    if (el && !showGuestQR) {
-                      const guestWhatsappLink = `https://wa.me/1234567890?text=Hello`;
-                      // QR code will be rendered
-                    }
-                  }}
+                  className="flex flex-col items-center p-8 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 mb-6"
                 >
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">{onboardingData?.businessName || 'Hotel'}</p>
                   <QRCodeSVG 
                     value={`https://wa.me/923057358019`}
-                    size={200}
+                    size={180}
                     level="H"
                     includeMargin={true}
                   />
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-4 font-medium">Powered by TalkServe.ai</p>
                 </div>
-                <p className="text-xs text-slate-500 text-center mb-4">Guests scan to add hotel WhatsApp contact</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400 text-center mb-4 font-medium">Guest WhatsApp Contact</p>
                 <button
                   onClick={() => {
                     const qrElement = document.getElementById('guest-qr');
                     if (qrElement) {
-                      const printWindow = window.open('', '', 'width=600,height=600');
-                      if (printWindow) {
-                        printWindow.document.write(qrElement.innerHTML);
-                        printWindow.print();
-                      }
-                    }
-                  }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors"
-                >
-                  Print QR
-                </button>
-              </div>
-
-              {/* Staff/Manager QR Code with Branding */}
-              <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-emerald-100 dark:border-emerald-900/30 flex flex-col items-center">
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Staff/Manager Portal Access</h4>
-                <div 
-                  id="staff-qr"
-                  className="p-6 bg-white rounded-xl border border-slate-200 mb-4 flex flex-col items-center"
-                >
-                  <p className="text-xs font-bold text-slate-700 mb-3 text-center max-w-xs">{onboardingData?.businessName || 'Hotel'}</p>
-                  <QRCodeSVG 
-                    value={`${baseUrl}/auth/staff-login?email=staff@hotel.talkserve.ai`}
-                    size={200}
-                    level="H"
-                    includeMargin={true}
-                  />
-                  <p className="text-[10px] text-slate-600 mt-3 text-center font-semibold">Powered by TalkServe.ai</p>
-                </div>
-                <p className="text-xs text-slate-500 text-center mb-4">Staff/Managers scan to access portal</p>
-                <button
-                  onClick={() => {
-                    const qrElement = document.getElementById('staff-qr');
-                    if (qrElement) {
-                      const printWindow = window.open('', '', 'width=600,height=700');
+                      const printWindow = window.open('', '', 'width=500,height=600');
                       if (printWindow) {
                         printWindow.document.write(`
                           <html>
-                            <head><style>body { margin: 0; padding: 20px; text-align: center; font-family: Arial; }</style></head>
+                            <head><style>body { margin: 0; padding: 20px; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial; background: #fff; }</style></head>
                             <body>
                               ${qrElement.innerHTML}
                             </body>
@@ -603,9 +564,49 @@ export default function HotelAdminPage() {
                       }
                     }
                   }}
-                  className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm font-medium transition-colors"
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
                 >
-                  Print QR
+                  Print
+                </button>
+              </div>
+
+              {/* Staff/Manager QR Code */}
+              <div className="flex flex-col items-center">
+                <div 
+                  id="staff-qr"
+                  className="flex flex-col items-center p-8 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 mb-6"
+                >
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">{onboardingData?.businessName || 'Hotel'}</p>
+                  <QRCodeSVG 
+                    value={`${baseUrl}/auth/staff-login?email=staff@hotel.talkserve.ai`}
+                    size={180}
+                    level="H"
+                    includeMargin={true}
+                  />
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-4 font-medium">Powered by TalkServe.ai</p>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-400 text-center mb-4 font-medium">Staff/Manager Portal</p>
+                <button
+                  onClick={() => {
+                    const qrElement = document.getElementById('staff-qr');
+                    if (qrElement) {
+                      const printWindow = window.open('', '', 'width=500,height=600');
+                      if (printWindow) {
+                        printWindow.document.write(`
+                          <html>
+                            <head><style>body { margin: 0; padding: 20px; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial; background: #fff; }</style></head>
+                            <body>
+                              ${qrElement.innerHTML}
+                            </body>
+                          </html>
+                        `);
+                        printWindow.print();
+                      }
+                    }
+                  }}
+                  className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  Print
                 </button>
               </div>
             </div>
