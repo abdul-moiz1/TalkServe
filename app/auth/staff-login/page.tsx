@@ -23,8 +23,14 @@ function StaffLoginForm() {
     setLoading(true);
 
     try {
-      // Use phone number or email as provided
+      // Check if input is a phone number or email
       let loginIdentifier = email;
+      const digitsOnly = email.replace(/\D/g, '');
+      
+      // If input looks like a phone number (all digits, 10+ chars), convert to internal format
+      if (digitsOnly.length >= 10 && !email.includes('@')) {
+        loginIdentifier = `${digitsOnly}@hotel.local`;
+      }
 
       const userResult = await signIn(loginIdentifier, password);
       const idToken = await userResult.getIdToken();
