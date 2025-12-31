@@ -14,7 +14,8 @@ import {
   FiLoader,
   FiChevronRight,
   FiGlobe,
-  FiBell
+  FiBell,
+  FiAlertCircle
 } from 'react-icons/fi';
 import Button from '@/components/Button';
 import LogoIcon from '@/components/LogoIcon';
