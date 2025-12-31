@@ -39,7 +39,8 @@ export async function POST(request: NextRequest) {
 
     // Create user in Firebase Auth
     try {
-      const authEmail = email || formattedPhone;
+      // Generate valid email for Firebase Auth
+      const authEmail = email || `${phone?.replace(/\D/g, '')}@hotel.local`;
       
       const userRecord = await auth.createUser({
         email: authEmail,
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         account: {
-          email: email || formattedPhone,
+          email: email || phone,
           password: generatedPassword,
           uid: userRecord.uid
         }
