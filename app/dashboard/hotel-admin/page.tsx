@@ -80,28 +80,30 @@ export default function HotelAdminPage() {
         console.log('Onboarding check result:', result);
 
         if (result.success && result.exists && result.data?.industryType === 'hotel') {
-          setOnboardingData(result.data);
+          // Fetch auth-check to get business ID and business number
+          const authRes = await fetch('/api/auth-check', {
+            headers: { 'Authorization': `Bearer ${idToken}` },
+          });
+          const authData = await authRes.json();
           
-          // If we have onboarding but no businessId in URL, try to get it
+          const dataWithPhone = {
+            ...result.data,
+            business_number: authData.business_number || result.data.business_number,
+          };
+          
+          setOnboardingData(dataWithPhone);
+          console.log('Onboarding data with phone:', dataWithPhone);
+          
+          // If we have onboarding but no businessId in URL, try to get it from auth-check
           const urlParams = new URLSearchParams(window.location.search);
-          const bid = urlParams.get('businessId') || localStorage.getItem('currentBusinessId');
+          const bid = urlParams.get('businessId') || localStorage.getItem('currentBusinessId') || authData.businessId;
           
           if (bid) {
             setBusinessId(bid);
             fetchTeamMembers(bid);
           } else {
-            // Fetch business ID if not in URL/localStorage
-            const bizRes = await fetch('/api/auth-check', {
-              headers: { 'Authorization': `Bearer ${idToken}` },
-            });
-            const bizData = await bizRes.json();
-            if (bizData.businessId) {
-              setBusinessId(bizData.businessId);
-              fetchTeamMembers(bizData.businessId);
-            } else {
-              setError('No business found. Please complete onboarding.');
-              setLoading(false); // Stop main loading if error
-            }
+            setError('No business found. Please complete onboarding.');
+            setLoading(false);
           }
         } else {
           console.log('No hotel onboarding found');

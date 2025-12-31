@@ -15,6 +15,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Database not available' }, { status: 500 });
     }
 
+    // Get user document to retrieve business_number
+    const userDoc = await db.collection('users').doc(userId).get();
+    const userData = userDoc.exists ? userDoc.data() : {};
+
     // Check onboarding for hotel status
     const onboardingSnapshot = await db.collection('onboarding')
       .where('user_id', '==', userId)
@@ -33,7 +37,8 @@ export async function GET(request: NextRequest) {
           redirect: `/dashboard/hotel-admin?businessId=${businessSnapshot.docs[0].id}`,
           businessId: businessSnapshot.docs[0].id,
           role: 'admin',
-          industryType: 'hotel'
+          industryType: 'hotel',
+          business_number: userData.business_number || null
         });
       }
     }
