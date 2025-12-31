@@ -73,36 +73,36 @@ export default function StaffPortal() {
     }
 
     fetchData();
-    fetchStaffInfo();
   }, [user, authLoading, businessId]);
-
-  const fetchStaffInfo = async () => {
-    try {
-      const idToken = await user?.getIdToken();
-      const response = await fetch(`/api/hotel/team?businessId=${businessId}`, {
-        headers: { Authorization: `Bearer ${idToken}` }
-      });
-      const data = await response.json();
-      if (data.success && data.members) {
-        const info = data.members.find((m: any) => m.userId === user?.uid);
-        if (info) {
-          setStaffInfo(info);
-          if (info.status === 'inactive') {
-            setIsAccountSuspended(true);
-          }
-        }
-      }
-    } catch (err) {
-      console.error('Error fetching staff info:', err);
-    }
-  };
 
   const fetchData = async () => {
     try {
       const idToken = await user?.getIdToken();
       const headers = { Authorization: `Bearer ${idToken}` };
 
-      const response = await fetch(`/api/hotel/tickets?businessId=${businessId}&assignedTo=${user?.uid}&department=${staffInfo?.department || ''}`, { headers });
+      // First check staff info and status
+      const teamResponse = await fetch(`/api/hotel/team?businessId=${businessId}`, { headers });
+      const teamData = await teamResponse.json();
+      
+      let userDept = '';
+      if (teamData.success && teamData.members) {
+        const info = teamData.members.find((m: any) => m.userId === user?.uid);
+        if (info) {
+          setStaffInfo(info);
+          userDept = info.department || '';
+          console.log('Staff status:', info.status);
+          // Check if account is inactive
+          if (info.status === 'inactive') {
+            console.log('Account suspended detected');
+            setIsAccountSuspended(true);
+            setLoading(false);
+            return;
+          }
+        }
+      }
+
+      // If not suspended, fetch tickets
+      const response = await fetch(`/api/hotel/tickets?businessId=${businessId}&assignedTo=${user?.uid}&department=${userDept}`, { headers });
       const data = await response.json();
 
       if (data.success) {
@@ -146,7 +146,7 @@ export default function StaffPortal() {
     }
   };
 
-  if (isAccountSuspended) {
+  if (isAccountSuspended && !loading) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
         <div className="text-center max-w-md">
@@ -156,7 +156,9 @@ export default function StaffPortal() {
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-3">Account Suspended</h2>
           <p className="text-slate-600 dark:text-slate-300 mb-2">Your account has been suspended</p>
           <p className="text-slate-500 dark:text-slate-400 text-sm mb-8">Please contact your manager or administrator for more information.</p>
-          <Button onClick={() => logout()} className="bg-red-600 hover:bg-red-700 w-full">Logout</Button>
+          <button onClick={() => logout()} className="w-full px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl transition-colors">
+            Logout
+          </button>
         </div>
       </div>
     );

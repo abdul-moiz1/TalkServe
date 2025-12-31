@@ -89,7 +89,9 @@ export default function ManagerPortal() {
       let userDept = department;
       if (teamData.success) {
         const currentMember = (teamData.members || []).find((m: any) => m.userId === user?.uid);
+        console.log('Current member:', currentMember);
         if (currentMember?.status === 'inactive') {
+          console.log('Account is inactive, showing suspension message');
           setIsAccountSuspended(true);
           setLoading(false);
           return;
@@ -147,7 +149,7 @@ export default function ManagerPortal() {
     }
   };
 
-  if (isAccountSuspended) {
+  if (isAccountSuspended && !loading) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
         <div className="text-center max-w-md">
@@ -157,7 +159,9 @@ export default function ManagerPortal() {
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-3">Account Suspended</h2>
           <p className="text-slate-600 dark:text-slate-300 mb-2">Your account has been suspended</p>
           <p className="text-slate-500 dark:text-slate-400 text-sm mb-8">Please contact your administrator for more information.</p>
-          <Button onClick={async () => { await logout(); router.push('/auth/staff-login'); }} className="bg-red-600 hover:bg-red-700 w-full">Logout</Button>
+          <button onClick={async () => { await logout(); router.push('/auth/staff-login'); }} className="w-full px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl transition-colors">
+            Logout
+          </button>
         </div>
       </div>
     );
