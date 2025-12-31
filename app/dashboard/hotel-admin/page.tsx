@@ -652,7 +652,7 @@ export default function HotelAdminPage() {
               >
                 <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">{onboardingData?.businessName || 'Hotel'}</p>
                 <QRCodeSVG 
-                  value={`${baseUrl}/auth/staff-login?email=staff@hotel.talkserve.ai`}
+                  value={`${baseUrl}/auth/staff-login`}
                   size={200}
                   level="H"
                   includeMargin={true}

@@ -23,18 +23,8 @@ function StaffLoginForm() {
     setLoading(true);
 
     try {
-      // Standardize input for phone numbers if it looks like one
+      // Use phone number or email as provided
       let loginIdentifier = email;
-      const digitsOnly = email.replace(/\D/g, '');
-      if (digitsOnly.length >= 10 && !email.includes('@')) {
-        if (digitsOnly.startsWith('0')) {
-          loginIdentifier = '+92' + digitsOnly.slice(1) + '@hotel.talkserve.ai';
-        } else if (digitsOnly.startsWith('92')) {
-          loginIdentifier = '+' + digitsOnly + '@hotel.talkserve.ai';
-        } else {
-          loginIdentifier = '+92' + digitsOnly + '@hotel.talkserve.ai';
-        }
-      }
 
       const userResult = await signIn(loginIdentifier, password);
       const idToken = await userResult.getIdToken();
