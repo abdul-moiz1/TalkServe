@@ -265,6 +265,11 @@ export default function StaffPortal() {
                       <p className="text-slate-900 dark:text-white font-bold text-sm truncate">
                         {task.requestText}
                       </p>
+                      {task.assignedByName && (
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Assigned by <span className="font-bold text-blue-600 dark:text-blue-400">{task.assignedByName}</span>
+                        </p>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -315,9 +320,14 @@ export default function StaffPortal() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-slate-900 dark:text-white font-bold text-sm mb-1">{task.requestText}</p>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 mb-1">
                         <span className="text-[9px] font-black uppercase px-2.5 py-1 rounded-lg tracking-wider text-white bg-emerald-500 shadow-md">Completed</span>
                       </div>
+                      {task.assignedByName && (
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                          Assigned by <span className="font-bold text-blue-600 dark:text-blue-400">{task.assignedByName}</span>
+                        </p>
+                      )}
                     </div>
                     <FiCheckCircle className="text-emerald-500 w-6 h-6 shrink-0 mt-0.5" />
                   </div>
