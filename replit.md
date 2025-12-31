@@ -155,12 +155,13 @@ Located in `firestore.rules`:
 - Tickets: Role-based read/write access
 - Invites: Only business admins can create/read
 
-## Recent Changes (Turn 1-11)
+## Recent Changes (Turn 1-12)
 - Turn 1-3: Foundation setup with ExtendedAuthContext, invite system, admin/manager dashboards
 - Turn 4: Staff dashboard (mobile-optimized) + Onboarding "Hotel" option
 - Turn 5: Invite acceptance API + member creation in Firestore
 - Turn 6-8: Firestore security rules + email sending setup + final cleanup
 - Turn 9-11: Account suspension feature, simplified 4-6 digit passwords, branded TS#### business IDs, phone search, 2 printable QR codes for guests/staff with hotel branding
+- Turn 12: Multi-language support - English and Arabic with RTL layout detection
 
 ## Key Features Added
 - **Simplified Passwords**: 4-6 digit numeric format for user-friendly access (e.g., 123456)
@@ -171,6 +172,7 @@ Located in `firestore.rules`:
   - Guest WhatsApp contact QR with print functionality
   - Staff/Manager portal access QR with hotel name and "Powered by TalkServe.ai" branding
 - **Onboarding Form**: Limited to "Hotel" and "Construction" business types only
+- **Multi-Language Support**: English and Arabic with automatic RTL layout for Arabic text
 
 ## Build Status
 ✅ All 10 pages compile without errors
@@ -181,3 +183,4 @@ Located in `firestore.rules`:
 ✅ Responsive design verified
 ✅ Account suspension implemented
 ✅ Printable QR codes with branding added
+✅ Multi-language support with English and Arabic (RTL auto-detection)
