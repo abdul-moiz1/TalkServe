@@ -525,24 +525,23 @@ export default function HotelAdminPage() {
           </motion.form>
         )}
 
-        {/* QR Codes Section - Buttons Only */}
+        {/* QR Codes Floating Buttons - Top Right */}
         {onboardingData && (
-          <div className="px-6 py-6 bg-white dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Printable QR Codes</h3>
-            <div className="flex flex-wrap gap-4">
-              <button
-                onClick={() => setShowGuestQR(true)}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
-              >
-                Guest WhatsApp QR
-              </button>
-              <button
-                onClick={() => setShowStaffQR(true)}
-                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors"
-              >
-                Staff/Manager QR
-              </button>
-            </div>
+          <div className="fixed top-20 right-6 flex flex-col gap-2 z-40">
+            <button
+              onClick={() => setShowGuestQR(true)}
+              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition-colors shadow-lg"
+              title="Guest WhatsApp QR"
+            >
+              Guest QR
+            </button>
+            <button
+              onClick={() => setShowStaffQR(true)}
+              className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium transition-colors shadow-lg"
+              title="Staff/Manager QR"
+            >
+              Staff QR
+            </button>
           </div>
         )}
 
@@ -578,7 +577,7 @@ export default function HotelAdminPage() {
               >
                 <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">{onboardingData?.businessName || 'Hotel'}</p>
                 <QRCodeSVG 
-                  value={`https://wa.me/923057358019`}
+                  value={`https://wa.me/${onboardingData?.business_number?.replace('whatsapp:', '').replace('+', '') || '18575243646'}`}
                   size={200}
                   level="H"
                   includeMargin={true}
