@@ -109,7 +109,7 @@ export default function StaffPortal() {
       }
 
       // If not suspended, fetch tickets
-      const response = await fetch(`/api/hotel/tickets?businessId=${businessId}&assignedTo=${user?.uid}&department=${userDept}`, { headers });
+      const response = await fetch(`/api/hotel/tickets?businessId=${businessId}&department=${userDept}`, { headers });
       const data = await response.json();
 
       if (data.success) {
