@@ -39,6 +39,11 @@ export default function HotelAdminPage() {
   const [generatedAccount, setGeneratedAccount] = useState<{email: string; password: string; role: string} | null>(null);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [baseUrl, setBaseUrl] = useState('');
+  const [isEditingMember, setIsEditingMember] = useState(false);
+  const [editingRole, setEditingRole] = useState('');
+  const [editingDepartment, setEditingDepartment] = useState('');
+  const [editingStatus, setEditingStatus] = useState('');
+  const [isSavingMember, setIsSavingMember] = useState(false);
 
   const [onboardingData, setOnboardingData] = useState<any>(null);
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
@@ -128,6 +133,46 @@ export default function HotelAdminPage() {
       setError('Failed to load team members');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveMemberChanges = async () => {
+    if (!selectedMember || !businessId) return;
+    
+    setIsSavingMember(true);
+    try {
+      const idToken = await user?.getIdToken();
+      const response = await fetch(`/api/hotel/team/${selectedMember.id}?businessId=${businessId}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          role: editingRole,
+          department: editingDepartment || null,
+          status: editingStatus,
+        }),
+      });
+
+      if (response.ok) {
+        const updatedMember = {
+          ...selectedMember,
+          role: editingRole,
+          department: editingDepartment,
+          status: editingStatus,
+        };
+        setSelectedMember(updatedMember);
+        setIsEditingMember(false);
+        fetchTeamMembers(businessId);
+      } else {
+        alert('Failed to update member');
+      }
+    } catch (err) {
+      alert('An error occurred while updating member');
+      console.error(err);
+    } finally {
+      setIsSavingMember(false);
     }
   };
 
@@ -562,6 +607,8 @@ export default function HotelAdminPage() {
             </div>
 
             <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
+              {!isEditingMember ? (
+              <>
               {/* Credentials Section */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
@@ -625,9 +672,20 @@ export default function HotelAdminPage() {
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div>
                     <h4 className="text-sm font-bold text-slate-900 dark:text-white">Management Actions</h4>
-                    <p className="text-xs text-slate-500">Deactivate or permanently remove this member</p>
+                    <p className="text-xs text-slate-500">Edit details, deactivate, or remove this member</p>
                   </div>
                   <div className="flex gap-3 w-full sm:w-auto">
+                    <button 
+                      onClick={() => {
+                        setIsEditingMember(true);
+                        setEditingRole(selectedMember.role);
+                        setEditingDepartment(selectedMember.department || '');
+                        setEditingStatus(selectedMember.status);
+                      }}
+                      className="flex-1 sm:flex-none px-6 py-3 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-900/10 dark:hover:bg-blue-900/20 rounded-2xl text-sm font-bold transition-colors"
+                    >
+                      Edit Details
+                    </button>
                     <button 
                       onClick={async () => {
                         if (confirm('Are you sure you want to remove this team member? This action cannot be undone.')) {
@@ -648,13 +706,76 @@ export default function HotelAdminPage() {
                           }
                         }
                       }}
-                      className="flex-1 sm:flex-none px-6 py-3 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/10 dark:hover:bg-red-900/20 rounded-2xl text-sm font-bold transition-colors flex items-center justify-center gap-2"
+                      className="flex-1 sm:flex-none px-6 py-3 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/10 dark:hover:bg-red-900/20 rounded-2xl text-sm font-bold transition-colors"
                     >
                       Remove Member
                     </button>
                   </div>
                 </div>
               </div>
+              </>
+              ) : (
+              <div className="space-y-6">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Edit Member Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Role</label>
+                    <select 
+                      value={editingRole}
+                      onChange={(e) => setEditingRole(e.target.value)}
+                      className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                    >
+                      <option value="admin">Admin</option>
+                      <option value="manager">Manager</option>
+                      <option value="staff">Staff</option>
+                    </select>
+                  </div>
+                  {editingRole !== 'admin' && (
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Department</label>
+                      <select 
+                        value={editingDepartment}
+                        onChange={(e) => setEditingDepartment(e.target.value)}
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                      >
+                        {departments.map(dept => (
+                          <option key={dept} value={dept}>
+                            {dept.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Status</label>
+                    <select 
+                      value={editingStatus}
+                      onChange={(e) => setEditingStatus(e.target.value)}
+                      className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                    >
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button 
+                    onClick={handleSaveMemberChanges}
+                    disabled={isSavingMember}
+                    className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-2xl text-sm font-bold transition-colors"
+                  >
+                    {isSavingMember ? 'Saving...' : 'Save Changes'}
+                  </button>
+                  <button 
+                    onClick={() => setIsEditingMember(false)}
+                    disabled={isSavingMember}
+                    className="flex-1 px-6 py-3 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-2xl text-sm font-bold transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+              )}
             </div>
           </motion.div>
         </div>
