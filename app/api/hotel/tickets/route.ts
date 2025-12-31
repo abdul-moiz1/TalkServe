@@ -40,45 +40,47 @@ export async function GET(request: NextRequest) {
     const userRole = memberData?.role;
     const userDepartment = memberData?.department;
 
-    // Build query
-    let query = db
+    // Determine which department to filter by
+    const filterDept = department || userDepartment;
+
+    // Get all tickets for this business first
+    let ticketsRef = db
       .collection('businesses')
       .doc(businessId)
       .collection('tickets') as any;
 
-    // Filter by department if provided (Staff/Managers)
-    if (department) {
-      const deptNormalized = department.toLowerCase();
-      query = query.where('department', 'in', [
-        deptNormalized, 
-        department.charAt(0).toUpperCase() + department.slice(1).toLowerCase(), 
-        department
-      ]);
-    } else if (userRole === 'manager' && userDepartment) {
-      // Managers fallback if no department in query
-      const deptNormalized = userDepartment.toLowerCase();
-      query = query.where('department', 'in', [
-        deptNormalized, 
-        userDepartment.charAt(0).toUpperCase() + userDepartment.slice(1).toLowerCase(), 
-        userDepartment
-      ]);
-    }
-
-    // Filter by status if provided
-    if (status && status !== 'all') {
-      query = query.where('status', '==', status);
-    }
-
-    const snapshot = await query.get();
-
-    const tickets = snapshot.docs.map((doc: any) => ({
+    const snapshot = await ticketsRef.get();
+    
+    let tickets = snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
       createdAt: doc.data().createdAt?.toDate?.().toISOString() || doc.data().createdAt,
       updatedAt: doc.data().updatedAt?.toDate?.().toISOString() || doc.data().updatedAt,
     }));
 
-    // Sort manually if index is missing
+    // Filter tickets based on role and department
+    if (userRole === 'staff' && filterDept) {
+      // Staff see only their department tickets
+      const deptLower = filterDept.toLowerCase();
+      tickets = tickets.filter((t: any) => 
+        t.department && t.department.toLowerCase() === deptLower
+      );
+    } else if (userRole === 'manager') {
+      // Managers can filter by department if specified
+      if (filterDept) {
+        const deptLower = filterDept.toLowerCase();
+        tickets = tickets.filter((t: any) => 
+          t.department && t.department.toLowerCase() === deptLower
+        );
+      }
+    }
+
+    // Filter by status if provided
+    if (status && status !== 'all') {
+      tickets = tickets.filter((t: any) => t.status === status);
+    }
+
+    // Sort by date
     tickets.sort((a: any, b: any) => {
       const dateA = new Date(a.createdAt || 0).getTime();
       const dateB = new Date(b.createdAt || 0).getTime();
