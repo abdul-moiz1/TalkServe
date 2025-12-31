@@ -49,14 +49,32 @@ export async function GET(request: NextRequest) {
       .doc(businessId)
       .collection('tickets') as any;
 
+    // Get all members for name lookup
+    const membersSnapshot = await db
+      .collection('businesses')
+      .doc(businessId)
+      .collection('members')
+      .get();
+
+    const memberMap: Record<string, any> = {};
+    membersSnapshot.docs.forEach(doc => {
+      memberMap[doc.id] = doc.data();
+    });
+
     const snapshot = await ticketsRef.get();
     
-    let tickets = snapshot.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate?.().toISOString() || doc.data().createdAt,
-      updatedAt: doc.data().updatedAt?.toDate?.().toISOString() || doc.data().updatedAt,
-    }));
+    let tickets = snapshot.docs.map((doc: any) => {
+      const ticketData = doc.data();
+      const assigned = ticketData.assignedTo ? memberMap[ticketData.assignedTo] : null;
+      
+      return {
+        id: doc.id,
+        ...ticketData,
+        assignedStaffName: assigned?.fullName || assigned?.email || ticketData.assignedStaffName,
+        createdAt: ticketData.createdAt?.toDate?.().toISOString() || ticketData.createdAt,
+        updatedAt: ticketData.updatedAt?.toDate?.().toISOString() || ticketData.updatedAt,
+      };
+    });
 
     // Filter tickets based on role and department
     if (userRole === 'staff') {
