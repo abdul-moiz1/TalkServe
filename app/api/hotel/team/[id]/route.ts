@@ -22,7 +22,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { role, department, status } = body;
+    const { fullName, phone, role, department, status } = body;
 
     const db = getAdminDb();
     if (!db) {
@@ -30,6 +30,8 @@ export async function PUT(
     }
 
     const updateData: any = {};
+    if (fullName !== undefined) updateData.fullName = fullName;
+    if (phone !== undefined) updateData.phone = phone;
     if (role !== undefined) updateData.role = role;
     if (department !== undefined) updateData.department = department;
     if (status !== undefined) updateData.status = status;

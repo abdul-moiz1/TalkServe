@@ -40,6 +40,8 @@ export default function HotelAdminPage() {
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [baseUrl, setBaseUrl] = useState('');
   const [isEditingMember, setIsEditingMember] = useState(false);
+  const [editingName, setEditingName] = useState('');
+  const [editingPhone, setEditingPhone] = useState('');
   const [editingRole, setEditingRole] = useState('');
   const [editingDepartment, setEditingDepartment] = useState('');
   const [editingStatus, setEditingStatus] = useState('');
@@ -149,6 +151,8 @@ export default function HotelAdminPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          fullName: editingName,
+          phone: editingPhone,
           role: editingRole,
           department: editingDepartment || null,
           status: editingStatus,
@@ -158,6 +162,8 @@ export default function HotelAdminPage() {
       if (response.ok) {
         const updatedMember = {
           ...selectedMember,
+          fullName: editingName,
+          phone: editingPhone,
           role: editingRole,
           department: editingDepartment,
           status: editingStatus,
@@ -594,8 +600,8 @@ export default function HotelAdminPage() {
                   <FiUser className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{selectedMember.fullName}</h3>
-                  <p className="text-slate-500 text-sm capitalize">{selectedMember.role} • {selectedMember.department?.replace('-', ' ')}</p>
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{isEditingMember ? editingName : selectedMember.fullName}</h3>
+                  <p className="text-slate-500 text-sm capitalize">{isEditingMember ? editingRole : selectedMember.role} • {isEditingMember ? editingDepartment?.replace('-', ' ') || 'No Department' : selectedMember.department?.replace('-', ' ')}</p>
                 </div>
               </div>
               <button 
@@ -678,6 +684,8 @@ export default function HotelAdminPage() {
                     <button 
                       onClick={() => {
                         setIsEditingMember(true);
+                        setEditingName(selectedMember.fullName || '');
+                        setEditingPhone(selectedMember.phone || '');
                         setEditingRole(selectedMember.role);
                         setEditingDepartment(selectedMember.department || '');
                         setEditingStatus(selectedMember.status);
@@ -718,6 +726,26 @@ export default function HotelAdminPage() {
               <div className="space-y-6">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">Edit Member Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Full Name</label>
+                    <input 
+                      type="text"
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      placeholder="John Doe"
+                      className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Phone Number</label>
+                    <input 
+                      type="tel"
+                      value={editingPhone}
+                      onChange={(e) => setEditingPhone(e.target.value)}
+                      placeholder="+92 3107320707"
+                      className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                    />
+                  </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Role</label>
                     <select 
