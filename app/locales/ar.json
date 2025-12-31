@@ -5,11 +5,20 @@
     "arabic": "العربية"
   },
   "navigation": {
-    "home": "الرئيسية",
-    "dashboard": "لوحة التحكم",
+    "industries": "الصناعات",
+    "dentalClinics": "عيادات الأسنان",
+    "restaurants": "المطاعم",
+    "serviceBusinesses": "الشركات الخدمية",
+    "features": "المميزات",
+    "pricing": "التسعير",
+    "security": "الأمان",
+    "contact": "اتصل بنا",
     "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "dashboard": "لوحة التحكم",
     "logout": "تسجيل الخروج",
-    "settings": "الإعدادات"
+    "settings": "الإعدادات",
+    "poweredBy": "مشغل بواسطة TalkServe"
   },
   "auth": {
     "staffLogin": "تسجيل دخول الموظف",

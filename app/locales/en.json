@@ -5,11 +5,20 @@
     "arabic": "العربية"
   },
   "navigation": {
-    "home": "Home",
-    "dashboard": "Dashboard",
+    "industries": "Industries",
+    "dentalClinics": "Dental Clinics",
+    "restaurants": "Restaurants",
+    "serviceBusinesses": "Service Businesses",
+    "features": "Features",
+    "pricing": "Pricing",
+    "security": "Security",
+    "contact": "Contact",
     "login": "Login",
+    "register": "Register",
+    "dashboard": "Dashboard",
     "logout": "Logout",
-    "settings": "Settings"
+    "settings": "Settings",
+    "poweredBy": "Powered by TalkServe"
   },
   "auth": {
     "staffLogin": "Staff Login",

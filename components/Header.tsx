@@ -9,22 +9,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import UserProfile from './auth/UserProfile';
 import LogoIcon from './LogoIcon';
 import LanguageSwitcher from './LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
-
-const navigation = [
-  { 
-    name: 'Industries', 
-    items: [
-      { name: 'Dental Clinics', href: '/dental' },
-      { name: 'Restaurants', href: '/restaurants' },
-      { name: 'Service Businesses', href: '/services' },
-    ]
-  },
-  { name: 'Features', href: '/features' },
-  { name: 'Pricing', href: '/pricing' },
-  { name: 'Security', href: '/security' },
-  { name: 'Contact', href: '/contact' },
-];
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -34,6 +20,22 @@ export default function Header() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
   const { user, loading } = useAuth();
+  const { t } = useTranslation();
+
+  const navigation = [
+    { 
+      name: t('navigation.industries'), 
+      items: [
+        { name: t('navigation.dentalClinics'), href: '/dental' },
+        { name: t('navigation.restaurants'), href: '/restaurants' },
+        { name: t('navigation.serviceBusinesses'), href: '/services' },
+      ]
+    },
+    { name: t('navigation.features'), href: '/features' },
+    { name: t('navigation.pricing'), href: '/pricing' },
+    { name: t('navigation.security'), href: '/security' },
+    { name: t('navigation.contact'), href: '/contact' },
+  ];
 
   const isDashboard = pathname?.startsWith('/dashboard');
   const isHotelPortal = pathname?.includes('/hotel/manager') || pathname?.includes('/hotel/staff');
@@ -70,7 +72,7 @@ export default function Header() {
             </div>
             <div className="flex items-center gap-4">
               <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                Powered by TalkServe
+                {t('navigation.poweredBy')}
               </span>
               <LanguageSwitcher />
               <button
@@ -181,14 +183,14 @@ export default function Header() {
                   href="/signin"
                   className="hidden md:inline-flex items-center px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors"
                 >
-                  Login
+                  {t('navigation.login')}
                 </Link>
 
                 <Link
                   href="/signup"
                   className="hidden md:inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  Register
+                  {t('navigation.register')}
                 </Link>
               </>
             )}
