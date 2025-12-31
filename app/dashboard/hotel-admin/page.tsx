@@ -527,7 +527,7 @@ export default function HotelAdminPage() {
 
         {/* QR Codes Floating Buttons - Top Right */}
         {onboardingData && (
-          <div className="fixed top-20 right-6 flex flex-col gap-3 z-40">
+          <div className="fixed top-20 right-6 flex flex-row gap-3 z-40">
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
@@ -605,7 +605,11 @@ export default function HotelAdminPage() {
                           </body>
                         </html>
                       `);
-                      printWindow.print();
+                      printWindow.document.close();
+                      setTimeout(() => {
+                        printWindow.print();
+                        printWindow.close();
+                      }, 250);
                     }
                   }
                 }}
@@ -671,7 +675,11 @@ export default function HotelAdminPage() {
                           </body>
                         </html>
                       `);
-                      printWindow.print();
+                      printWindow.document.close();
+                      setTimeout(() => {
+                        printWindow.print();
+                        printWindow.close();
+                      }, 250);
                     }
                   }
                 }}
