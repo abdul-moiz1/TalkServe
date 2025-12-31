@@ -2,7 +2,9 @@
   "common": {
     "language": "Language",
     "english": "English",
-    "arabic": "العربية"
+    "arabic": "العربية",
+    "talkToUs": "Talk to Us",
+    "learnMore": "Learn More"
   },
   "navigation": {
     "industries": "Industries",
@@ -19,6 +21,47 @@
     "logout": "Logout",
     "settings": "Settings",
     "poweredBy": "Powered by TalkServe"
+  },
+  "hero": {
+    "title": "Never Miss Another Customer —",
+    "highlighted": "On Voice, SMS, or WhatsApp",
+    "description": "TalkServe's AI receptionist responds instantly across calls, texts, and WhatsApp. It books appointments or orders, answers questions, and follows up — 24/7. Trusted by healthcare clinics, restaurants, and service businesses across North America.",
+    "coverage24": "24/7 coverage",
+    "worksSystems": "Works with your systems"
+  },
+  "meetTalkServe": {
+    "title": "Meet TalkServe",
+    "subtitle": "Your AI receptionist for Voice, SMS & WhatsApp — available 24/7.",
+    "feature1": "Answers instantly — no hold music, no voicemail, no missed texts or WhatsApp messages.",
+    "feature2": "Books & takes orders — syncs with your calendar, booking app, or POS across all channels.",
+    "feature3": "Handles FAQs — services, hours, prices, menus, directions — by call, SMS, or WhatsApp.",
+    "feature4": "Confirms & reminds — automated SMS/WhatsApp reminders cut no-shows and missed appointments.",
+    "feature5": "Routes priority cases — urgent calls or messages go directly to your team.",
+    "feature6": "Works 24/7/365 — peak hours, weekends, holidays, and after-hours coverage."
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "step1Title": "Connect your channels",
+    "step1Desc": "Forward your phone number and link your SMS & WhatsApp Business accounts to TalkServe.",
+    "step2Title": "Train your agent",
+    "step2Desc": "We customize its voice, responses, menu, and knowledge base for calls, texts, and WhatsApp chats.",
+    "step3Title": "Go live",
+    "step3Desc": "Start handling real calls, SMS, and WhatsApp messages within one business day."
+  },
+  "features": {
+    "title": "Features at a Glance",
+    "voiceConversation": "Voice & Conversation",
+    "voiceChannel": "(Voice channel — optional)",
+    "callManagement": "Call Management",
+    "scheduling": "Scheduling & Booking",
+    "communication": "Customer Communication",
+    "textChannel": "(SMS & WhatsApp)",
+    "integrations": "Integrations"
+  },
+  "contact": {
+    "title": "Let's talk about your",
+    "highlighted": "calls, texts & WhatsApp",
+    "description": "Have questions? Want a demo? Our team is here to help you explore the best way to use TalkServe for your business."
   },
   "auth": {
     "staffLogin": "Staff Login",

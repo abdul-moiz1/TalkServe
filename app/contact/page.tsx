@@ -4,10 +4,12 @@ import HeroSection from '@/components/HeroSection';
 import { HiPhone } from 'react-icons/hi';
 import { IoLogoWhatsapp } from 'react-icons/io';
 import { useVoiceAgent } from '@/components/VoiceAgentContext';
+import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
 
 export default function ContactPage() {
   const { openDialog } = useVoiceAgent();
+  const { t } = useTranslation();
   const phoneNumber = '+18575243646';
   const message = 'hello';
   const whatsappUrl = `https://wa.me/${phoneNumber.replace('+', '')}?text=${encodeURIComponent(message)}`;
@@ -16,9 +18,9 @@ export default function ContactPage() {
   return (
     <>
       <HeroSection
-        title="Let's talk about your"
-        highlightedText="calls, texts & WhatsApp"
-        description="Have questions? Want a demo? Our team is here to help you explore the best way to use TalkServe for your business."
+        title={t('contact.title')}
+        highlightedText={t('contact.highlighted')}
+        description={t('contact.description')}
         imagePath="/images/heroes/Customer_service_communication_3a46d4c0.png"
         imageAlt="Customer service communication"
       >
@@ -28,7 +30,7 @@ export default function ContactPage() {
             className="inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-medium text-white bg-primary rounded-lg hover:bg-blue-700 transition-all duration-250 hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/30"
           >
             <HiPhone className="h-5 w-5" />
-            Talk to Us
+            {t('common.talkToUs')}
           </button>
         </div>
       </HeroSection>

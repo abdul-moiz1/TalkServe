@@ -4,28 +4,30 @@ import AnimatedSection from '@/components/AnimatedSection';
 import Button from '@/components/Button';
 import { HiCheckCircle, HiPhone } from 'react-icons/hi';
 import { useVoiceAgent } from '@/components/VoiceAgentContext';
-
-const features = [
-  'Answers instantly — no hold music, no voicemail, no missed texts or WhatsApp messages.',
-  'Books & takes orders — syncs with your calendar, booking app, or POS across all channels.',
-  'Handles FAQs — services, hours, prices, menus, directions — by call, SMS, or WhatsApp.',
-  'Confirms & reminds — automated SMS/WhatsApp reminders cut no-shows and missed appointments.',
-  'Routes priority cases — urgent calls or messages go directly to your team.',
-  'Works 24/7/365 — peak hours, weekends, holidays, and after-hours coverage.',
-];
+import { useTranslation } from 'react-i18next';
 
 export default function MeetTalkServe() {
   const { openDialog } = useVoiceAgent();
+  const { t } = useTranslation();
+
+  const features = [
+    t('meetTalkServe.feature1'),
+    t('meetTalkServe.feature2'),
+    t('meetTalkServe.feature3'),
+    t('meetTalkServe.feature4'),
+    t('meetTalkServe.feature5'),
+    t('meetTalkServe.feature6'),
+  ];
   
   return (
     <section className="py-20 bg-slate-50 dark:bg-slate-900">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <AnimatedSection className="text-center mb-16">
           <h2 className="text-3xl font-display font-bold text-slate-900 dark:text-white mb-4">
-            Meet TalkServe
+            {t('meetTalkServe.title')}
           </h2>
           <p className="text-xl text-slate-600 dark:text-slate-300">
-            Your AI receptionist for Voice, SMS & WhatsApp — available 24/7.
+            {t('meetTalkServe.subtitle')}
           </p>
         </AnimatedSection>
 
@@ -43,7 +45,7 @@ export default function MeetTalkServe() {
         <AnimatedSection delay={0.6} className="text-center">
           <Button onClick={openDialog} variant="primary" size="lg" className="gap-2">
             <HiPhone className="h-5 w-5" />
-            Talk to Us
+            {t('common.talkToUs')}
           </Button>
         </AnimatedSection>
       </div>
