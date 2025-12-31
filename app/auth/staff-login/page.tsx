@@ -24,12 +24,16 @@ function StaffLoginForm() {
 
     try {
       // Check if input is a phone number or email
-      let loginIdentifier = email;
-      const digitsOnly = email.replace(/\D/g, '');
+      let loginIdentifier = email.trim();
       
-      // If input looks like a phone number (all digits, 10+ chars), convert to internal format
-      if (digitsOnly.length >= 10 && !email.includes('@')) {
-        loginIdentifier = `${digitsOnly}@hotel.local`;
+      // If it doesn't contain @, it's a phone number - convert to internal format
+      if (!loginIdentifier.includes('@')) {
+        // Extract only digits for consistent phone format
+        const digitsOnly = loginIdentifier.replace(/\D/g, '');
+        // If we have phone digits, use them with @hotel.local
+        if (digitsOnly.length >= 10) {
+          loginIdentifier = `${digitsOnly}@hotel.local`;
+        }
       }
 
       const userResult = await signIn(loginIdentifier, password);
