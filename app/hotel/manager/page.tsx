@@ -142,7 +142,13 @@ export default function ManagerPortal() {
       });
 
       if (response.ok) {
-        fetchData(); // Refresh list
+        const data = await response.json();
+        // Update selectedTicket with new data
+        if (data.success && data.ticket) {
+          setSelectedTicket(data.ticket);
+        }
+        // Refresh the full list
+        fetchData();
       }
     } catch (err) {
       console.error('Error updating ticket:', err);
