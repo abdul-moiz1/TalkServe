@@ -11,9 +11,8 @@ export default function I18nProvider({ children }: { children: ReactNode }) {
       i18n.init();
     }
     
-    // Set initial direction based on language
+    // Set language attribute
     const currentLang = i18n.language || localStorage.getItem('i18nextLng') || 'en';
-    document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = currentLang;
   }, []);
 
