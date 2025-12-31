@@ -666,13 +666,6 @@ function TicketDetails({ ticket, onClose, onUpdateStatus, team }: {
             ))}
           </select>
         </div>
-
-        <div>
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Communication</label>
-          <button className="w-full flex items-center justify-center gap-2 py-3 border-2 border-slate-100 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors">
-            <FiMessageSquare /> Message Staff
-          </button>
-        </div>
       </div>
       
       <button 
