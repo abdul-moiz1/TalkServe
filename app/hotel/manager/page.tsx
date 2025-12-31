@@ -640,20 +640,17 @@ function TicketDetails({ ticket, onClose, onUpdateStatus, team }: {
         </div>
 
         <div>
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Actions</label>
-          <div className="grid grid-cols-2 gap-3">
-            <button 
-              onClick={() => onUpdateStatus(ticket.id, 'in-progress')}
-              className="py-3 px-4 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-200 dark:shadow-none"
+          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Status</label>
+          <div className="flex gap-2">
+            <select 
+              onChange={(e) => onUpdateStatus(ticket.id, e.target.value)}
+              defaultValue={ticket.status}
+              className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-medium"
             >
-              Start Task
-            </button>
-            <button 
-              onClick={() => onUpdateStatus(ticket.id, 'completed')}
-              className="py-3 px-4 bg-emerald-500 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-200 dark:shadow-none"
-            >
-              Complete
-            </button>
+              <option value="created">New</option>
+              <option value="in-progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
           </div>
         </div>
 

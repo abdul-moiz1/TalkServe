@@ -241,64 +241,50 @@ export default function StaffPortal() {
                     initial={ { opacity: 0, y: 10 } }
                     animate={ { opacity: 1, y: 0 } }
                     transition={ { type: 'spring', stiffness: 300, damping: 30 } }
-                    className="group bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all relative overflow-hidden"
+                    className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all flex items-center gap-3 group"
                   >
-                    <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 bg-white dark:bg-slate-700 rounded-2xl flex items-center justify-center border border-slate-200 dark:border-slate-600 shrink-0 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:border-blue-300 dark:group-hover:border-blue-500 transition-colors shadow-sm">
-                        <span className="text-xl font-black text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">#{task.guestRoom}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-lg tracking-wider ${
-                            task.priority === 'urgent' ? 'bg-red-500 text-white shadow-lg shadow-red-200 dark:shadow-none' : 'bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200'
-                          }`}>
-                            {task.priority}
-                          </span>
-                          <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-lg tracking-wider text-white ${statusColors[task.status]} shadow-md`}>
-                            {statusLabels[task.status]}
-                          </span>
-                        </div>
-                        <p className="text-slate-900 dark:text-white font-bold text-sm leading-snug mb-2">
-                          {task.requestText}
-                        </p>
-                        {task.assignedByName && (
-                          <div className="mt-2 flex items-center gap-1">
-                            <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Assigned by</span>
-                            <span className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest italic">{task.assignedByName}</span>
-                          </div>
-                        )}
-                      </div>
+                    <div className={`w-1 h-10 rounded-full ${
+                      task.priority === 'urgent' ? 'bg-red-500' : 'bg-blue-500'
+                    }`} />
+                    
+                    <div className="w-10 h-10 bg-slate-900 dark:bg-white rounded-lg flex-shrink-0 flex items-center justify-center shadow-sm">
+                      <span className="text-sm font-black text-white dark:text-slate-900">#{task.guestRoom}</span>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="mt-4 flex items-center gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded tracking-tighter ${
+                          task.priority === 'urgent' ? 'bg-red-500/10 text-red-600' : 'bg-blue-500/10 text-blue-600'
+                        }`}>
+                          {task.priority}
+                        </span>
+                        <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded tracking-tighter text-white ${statusColors[task.status]}`}>
+                          {statusLabels[task.status]}
+                        </span>
+                      </div>
+                      <p className="text-slate-900 dark:text-white font-bold text-sm truncate">
+                        {task.requestText}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
                       {task.status === 'created' && (
-                        <>
-                          <button
-                            onClick={() => handleUpdateStatus(task.id, 'in-progress')}
-                            className="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm py-2.5 px-3 rounded-xl transition-all duration-200 transform active:scale-95 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
-                          >
-                            <FiPlay className="w-4 h-4" />
-                            Start
-                          </button>
-                        </>
+                        <button
+                          onClick={() => handleUpdateStatus(task.id, 'in-progress')}
+                          className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs py-1.5 px-2.5 rounded-lg transition-all active:scale-95 shadow-sm"
+                          title="Start task"
+                        >
+                          Start
+                        </button>
                       )}
                       {task.status === 'in-progress' && (
-                        <>
-                          <button
-                            onClick={() => handleUpdateStatus(task.id, 'completed')}
-                            className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm py-2.5 px-3 rounded-xl transition-all duration-200 transform active:scale-95 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
-                          >
-                            <FiCheckCircle className="w-4 h-4" />
-                            Complete
-                          </button>
-                          <button
-                            onClick={() => handleUpdateStatus(task.id, 'created')}
-                            className="flex-1 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-500 text-slate-700 dark:text-white font-bold text-sm py-2.5 px-3 rounded-xl transition-all duration-200 transform active:scale-95 shadow-md"
-                          >
-                            Reset
-                          </button>
-                        </>
+                        <button
+                          onClick={() => handleUpdateStatus(task.id, 'completed')}
+                          className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs py-1.5 px-2.5 rounded-lg transition-all active:scale-95 shadow-sm"
+                          title="Mark complete"
+                        >
+                          Done
+                        </button>
                       )}
                     </div>
                   </motion.div>
