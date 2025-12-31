@@ -52,6 +52,7 @@ function StaffLoginForm() {
         console.log('Phones to try:', phonesToTry);
         
         // Try each format
+        let loginSuccess = false;
         for (const phone of phonesToTry) {
           try {
             console.log('Attempting login with:', phone);
@@ -70,15 +71,22 @@ function StaffLoginForm() {
             } else {
               window.location.href = '/dashboard';
             }
-            return; // Success, exit
+            loginSuccess = true;
+            break; // Success, exit loop
           } catch (err) {
             lastError = err;
             console.log('Failed with:', phone, err);
           }
         }
         
-        // If all formats failed, throw the last error
-        throw lastError;
+        // If all formats failed, throw an error
+        if (!loginSuccess) {
+          if (lastError instanceof Error) {
+            throw lastError;
+          } else {
+            throw new Error('Invalid credentials');
+          }
+        }
       } else {
         // Email format - use as provided
         console.log('Email input detected:', loginInput);
