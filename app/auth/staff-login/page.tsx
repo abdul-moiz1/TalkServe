@@ -23,35 +23,83 @@ function StaffLoginForm() {
     setLoading(true);
 
     try {
-      // Check if input is a phone number or email
-      let loginIdentifier = email.trim();
+      // Get the input value
+      let loginInput = email.trim();
+      let loginIdentifier = loginInput;
+      let lastError: any = null;
       
-      // If it doesn't contain @, it's a phone number - convert to internal format
-      if (!loginIdentifier.includes('@')) {
+      // If input doesn't contain @, treat it as a phone number and try multiple formats
+      if (!loginInput.includes('@')) {
         // Extract only digits for consistent phone format
-        const digitsOnly = loginIdentifier.replace(/\D/g, '');
-        // If we have phone digits, use them with @hotel.local
-        if (digitsOnly.length >= 10) {
-          loginIdentifier = `${digitsOnly}@hotel.local`;
+        const digitsOnly = loginInput.replace(/\D/g, '');
+        console.log('Phone input detected:', loginInput, '-> digits:', digitsOnly);
+        
+        // Try multiple phone formats in case account was created differently
+        const phonesToTry = [
+          `${digitsOnly}@hotel.local`,  // Direct digits
+        ];
+        
+        // If it starts with 0, also try with 92 prefix
+        if (digitsOnly.startsWith('0') && digitsOnly.length === 11) {
+          phonesToTry.push(`92${digitsOnly.slice(1)}@hotel.local`);
+        }
+        
+        // If it starts with 92, also try with leading 0
+        if (digitsOnly.startsWith('92') && digitsOnly.length === 12) {
+          phonesToTry.push(`0${digitsOnly.slice(2)}@hotel.local`);
+        }
+        
+        console.log('Phones to try:', phonesToTry);
+        
+        // Try each format
+        for (const phone of phonesToTry) {
+          try {
+            console.log('Attempting login with:', phone);
+            const userResult = await signIn(phone, password);
+            const idToken = await userResult.getIdToken();
+            const response = await fetch('/api/auth-check', {
+              headers: { Authorization: `Bearer ${idToken}` }
+            });
+            const data = await response.json();
+            
+            if (data.redirect) {
+              if (data.businessId) localStorage.setItem('currentBusinessId', data.businessId);
+              if (data.role) localStorage.setItem('userRole', data.role);
+              if (data.department) localStorage.setItem('userDepartment', data.department);
+              window.location.href = data.redirect;
+            } else {
+              window.location.href = '/dashboard';
+            }
+            return; // Success, exit
+          } catch (err) {
+            lastError = err;
+            console.log('Failed with:', phone, err);
+          }
+        }
+        
+        // If all formats failed, throw the last error
+        throw lastError;
+      } else {
+        // Email format - use as provided
+        console.log('Email input detected:', loginInput);
+        const userResult = await signIn(loginIdentifier, password);
+        const idToken = await userResult.getIdToken();
+        const response = await fetch('/api/auth-check', {
+          headers: { Authorization: `Bearer ${idToken}` }
+        });
+        const data = await response.json();
+        
+        if (data.redirect) {
+          if (data.businessId) localStorage.setItem('currentBusinessId', data.businessId);
+          if (data.role) localStorage.setItem('userRole', data.role);
+          if (data.department) localStorage.setItem('userDepartment', data.department);
+          window.location.href = data.redirect;
+        } else {
+          window.location.href = '/dashboard';
         }
       }
-
-      const userResult = await signIn(loginIdentifier, password);
-      const idToken = await userResult.getIdToken();
-      const response = await fetch('/api/auth-check', {
-        headers: { Authorization: `Bearer ${idToken}` }
-      });
-      const data = await response.json();
-      
-      if (data.redirect) {
-        if (data.businessId) localStorage.setItem('currentBusinessId', data.businessId);
-        if (data.role) localStorage.setItem('userRole', data.role);
-        if (data.department) localStorage.setItem('userDepartment', data.department);
-        window.location.href = data.redirect;
-      } else {
-        window.location.href = '/dashboard';
-      }
     } catch (err: any) {
+      console.error('Login error:', err);
       setError('Invalid ID or password. Please contact your manager.');
     } finally {
       setLoading(false);
