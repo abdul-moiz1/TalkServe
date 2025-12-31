@@ -8,6 +8,7 @@ import { useTheme } from './DarkModeProvider';
 import { useAuth } from '@/contexts/AuthContext';
 import UserProfile from './auth/UserProfile';
 import LogoIcon from './LogoIcon';
+import LanguageSwitcher from './LanguageSwitcher';
 import clsx from 'clsx';
 
 const navigation = [
@@ -71,6 +72,7 @@ export default function Header() {
               <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                 Powered by TalkServe
               </span>
+              <LanguageSwitcher />
               <button
                 onClick={toggleTheme}
                 className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -154,6 +156,7 @@ export default function Header() {
           </div>
 
           <div className="flex items-center gap-4">
+            <LanguageSwitcher />
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"

@@ -1,0 +1,51 @@
+{
+  "common": {
+    "language": "Language",
+    "english": "English",
+    "arabic": "العربية"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "logout": "Logout",
+    "settings": "Settings"
+  },
+  "auth": {
+    "staffLogin": "Staff Login",
+    "managerLogin": "Manager Login",
+    "phoneNumber": "Phone Number",
+    "password": "Password",
+    "signIn": "Sign In",
+    "forgotPassword": "Forgot Password?",
+    "resetPassword": "Reset Password",
+    "enterPhone": "Enter your phone number",
+    "enterPassword": "Enter your password"
+  },
+  "dashboard": {
+    "adminDashboard": "Admin Dashboard",
+    "teamManagement": "Team Management",
+    "staffMembers": "Staff Members",
+    "addMember": "Add Team Member",
+    "editMember": "Edit Member",
+    "deleteMember": "Delete Member",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "role": "Role",
+    "department": "Department",
+    "actions": "Actions",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "search": "Search"
+  },
+  "messages": {
+    "welcome": "Welcome to TalkServe",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "success": "Success!",
+    "noResults": "No results found"
+  }
+}

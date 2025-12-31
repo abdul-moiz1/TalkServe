@@ -9,6 +9,7 @@ import { DarkModeProvider } from "@/components/DarkModeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import VoiceflowWidget from "@/components/VoiceflowWidget";
 import { VoiceAgentProvider } from "@/components/VoiceAgentContext";
+import I18nProvider from "@/components/I18nProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -49,17 +50,19 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${plusJakarta.variable}`}>
       <body className="font-sans antialiased" suppressHydrationWarning>
-        <DarkModeProvider>
-          <AuthProvider>
-            <VoiceAgentProvider>
-              <ConditionalHeader />
-              <main className="min-h-screen">{children}</main>
-              <ConditionalFooter />
-              <CookieConsent />
-              <VoiceflowWidget />
-            </VoiceAgentProvider>
-          </AuthProvider>
-        </DarkModeProvider>
+        <I18nProvider>
+          <DarkModeProvider>
+            <AuthProvider>
+              <VoiceAgentProvider>
+                <ConditionalHeader />
+                <main className="min-h-screen">{children}</main>
+                <ConditionalFooter />
+                <CookieConsent />
+                <VoiceflowWidget />
+              </VoiceAgentProvider>
+            </AuthProvider>
+          </DarkModeProvider>
+        </I18nProvider>
       </body>
     </html>
   );

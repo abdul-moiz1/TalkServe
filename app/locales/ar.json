@@ -1,0 +1,51 @@
+{
+  "common": {
+    "language": "اللغة",
+    "english": "English",
+    "arabic": "العربية"
+  },
+  "navigation": {
+    "home": "الرئيسية",
+    "dashboard": "لوحة التحكم",
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج",
+    "settings": "الإعدادات"
+  },
+  "auth": {
+    "staffLogin": "تسجيل دخول الموظف",
+    "managerLogin": "تسجيل دخول المدير",
+    "phoneNumber": "رقم الهاتف",
+    "password": "كلمة المرور",
+    "signIn": "دخول",
+    "forgotPassword": "هل نسيت كلمة المرور؟",
+    "resetPassword": "إعادة تعيين كلمة المرور",
+    "enterPhone": "أدخل رقم هاتفك",
+    "enterPassword": "أدخل كلمة المرور الخاصة بك"
+  },
+  "dashboard": {
+    "adminDashboard": "لوحة تحكم المسؤول",
+    "teamManagement": "إدارة الفريق",
+    "staffMembers": "أعضاء الموظفين",
+    "addMember": "إضافة عضو فريق",
+    "editMember": "تعديل العضو",
+    "deleteMember": "حذف العضو",
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "role": "الدور",
+    "department": "القسم",
+    "actions": "الإجراءات",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "search": "بحث"
+  },
+  "messages": {
+    "welcome": "أهلا بك في TalkServe",
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ ما",
+    "success": "نجح!",
+    "noResults": "لم يتم العثور على نتائج"
+  }
+}
