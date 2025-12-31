@@ -24,26 +24,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Backend services not available' }, { status: 500 });
     }
 
-    // Standardize phone number for E.164 compliance if provided
+    // Use phone number as provided without modification
     let formattedPhone = phone;
-    if (phone) {
-      // Clean up the phone number: remove all non-digit characters
-      const digitsOnly = phone.replace(/\D/g, '');
-      
-      // If it doesn't already have a country code (assuming Pakistan +92 if it starts with 0 or is 10-11 digits)
-      if (digitsOnly.startsWith('0')) {
-        // Replace leading 0 with Pakistan country code 92
-        formattedPhone = '+92' + digitsOnly.slice(1);
-      } else if (digitsOnly.length === 10) {
-        // Likely a local number without leading 0, assume Pakistan
-        formattedPhone = '+92' + digitsOnly;
-      } else if (digitsOnly.startsWith('92') && digitsOnly.length === 12) {
-        formattedPhone = '+' + digitsOnly;
-      } else {
-        // Fallback: just ensure it has a +
-        formattedPhone = phone.trim().startsWith('+') ? phone.trim() : '+' + digitsOnly;
-      }
-    }
 
     // Verify user is owner or admin of this business
     const businessRef = db.collection('businesses').doc(businessId);
@@ -57,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     // Create user in Firebase Auth
     try {
-      const authEmail = email || `${formattedPhone}@hotel.talkserve.ai`;
+      const authEmail = email || formattedPhone;
       
       const userRecord = await auth.createUser({
         email: authEmail,
@@ -84,7 +66,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         account: {
-          email: email || `${formattedPhone}@hotel.talkserve.ai`,
+          email: email || formattedPhone,
           password: generatedPassword,
           uid: userRecord.uid
         }
