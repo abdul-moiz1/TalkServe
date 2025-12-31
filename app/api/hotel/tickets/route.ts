@@ -59,14 +59,11 @@ export async function GET(request: NextRequest) {
     }));
 
     // Filter tickets based on role and department
-    if (userRole === 'staff' && filterDept) {
-      // Staff see only their department tickets
-      const deptLower = filterDept.toLowerCase();
-      tickets = tickets.filter((t: any) => 
-        t.department && t.department.toLowerCase() === deptLower
-      );
+    if (userRole === 'staff') {
+      // Staff see only tickets assigned to them
+      tickets = tickets.filter((t: any) => t.assignedTo === userId);
     } else if (userRole === 'manager') {
-      // Managers can filter by department if specified
+      // Managers see all tickets in their department
       if (filterDept) {
         const deptLower = filterDept.toLowerCase();
         tickets = tickets.filter((t: any) => 
