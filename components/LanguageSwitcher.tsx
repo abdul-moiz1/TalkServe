@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 
 export default function LanguageSwitcher() {
-  const { i18n, t } = useTranslation();
+  const { i18n } = useTranslation();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -15,33 +15,22 @@ export default function LanguageSwitcher() {
 
   const currentLang = i18n.language;
 
-  const handleLanguageChange = (lang: string) => {
-    i18n.changeLanguage(lang);
-    document.documentElement.lang = lang;
+  const handleLanguageChange = () => {
+    const newLang = currentLang === 'en' ? 'ar' : 'en';
+    i18n.changeLanguage(newLang);
+    document.documentElement.lang = newLang;
   };
 
   return (
-    <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
-      <button
-        onClick={() => handleLanguageChange('en')}
-        className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-          currentLang === 'en'
-            ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-        }`}
-      >
-        {t('common.english')}
-      </button>
-      <button
-        onClick={() => handleLanguageChange('ar')}
-        className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-          currentLang === 'ar'
-            ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-        }`}
-      >
-        {t('common.arabic')}
-      </button>
-    </div>
+    <button
+      onClick={handleLanguageChange}
+      className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+      aria-label="Toggle language"
+      title={currentLang === 'en' ? 'Switch to Arabic' : 'Switch to English'}
+    >
+      <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
+        {currentLang === 'en' ? 'عربي' : 'EN'}
+      </span>
+    </button>
   );
 }
