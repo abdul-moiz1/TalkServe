@@ -644,7 +644,7 @@ function TicketDetails({ ticket, onClose, onUpdateStatus, team }: {
           <div className="flex gap-2">
             <select 
               onChange={(e) => onUpdateStatus(ticket.id, e.target.value)}
-              defaultValue={ticket.status}
+              value={ticket.status}
               className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-medium"
             >
               <option value="created">New</option>
@@ -657,8 +657,9 @@ function TicketDetails({ ticket, onClose, onUpdateStatus, team }: {
         <div>
           <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Assign Staff</label>
           <select 
+            onChange={(e) => onUpdateStatus(ticket.id, ticket.status, e.target.value || null)}
+            value={ticket.assignedTo || ""}
             className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-medium"
-            defaultValue={ticket.assignedTo || ""}
           >
             <option value="">Unassigned</option>
             {team.map(m => (
