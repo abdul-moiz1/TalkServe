@@ -154,17 +154,14 @@ function StaffLoginForm() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full pl-11 pr-4 py-4 bg-slate-800/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all outline-none"
-                  placeholder="e.g., 03001234567 or your email"
+                  placeholder="e.g., 03001234567"
                 />
               </div>
-              <p className="text-[11px] text-blue-300/60 mt-2">
-                💡 Use just your phone number (with or without spaces/dashes) or your email address
-              </p>
             </div>
 
             <div className="space-y-2">
               <label className="text-xs font-bold text-blue-400 uppercase tracking-widest ml-1">
-                Password (Temporary or Custom)
+                Password
               </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-400">
@@ -176,12 +173,9 @@ function StaffLoginForm() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   className="w-full pl-11 pr-4 py-4 bg-slate-800/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all outline-none"
-                  placeholder="Enter the password provided by your manager"
+                  placeholder="••••••"
                 />
               </div>
-              <p className="text-[11px] text-blue-300/60 mt-2">
-                💡 Use the password sent to you by your manager or administrator
-              </p>
             </div>
 
             <button

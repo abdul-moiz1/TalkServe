@@ -52,6 +52,7 @@ export default function HotelAdminPage() {
   const [searchPhone, setSearchPhone] = useState('');
   const [showGuestQR, setShowGuestQR] = useState(false);
   const [showStaffQR, setShowStaffQR] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -338,7 +339,7 @@ export default function HotelAdminPage() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-emerald-800 dark:text-emerald-300 font-semibold flex items-center gap-2">
                 <FiCheckCircle className="w-5 h-5" />
-                Account Created Successfully
+                Account Created
               </h3>
               <button 
                 onClick={() => setGeneratedAccount(null)}
@@ -347,76 +348,45 @@ export default function HotelAdminPage() {
                 <FiX className="w-5 h-5" />
               </button>
             </div>
-            <div className="space-y-6">
-              <p className="text-sm text-emerald-700 dark:text-emerald-400 font-medium">
-                IMPORTANT: Save these credentials and share them with the staff member. They will not be shown again.
-              </p>
-              
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-xs text-emerald-600 dark:text-emerald-500 font-semibold uppercase tracking-wider">Phone Number / Staff ID</label>
-                    <div className="flex gap-2">
-                      <input
-                        readOnly
-                        value={generatedAccount.email.includes('@hotel.local') ? generatedAccount.email.split('@')[0] : generatedAccount.email}
-                        className="flex-1 px-3 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
-                      />
-                      <button 
-                        onClick={() => {
-                          const displayValue = generatedAccount.email.includes('@hotel.local') ? generatedAccount.email.split('@')[0] : generatedAccount.email;
-                          navigator.clipboard.writeText(displayValue);
-                          alert('Phone number copied!');
-                        }}
-                        className="p-2 bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-200"
-                      >
-                        Copy
-                      </button>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs text-emerald-600 dark:text-emerald-500 font-semibold uppercase tracking-wider">Generated Password</label>
-                    <div className="flex gap-2">
-                      <input
-                        readOnly
-                        value={generatedAccount.password}
-                        className="flex-1 px-3 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono"
-                      />
-                      <button 
-                        onClick={() => {
-                          navigator.clipboard.writeText(generatedAccount.password);
-                          alert('Password copied!');
-                        }}
-                        className="p-2 bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-200"
-                      >
-                        Copy
-                      </button>
-                    </div>
-                  </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-emerald-600 dark:text-emerald-500 font-bold uppercase tracking-wider">Staff ID</label>
+                <div className="flex gap-2 mt-1">
+                  <input
+                    readOnly
+                    value={generatedAccount.email.includes('@hotel.local') ? generatedAccount.email.split('@')[0] : generatedAccount.email}
+                    className="flex-1 px-2 py-1.5 rounded text-xs border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                  />
+                  <button 
+                    onClick={() => {
+                      const displayValue = generatedAccount.email.includes('@hotel.local') ? generatedAccount.email.split('@')[0] : generatedAccount.email;
+                      navigator.clipboard.writeText(displayValue);
+                      alert('Copied!');
+                    }}
+                    className="px-2 bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300 rounded text-xs font-medium hover:bg-emerald-200"
+                  >
+                    Copy
+                  </button>
                 </div>
-
-                <div className="p-4 bg-white dark:bg-slate-800 rounded-xl border border-emerald-100 dark:border-emerald-800/50">
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
-                    <FiLink className="w-4 h-4 text-blue-500" />
-                    Direct Access Link
-                  </h4>
-                  <p className="text-xs text-slate-500 mb-3">Share this link with the {generatedAccount.role} for direct login.</p>
-                  <div className="flex gap-2">
-                    <input
-                      readOnly
-                      value={`${baseUrl}/auth/staff-login?email=${encodeURIComponent(generatedAccount.email)}&role=${generatedAccount.role}`}
-                      className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 text-xs"
-                    />
-                    <button 
-                      onClick={() => {
-                        navigator.clipboard.writeText(`${baseUrl}/auth/staff-login?email=${encodeURIComponent(generatedAccount.email)}&role=${generatedAccount.role}`);
-                        alert('Login link copied!');
-                      }}
-                      className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs font-medium transition-colors"
-                    >
-                      Copy Link
-                    </button>
-                  </div>
+              </div>
+              <div>
+                <label className="text-xs text-emerald-600 dark:text-emerald-500 font-bold uppercase tracking-wider">Password</label>
+                <div className="flex gap-2 mt-1">
+                  <input
+                    readOnly
+                    value={generatedAccount.password}
+                    className="flex-1 px-2 py-1.5 rounded text-xs border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono"
+                  />
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(generatedAccount.password);
+                      alert('Copied!');
+                    }}
+                    className="px-2 bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300 rounded text-xs font-medium hover:bg-emerald-200"
+                  >
+                    Copy
+                  </button>
                 </div>
               </div>
             </div>
@@ -834,14 +804,45 @@ export default function HotelAdminPage() {
                 </div>
               </div>
 
-              {/* Danger Zone */}
+              {/* Management Actions */}
               <div className="pt-8 border-t border-slate-100 dark:border-slate-700">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div>
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">Management Actions</h4>
-                    <p className="text-xs text-slate-500">Edit details, deactivate, or remove this member</p>
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">Actions</h4>
+                    <p className="text-xs text-slate-500">Reset password, edit, or remove</p>
                   </div>
-                  <div className="flex gap-3 w-full sm:w-auto">
+                  <div className="flex gap-3 w-full sm:w-auto flex-wrap">
+                    <button 
+                      onClick={async () => {
+                        if (confirm('Reset password for this member?')) {
+                          setIsResettingPassword(true);
+                          try {
+                            const idToken = await user?.getIdToken();
+                            const response = await fetch('/api/hotel/members/reset-password', {
+                              method: 'POST',
+                              headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ businessId, memberId: selectedMember.id })
+                            });
+                            const data = await response.json();
+                            if (data.success) {
+                              setGeneratedAccount({ email: data.email, password: data.password, role: selectedMember.role });
+                              fetchTeamMembers(businessId!);
+                              alert('Password reset successfully!');
+                            } else {
+                              alert('Failed to reset password');
+                            }
+                          } catch (err) {
+                            alert('Error resetting password');
+                          } finally {
+                            setIsResettingPassword(false);
+                          }
+                        }
+                      }}
+                      disabled={isResettingPassword}
+                      className="flex-1 sm:flex-none px-6 py-3 bg-amber-50 hover:bg-amber-100 text-amber-600 dark:bg-amber-900/10 dark:hover:bg-amber-900/20 rounded-2xl text-sm font-bold transition-colors disabled:opacity-50"
+                    >
+                      {isResettingPassword ? 'Resetting...' : 'Reset Password'}
+                    </button>
                     <button 
                       onClick={() => {
                         setIsEditingMember(true);
@@ -853,11 +854,11 @@ export default function HotelAdminPage() {
                       }}
                       className="flex-1 sm:flex-none px-6 py-3 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-900/10 dark:hover:bg-blue-900/20 rounded-2xl text-sm font-bold transition-colors"
                     >
-                      Edit Details
+                      Edit
                     </button>
                     <button 
                       onClick={async () => {
-                        if (confirm('Are you sure you want to remove this team member? This action cannot be undone.')) {
+                        if (confirm('Remove this member?')) {
                           try {
                             const idToken = await user?.getIdToken();
                             const response = await fetch(`/api/hotel/team/${selectedMember.id}?businessId=${businessId}`, {
@@ -877,7 +878,7 @@ export default function HotelAdminPage() {
                       }}
                       className="flex-1 sm:flex-none px-6 py-3 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/10 dark:hover:bg-red-900/20 rounded-2xl text-sm font-bold transition-colors"
                     >
-                      Remove Member
+                      Remove
                     </button>
                   </div>
                 </div>
