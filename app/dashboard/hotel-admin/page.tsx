@@ -525,92 +525,157 @@ export default function HotelAdminPage() {
           </motion.form>
         )}
 
-        {/* QR Codes Section */}
+        {/* QR Codes Section - Buttons Only */}
         {onboardingData && (
-          <div className="px-6 py-8 bg-white dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-8">Printable QR Codes</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl">
-              {/* Guest QR Code */}
-              <div className="flex flex-col items-center">
-                <div 
-                  id="guest-qr" 
-                  className="flex flex-col items-center p-8 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 mb-6"
-                >
-                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">{onboardingData?.businessName || 'Hotel'}</p>
-                  <QRCodeSVG 
-                    value={`https://wa.me/923057358019`}
-                    size={180}
-                    level="H"
-                    includeMargin={true}
-                  />
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-4 font-medium">Powered by TalkServe.ai</p>
-                </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400 text-center mb-4 font-medium">Guest WhatsApp Contact</p>
+          <div className="px-6 py-6 bg-white dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Printable QR Codes</h3>
+            <div className="flex flex-wrap gap-4">
+              <button
+                onClick={() => setShowGuestQR(true)}
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+              >
+                Guest WhatsApp QR
+              </button>
+              <button
+                onClick={() => setShowStaffQR(true)}
+                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors"
+              >
+                Staff/Manager QR
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Guest QR Modal */}
+        {showGuestQR && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowGuestQR(false)}
+            className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white dark:bg-slate-800 rounded-2xl p-8 max-w-sm w-full shadow-2xl"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h4 className="text-lg font-bold text-slate-900 dark:text-white">Guest WhatsApp QR</h4>
                 <button
-                  onClick={() => {
-                    const qrElement = document.getElementById('guest-qr');
-                    if (qrElement) {
-                      const printWindow = window.open('', '', 'width=500,height=600');
-                      if (printWindow) {
-                        printWindow.document.write(`
-                          <html>
-                            <head><style>body { margin: 0; padding: 20px; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial; background: #fff; }</style></head>
-                            <body>
-                              ${qrElement.innerHTML}
-                            </body>
-                          </html>
-                        `);
-                        printWindow.print();
-                      }
-                    }
-                  }}
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                  onClick={() => setShowGuestQR(false)}
+                  className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                 >
-                  Print
+                  <FiX className="w-5 h-5 text-slate-500" />
+                </button>
+              </div>
+              
+              <div 
+                id="guest-qr-modal"
+                className="flex flex-col items-center p-8 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 mb-6"
+              >
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">{onboardingData?.businessName || 'Hotel'}</p>
+                <QRCodeSVG 
+                  value={`https://wa.me/923057358019`}
+                  size={200}
+                  level="H"
+                  includeMargin={true}
+                />
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-4 font-medium">Powered by TalkServe.ai</p>
+              </div>
+
+              <button
+                onClick={() => {
+                  const qrElement = document.getElementById('guest-qr-modal');
+                  if (qrElement) {
+                    const printWindow = window.open('', '', 'width=500,height=600');
+                    if (printWindow) {
+                      printWindow.document.write(`
+                        <html>
+                          <head><style>body { margin: 0; padding: 20px; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial; background: #fff; }</style></head>
+                          <body>
+                            ${qrElement.innerHTML}
+                          </body>
+                        </html>
+                      `);
+                      printWindow.print();
+                    }
+                  }
+                }}
+                className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+              >
+                Print QR Code
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* Staff QR Modal */}
+        {showStaffQR && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowStaffQR(false)}
+            className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white dark:bg-slate-800 rounded-2xl p-8 max-w-sm w-full shadow-2xl"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h4 className="text-lg font-bold text-slate-900 dark:text-white">Staff/Manager Portal QR</h4>
+                <button
+                  onClick={() => setShowStaffQR(false)}
+                  className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                >
+                  <FiX className="w-5 h-5 text-slate-500" />
                 </button>
               </div>
 
-              {/* Staff/Manager QR Code */}
-              <div className="flex flex-col items-center">
-                <div 
-                  id="staff-qr"
-                  className="flex flex-col items-center p-8 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 mb-6"
-                >
-                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">{onboardingData?.businessName || 'Hotel'}</p>
-                  <QRCodeSVG 
-                    value={`${baseUrl}/auth/staff-login?email=staff@hotel.talkserve.ai`}
-                    size={180}
-                    level="H"
-                    includeMargin={true}
-                  />
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-4 font-medium">Powered by TalkServe.ai</p>
-                </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400 text-center mb-4 font-medium">Staff/Manager Portal</p>
-                <button
-                  onClick={() => {
-                    const qrElement = document.getElementById('staff-qr');
-                    if (qrElement) {
-                      const printWindow = window.open('', '', 'width=500,height=600');
-                      if (printWindow) {
-                        printWindow.document.write(`
-                          <html>
-                            <head><style>body { margin: 0; padding: 20px; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial; background: #fff; }</style></head>
-                            <body>
-                              ${qrElement.innerHTML}
-                            </body>
-                          </html>
-                        `);
-                        printWindow.print();
-                      }
-                    }
-                  }}
-                  className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors"
-                >
-                  Print
-                </button>
+              <div 
+                id="staff-qr-modal"
+                className="flex flex-col items-center p-8 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 mb-6"
+              >
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">{onboardingData?.businessName || 'Hotel'}</p>
+                <QRCodeSVG 
+                  value={`${baseUrl}/auth/staff-login?email=staff@hotel.talkserve.ai`}
+                  size={200}
+                  level="H"
+                  includeMargin={true}
+                />
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-4 font-medium">Powered by TalkServe.ai</p>
               </div>
-            </div>
-          </div>
+
+              <button
+                onClick={() => {
+                  const qrElement = document.getElementById('staff-qr-modal');
+                  if (qrElement) {
+                    const printWindow = window.open('', '', 'width=500,height=600');
+                    if (printWindow) {
+                      printWindow.document.write(`
+                        <html>
+                          <head><style>body { margin: 0; padding: 20px; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial; background: #fff; }</style></head>
+                          <body>
+                            ${qrElement.innerHTML}
+                          </body>
+                        </html>
+                      `);
+                      printWindow.print();
+                    }
+                  }
+                }}
+                className="w-full px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors"
+              >
+                Print QR Code
+              </button>
+            </motion.div>
+          </motion.div>
         )}
 
         {/* Search Bar */}
