@@ -50,6 +50,8 @@ export default function HotelAdminPage() {
   const [onboardingData, setOnboardingData] = useState<any>(null);
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   const [searchPhone, setSearchPhone] = useState('');
+  const [showGuestQR, setShowGuestQR] = useState(false);
+  const [showStaffQR, setShowStaffQR] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -521,6 +523,93 @@ export default function HotelAdminPage() {
               </Button>
             </div>
           </motion.form>
+        )}
+
+        {/* QR Codes Section */}
+        {onboardingData && (
+          <div className="p-6 bg-gradient-to-r from-blue-50 to-slate-50 dark:from-blue-900/20 dark:to-slate-900/20 border-b border-blue-100 dark:border-blue-900/30">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Printable QR Codes</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Guest QR Code */}
+              <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-blue-100 dark:border-blue-900/30 flex flex-col items-center">
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Guest WhatsApp Contact</h4>
+                <div 
+                  id="guest-qr" 
+                  className="p-4 bg-white rounded-xl border border-slate-200 mb-4"
+                  ref={(el) => {
+                    if (el && !showGuestQR) {
+                      const guestWhatsappLink = `https://wa.me/1234567890?text=Hello`;
+                      // QR code will be rendered
+                    }
+                  }}
+                >
+                  <QRCodeSVG 
+                    value={`https://wa.me/923057358019`}
+                    size={200}
+                    level="H"
+                    includeMargin={true}
+                  />
+                </div>
+                <p className="text-xs text-slate-500 text-center mb-4">Guests scan to add hotel WhatsApp contact</p>
+                <button
+                  onClick={() => {
+                    const qrElement = document.getElementById('guest-qr');
+                    if (qrElement) {
+                      const printWindow = window.open('', '', 'width=600,height=600');
+                      if (printWindow) {
+                        printWindow.document.write(qrElement.innerHTML);
+                        printWindow.print();
+                      }
+                    }
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors"
+                >
+                  Print QR
+                </button>
+              </div>
+
+              {/* Staff/Manager QR Code with Branding */}
+              <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-emerald-100 dark:border-emerald-900/30 flex flex-col items-center">
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Staff/Manager Portal Access</h4>
+                <div 
+                  id="staff-qr"
+                  className="p-6 bg-white rounded-xl border border-slate-200 mb-4 flex flex-col items-center"
+                >
+                  <p className="text-xs font-bold text-slate-700 mb-3 text-center max-w-xs">{onboardingData?.businessName || 'Hotel'}</p>
+                  <QRCodeSVG 
+                    value={`${baseUrl}/auth/staff-login?email=staff@hotel.talkserve.ai`}
+                    size={200}
+                    level="H"
+                    includeMargin={true}
+                  />
+                  <p className="text-[10px] text-slate-600 mt-3 text-center font-semibold">Powered by TalkServe.ai</p>
+                </div>
+                <p className="text-xs text-slate-500 text-center mb-4">Staff/Managers scan to access portal</p>
+                <button
+                  onClick={() => {
+                    const qrElement = document.getElementById('staff-qr');
+                    if (qrElement) {
+                      const printWindow = window.open('', '', 'width=600,height=700');
+                      if (printWindow) {
+                        printWindow.document.write(`
+                          <html>
+                            <head><style>body { margin: 0; padding: 20px; text-align: center; font-family: Arial; }</style></head>
+                            <body>
+                              ${qrElement.innerHTML}
+                            </body>
+                          </html>
+                        `);
+                        printWindow.print();
+                      }
+                    }
+                  }}
+                  className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm font-medium transition-colors"
+                >
+                  Print QR
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Search Bar */}

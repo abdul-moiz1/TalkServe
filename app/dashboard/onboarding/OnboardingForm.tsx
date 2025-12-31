@@ -505,15 +505,7 @@ export default function OnboardingForm() {
           >
             <option value="">Select an industry</option>
             <option value="hotel">Hotel</option>
-            <option value="dental">Dental Clinic</option>
-            <option value="restaurant">Restaurant</option>
-            <option value="healthcare">Healthcare</option>
-            <option value="retail">Retail</option>
-            <option value="professional-services">Professional Services</option>
-            <option value="home-services">Home Services</option>
-            <option value="automotive">Automotive</option>
-            <option value="hospitality">Hospitality</option>
-            <option value="other">Other</option>
+            <option value="construction">Construction</option>
           </select>
         </div>
       </div>
