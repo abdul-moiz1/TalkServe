@@ -355,17 +355,18 @@ export default function HotelAdminPage() {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-1">
-                    <label className="text-xs text-emerald-600 dark:text-emerald-500 font-semibold uppercase tracking-wider">Email/Username</label>
+                    <label className="text-xs text-emerald-600 dark:text-emerald-500 font-semibold uppercase tracking-wider">Phone Number / Staff ID</label>
                     <div className="flex gap-2">
                       <input
                         readOnly
-                        value={generatedAccount.email}
+                        value={generatedAccount.email.includes('@hotel.local') ? generatedAccount.email.split('@')[0] : generatedAccount.email}
                         className="flex-1 px-3 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
                       />
                       <button 
                         onClick={() => {
-                          navigator.clipboard.writeText(generatedAccount.email);
-                          alert('Email copied!');
+                          const displayValue = generatedAccount.email.includes('@hotel.local') ? generatedAccount.email.split('@')[0] : generatedAccount.email;
+                          navigator.clipboard.writeText(displayValue);
+                          alert('Phone number copied!');
                         }}
                         className="p-2 bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-200"
                       >
