@@ -52,7 +52,8 @@ export default function StaffPortal() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
-  const [staffInfo, setStaffInfo] = useState<{ fullName: string; phone?: string; createdAt: string; department?: string } | null>(null);
+  const [staffInfo, setStaffInfo] = useState<{ fullName: string; phone?: string; createdAt: string; department?: string; status?: string } | null>(null);
+  const [isAccountSuspended, setIsAccountSuspended] = useState(false);
 
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
@@ -84,7 +85,12 @@ export default function StaffPortal() {
       const data = await response.json();
       if (data.success && data.members) {
         const info = data.members.find((m: any) => m.userId === user?.uid);
-        if (info) setStaffInfo(info);
+        if (info) {
+          setStaffInfo(info);
+          if (info.status === 'inactive') {
+            setIsAccountSuspended(true);
+          }
+        }
       }
     } catch (err) {
       console.error('Error fetching staff info:', err);
@@ -139,6 +145,22 @@ export default function StaffPortal() {
       setSyncing(false);
     }
   };
+
+  if (isAccountSuspended) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <div className="p-6 bg-red-50 dark:bg-red-900/20 rounded-3xl mb-6 inline-block">
+            <FiAlertCircle className="w-16 h-16 text-red-600" />
+          </div>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-3">Account Suspended</h2>
+          <p className="text-slate-600 dark:text-slate-300 mb-2">Your account has been suspended</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mb-8">Please contact your manager or administrator for more information.</p>
+          <Button onClick={() => logout()} className="bg-red-600 hover:bg-red-700 w-full">Logout</Button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading || authLoading) {
     return (

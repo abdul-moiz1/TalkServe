@@ -54,6 +54,7 @@ export default function ManagerPortal() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [isAccountSuspended, setIsAccountSuspended] = useState(false);
 
   const businessId = searchParams.get('businessId');
   const department = searchParams.get('department') || localStorage.getItem('userDepartment') || '';
@@ -88,6 +89,11 @@ export default function ManagerPortal() {
       let userDept = department;
       if (teamData.success) {
         const currentMember = (teamData.members || []).find((m: any) => m.userId === user?.uid);
+        if (currentMember?.status === 'inactive') {
+          setIsAccountSuspended(true);
+          setLoading(false);
+          return;
+        }
         if (currentMember?.department) {
           userDept = currentMember.department;
           localStorage.setItem('userDepartment', userDept);
@@ -140,6 +146,22 @@ export default function ManagerPortal() {
       console.error('Error updating ticket:', err);
     }
   };
+
+  if (isAccountSuspended) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <div className="p-6 bg-red-50 dark:bg-red-900/20 rounded-3xl mb-6 inline-block">
+            <FiAlertCircle className="w-16 h-16 text-red-600" />
+          </div>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-3">Account Suspended</h2>
+          <p className="text-slate-600 dark:text-slate-300 mb-2">Your account has been suspended</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mb-8">Please contact your administrator for more information.</p>
+          <Button onClick={async () => { await logout(); router.push('/auth/staff-login'); }} className="bg-red-600 hover:bg-red-700 w-full">Logout</Button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading || authLoading) {
     return (
