@@ -44,6 +44,12 @@ const statusBorderColors: Record<string, string> = {
   completed: 'bg-emerald-500',
 };
 
+const statusLabels: Record<string, string> = {
+  created: 'New',
+  'in-progress': 'In Progress',
+  completed: 'Completed',
+};
+
 export default function StaffPortal() {
   const { user, logout, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -183,7 +189,7 @@ export default function StaffPortal() {
   const completedToday = tickets.filter(t => t.status === 'completed');
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-sans">
       {/* Header */}
       <header className="px-4 py-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 flex justify-between items-center sticky top-0 z-50">
         <div className="flex items-center gap-3">
@@ -232,53 +238,68 @@ export default function StaffPortal() {
                 activeTasks.map(task => (
                   <motion.div 
                     key={task.id}
-                    drag="x"
-                    dragConstraints={ { left: 0, right: 150 } }
-                    dragElastic={0.05}
-                    onDragEnd={(_, info) => {
-                      if (info.offset.x > 100) {
-                        if (task.status === 'created') handleUpdateStatus(task.id, 'in-progress');
-                        else if (task.status === 'in-progress') handleUpdateStatus(task.id, 'completed');
-                      }
-                    }}
-                    style={ { x: 0 } } // Ensure it snaps back automatically via Framer Motion
-                    whileDrag={ { scale: 1.01, zIndex: 50 } }
-                    transition={ { type: 'spring', stiffness: 500, damping: 40, mass: 0.5 } }
-                    className="group bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 hover:border-blue-200 dark:hover:border-blue-900 hover:shadow-xl transition-all cursor-grab active:cursor-grabbing relative overflow-hidden touch-pan-y"
+                    initial={ { opacity: 0, y: 10 } }
+                    animate={ { opacity: 1, y: 0 } }
+                    transition={ { type: 'spring', stiffness: 300, damping: 30 } }
+                    className="group bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all relative overflow-hidden"
                   >
-                    {/* Status Background Indicators for Swipe */}
-                    <div className="absolute inset-y-0 left-0 w-full bg-emerald-500/10 flex items-center justify-start px-8 opacity-0 group-active:opacity-100 transition-opacity">
-                       <FiCheckCircle className="w-6 h-6 text-emerald-500" />
-                    </div>
-
-                    <div className="flex items-center gap-4 relative z-10 bg-white dark:bg-slate-900 pointer-events-none">
-                      <div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center border border-slate-100 dark:border-slate-700 shrink-0 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 group-hover:border-blue-100 dark:group-hover:border-blue-800 transition-colors">
+                    <div className="flex items-start gap-4">
+                      <div className="w-14 h-14 bg-white dark:bg-slate-700 rounded-2xl flex items-center justify-center border border-slate-200 dark:border-slate-600 shrink-0 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:border-blue-300 dark:group-hover:border-blue-500 transition-colors shadow-sm">
                         <span className="text-xl font-black text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">#{task.guestRoom}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md tracking-wider ${
-                            task.priority === 'urgent' ? 'bg-red-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-lg tracking-wider ${
+                            task.priority === 'urgent' ? 'bg-red-500 text-white shadow-lg shadow-red-200 dark:shadow-none' : 'bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200'
                           }`}>
                             {task.priority}
                           </span>
-                          <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md tracking-wider text-white ${statusColors[task.status]}`}>
-                            {task.status.replace('-', ' ')}
+                          <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-lg tracking-wider text-white ${statusColors[task.status]} shadow-md`}>
+                            {statusLabels[task.status]}
                           </span>
                         </div>
-                        <p className="text-slate-900 dark:text-white font-bold text-sm truncate leading-tight">
+                        <p className="text-slate-900 dark:text-white font-bold text-sm leading-snug mb-2">
                           {task.requestText}
                         </p>
                         {task.assignedByName && (
-                          <div className="mt-1.5 flex items-center gap-1">
-                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Assigned by</span>
-                            <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest italic">{task.assignedByName}</span>
+                          <div className="mt-2 flex items-center gap-1">
+                            <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Assigned by</span>
+                            <span className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest italic">{task.assignedByName}</span>
                           </div>
                         )}
                       </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <FiChevronRight className="w-5 h-5 text-slate-300" />
-                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="mt-4 flex items-center gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
+                      {task.status === 'created' && (
+                        <>
+                          <button
+                            onClick={() => handleUpdateStatus(task.id, 'in-progress')}
+                            className="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm py-2.5 px-3 rounded-xl transition-all duration-200 transform active:scale-95 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                          >
+                            <FiPlay className="w-4 h-4" />
+                            Start
+                          </button>
+                        </>
+                      )}
+                      {task.status === 'in-progress' && (
+                        <>
+                          <button
+                            onClick={() => handleUpdateStatus(task.id, 'completed')}
+                            className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm py-2.5 px-3 rounded-xl transition-all duration-200 transform active:scale-95 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                          >
+                            <FiCheckCircle className="w-4 h-4" />
+                            Complete
+                          </button>
+                          <button
+                            onClick={() => handleUpdateStatus(task.id, 'created')}
+                            className="flex-1 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-500 text-slate-700 dark:text-white font-bold text-sm py-2.5 px-3 rounded-xl transition-all duration-200 transform active:scale-95 shadow-md"
+                          >
+                            Reset
+                          </button>
+                        </>
+                      )}
                     </div>
                   </motion.div>
                 ))
@@ -292,22 +313,37 @@ export default function StaffPortal() {
               initial={ { opacity: 0 } }
               animate={ { opacity: 1 } }
               exit={ { opacity: 0 } }
-              className="space-y-2"
+              className="space-y-3"
             >
               {completedToday.map(task => (
-                <div 
-                  key={task.id} 
-                  onClick={() => setSelectedTicket(task)}
-                  className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-4 border border-slate-100 dark:border-slate-800 flex items-center gap-4 opacity-70 hover:opacity-100 transition-opacity cursor-pointer"
+                <motion.div 
+                  key={task.id}
+                  initial={ { opacity: 0, y: 10 } }
+                  animate={ { opacity: 1, y: 0 } }
+                  transition={ { type: 'spring', stiffness: 300, damping: 30 } }
+                  className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-4 border border-emerald-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-500 hover:shadow-lg transition-all cursor-pointer"
                 >
-                  <span className="font-black text-slate-400 text-sm">#{task.guestRoom}</span>
-                  <p className="text-slate-600 dark:text-slate-400 text-sm font-medium flex-1 truncate">{task.requestText}</p>
-                  <FiCheckCircle className="text-emerald-500 w-5 h-5" />
-                </div>
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-white dark:bg-slate-700 rounded-xl flex items-center justify-center border border-emerald-200 dark:border-slate-600 shrink-0 shadow-sm">
+                      <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">#{task.guestRoom}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-slate-900 dark:text-white font-bold text-sm mb-1">{task.requestText}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] font-black uppercase px-2.5 py-1 rounded-lg tracking-wider text-white bg-emerald-500 shadow-md">Completed</span>
+                      </div>
+                    </div>
+                    <FiCheckCircle className="text-emerald-500 w-6 h-6 shrink-0 mt-0.5" />
+                  </div>
+                </motion.div>
               ))}
               {completedToday.length === 0 && (
-                <div className="text-center py-20 text-slate-400 font-bold uppercase tracking-widest text-[10px]">
-                  No archived tasks
+                <div className="text-center py-24">
+                  <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <FiCheckCircle className="w-10 h-10 text-slate-300 dark:text-slate-600" />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">No completed tasks</h3>
+                  <p className="text-sm text-slate-500 mt-1">Finished tasks will appear here.</p>
                 </div>
               )}
             </motion.div>
