@@ -754,8 +754,8 @@ export default function HotelAdminPage() {
                     <div className="space-y-1">
                       <label className="text-xs font-bold text-slate-500">Staff ID / Email</label>
                       <div className="flex gap-2">
-                        <input readOnly value={selectedMember.email} className="flex-1 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-medium" />
-                        <button onClick={() => { navigator.clipboard.writeText(selectedMember.email); alert('Copied!'); }} className="p-3 bg-slate-100 dark:bg-slate-700 rounded-xl hover:bg-slate-200 transition-colors">Copy</button>
+                        <input readOnly value={selectedMember.email.includes('@hotel.local') ? selectedMember.email.split('@')[0] : selectedMember.email} className="flex-1 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-medium" />
+                        <button onClick={() => { const displayValue = selectedMember.email.includes('@hotel.local') ? selectedMember.email.split('@')[0] : selectedMember.email; navigator.clipboard.writeText(displayValue); alert('Copied!'); }} className="p-3 bg-slate-100 dark:bg-slate-700 rounded-xl hover:bg-slate-200 transition-colors">Copy</button>
                       </div>
                     </div>
                     {selectedMember.password && (
