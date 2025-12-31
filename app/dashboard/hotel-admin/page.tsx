@@ -528,7 +528,7 @@ export default function HotelAdminPage() {
               >
                 <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">{onboardingData?.businessName || 'Hotel'}</p>
                 <QRCodeSVG 
-                  value={`https://wa.me/${onboardingData?.business_number?.replace('whatsapp:', '').replace(/\D/g, '')}?text=${encodeURIComponent('Hello')}`}
+                  value={`https://wa.me/${onboardingData?.business_number?.replace('whatsapp:', '').replace('+', '')}`}
                   size={200}
                   level="H"
                   includeMargin={true}
