@@ -146,7 +146,7 @@ function StaffLoginForm() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full pl-11 pr-4 py-4 bg-slate-800/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all outline-none"
-                  placeholder="e.g. 0310... or email@hotel"
+                  placeholder="Enter your phone number or email"
                 />
               </div>
             </div>
