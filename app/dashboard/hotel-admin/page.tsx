@@ -529,10 +529,15 @@ export default function HotelAdminPage() {
                 <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">{onboardingData?.businessName || 'Hotel'}</p>
                 <QRCodeSVG 
                   value={(() => {
-                    const phoneNum = onboardingData?.business_number?.replace('whatsapp:', '').replace(/\D/g, '') || '18575243646';
-                    // If number starts with 0 (local format), replace with country code 92 (Pakistan)
-                    const formattedNum = phoneNum.startsWith('0') ? '92' + phoneNum.slice(1) : phoneNum;
-                    return `https://wa.me/${formattedNum}`;
+                    let phoneNum = onboardingData?.business_number?.replace('whatsapp:', '').replace(/\D/g, '') || '18575243646';
+                    
+                    // Check if number already has country code (starts with 92 or other country codes)
+                    if (!phoneNum.startsWith('92') && !phoneNum.startsWith('1') && !phoneNum.startsWith('44') && phoneNum.startsWith('0')) {
+                      // Local format starting with 0, convert to international
+                      phoneNum = '92' + phoneNum.slice(1);
+                    }
+                    
+                    return `https://wa.me/${phoneNum}`;
                   })()}
                   size={200}
                   level="H"
