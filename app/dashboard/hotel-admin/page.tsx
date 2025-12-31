@@ -527,21 +527,27 @@ export default function HotelAdminPage() {
 
         {/* QR Codes Floating Buttons - Top Right */}
         {onboardingData && (
-          <div className="fixed top-20 right-6 flex flex-col gap-2 z-40">
-            <button
+          <div className="fixed top-20 right-6 flex flex-col gap-3 z-40">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setShowGuestQR(true)}
-              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition-colors shadow-lg"
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full text-sm font-semibold transition-all shadow-lg hover:shadow-xl"
               title="Guest WhatsApp QR"
             >
+              <FiSmartphone className="w-4 h-4" />
               Guest QR
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setShowStaffQR(true)}
-              className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium transition-colors shadow-lg"
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-full text-sm font-semibold transition-all shadow-lg hover:shadow-xl"
               title="Staff/Manager QR"
             >
+              <FiSmartphone className="w-4 h-4" />
               Staff QR
-            </button>
+            </motion.button>
           </div>
         )}
 
