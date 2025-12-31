@@ -250,7 +250,11 @@ export async function POST(request: NextRequest) {
 
       let businessId = null;
       if (onboardingData.industryType === 'hotel') {
-        const businessRef = db.collection("businesses").doc();
+        // Generate business ID with format: TS + 4 random digits
+        const randomDigits = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+        const customBusinessId = `TS${randomDigits}`;
+        
+        const businessRef = db.collection("businesses").doc(customBusinessId);
         transaction.set(businessRef, {
           name: onboardingData.businessName,
           type: 'hotel',
@@ -258,7 +262,7 @@ export async function POST(request: NextRequest) {
           createdAt: new Date().toISOString(),
           onboardingId: onboardingRef.id
         });
-        businessId = businessRef.id;
+        businessId = customBusinessId;
       }
 
       // Update user document to link to business

@@ -49,6 +49,7 @@ export default function HotelAdminPage() {
 
   const [onboardingData, setOnboardingData] = useState<any>(null);
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
+  const [searchPhone, setSearchPhone] = useState('');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -522,6 +523,19 @@ export default function HotelAdminPage() {
           </motion.form>
         )}
 
+        {/* Search Bar */}
+        {teamMembers.length > 0 && (
+          <div className="px-6 py-4 bg-slate-50 dark:bg-slate-700/30 border-b border-slate-100 dark:border-slate-700">
+            <input
+              type="text"
+              placeholder="Search by phone number..."
+              value={searchPhone}
+              onChange={(e) => setSearchPhone(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
+            />
+          </div>
+        )}
+
         <div className="divide-y divide-slate-100 dark:divide-slate-700">
           {teamMembers.length === 0 ? (
             <div className="px-8 py-24 text-center">
@@ -534,7 +548,11 @@ export default function HotelAdminPage() {
               </p>
             </div>
           ) : (
-            teamMembers.map((member, index) => (
+            teamMembers
+              .filter(member => 
+                !searchPhone || (member.phone && member.phone.toLowerCase().includes(searchPhone.toLowerCase()))
+              )
+              .map((member, index) => (
               <motion.div
                 key={member.id}
                 initial={{ opacity: 0 }}

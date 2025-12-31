@@ -52,8 +52,8 @@ export async function POST(request: NextRequest) {
     // to create members while we investigate the ownerId mismatch.
     // This unblocks the user immediately.
 
-    // Generate a secure temporary password
-    const generatedPassword = crypto.randomBytes(6).toString('hex') + '!';
+    // Generate a 4-6 digit temporary password
+    const generatedPassword = String(Math.floor(Math.random() * 900000) + 100000).slice(0, 6);
 
     // Create user in Firebase Auth
     try {
