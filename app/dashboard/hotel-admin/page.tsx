@@ -268,6 +268,30 @@ export default function HotelAdminPage() {
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Hotel Team</h1>
           <p className="text-slate-600 dark:text-slate-400 mt-1">Manage your staff roles and invitations</p>
         </div>
+        {onboardingData && (
+          <div className="flex flex-row gap-3">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowGuestQR(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full text-sm font-semibold transition-all shadow-lg hover:shadow-xl"
+              title="Guest WhatsApp QR"
+            >
+              <FiSmartphone className="w-4 h-4" />
+              Guest QR
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowStaffQR(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-full text-sm font-semibold transition-all shadow-lg hover:shadow-xl"
+              title="Staff/Manager QR"
+            >
+              <FiSmartphone className="w-4 h-4" />
+              Staff QR
+            </motion.button>
+          </div>
+        )}
       </div>
 
       <motion.div
@@ -525,31 +549,6 @@ export default function HotelAdminPage() {
           </motion.form>
         )}
 
-        {/* QR Codes Floating Buttons - Top Right */}
-        {onboardingData && (
-          <div className="fixed top-20 right-6 flex flex-row gap-3 z-40">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowGuestQR(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full text-sm font-semibold transition-all shadow-lg hover:shadow-xl"
-              title="Guest WhatsApp QR"
-            >
-              <FiSmartphone className="w-4 h-4" />
-              Guest QR
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowStaffQR(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-full text-sm font-semibold transition-all shadow-lg hover:shadow-xl"
-              title="Staff/Manager QR"
-            >
-              <FiSmartphone className="w-4 h-4" />
-              Staff QR
-            </motion.button>
-          </div>
-        )}
 
         {/* Guest QR Modal */}
         {showGuestQR && (
