@@ -90,6 +90,12 @@ export default function ManagerPortal() {
       if (teamData.success) {
         const currentMember = (teamData.members || []).find((m: any) => m.userId === user?.uid);
         console.log('Current member:', currentMember);
+        
+        if (!currentMember || (currentMember.role !== 'manager' && currentMember.role !== 'admin')) {
+          router.push('/auth/staff-login');
+          return;
+        }
+
         if (currentMember?.status === 'inactive') {
           console.log('Account is inactive, showing suspension message');
           setIsAccountSuspended(true);

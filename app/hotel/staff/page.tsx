@@ -97,6 +97,10 @@ export default function StaffPortal() {
       if (teamData.success && teamData.members) {
         const info = teamData.members.find((m: any) => m.userId === user?.uid);
         if (info) {
+          if (info.role !== 'staff') {
+            router.push('/auth/staff-login');
+            return;
+          }
           setStaffInfo(info);
           userDept = info.department || '';
           console.log('Staff status:', info.status);
