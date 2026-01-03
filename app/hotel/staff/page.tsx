@@ -279,7 +279,7 @@ export default function StaffPortal() {
                     </div>
 
                     <div className="flex items-center gap-1.5 flex-shrink-0">
-                      {task.status === 'created' && (
+                      {((task.status || '').toLowerCase() === 'created' || (task.status || '').toLowerCase() === 'assigned') && (
                         <button
                           onClick={() => handleUpdateStatus(task.id, 'in-progress')}
                           className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs py-1.5 px-2.5 rounded-lg transition-all active:scale-95 shadow-sm"
@@ -288,7 +288,7 @@ export default function StaffPortal() {
                           Start
                         </button>
                       )}
-                      {task.status === 'in-progress' && (
+                      {(task.status || '').toLowerCase() === 'in-progress' && (
                         <button
                           onClick={() => handleUpdateStatus(task.id, 'completed')}
                           className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs py-1.5 px-2.5 rounded-lg transition-all active:scale-95 shadow-sm"
