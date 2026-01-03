@@ -180,13 +180,15 @@ export default function StaffPortal() {
   }
 
   const activeTasks = tickets
-    .filter(t => t.status !== 'completed')
+    .filter(t => t.status !== 'completed' && t.assignedTo === user?.uid)
     .sort((a, b) => {
-      const priorityOrder = { urgent: 0, normal: 1, low: 2 };
-      return priorityOrder[a.priority] - priorityOrder[b.priority];
+      const priorityOrder: Record<string, number> = { urgent: 0, high: 0, normal: 1, low: 2 };
+      const aPrio = (a.priority || 'normal').toLowerCase();
+      const bPrio = (b.priority || 'normal').toLowerCase();
+      return (priorityOrder[aPrio] ?? 1) - (priorityOrder[bPrio] ?? 1);
     });
 
-  const completedToday = tickets.filter(t => t.status === 'completed');
+  const completedToday = tickets.filter(t => t.status === 'completed' && t.assignedTo === user?.uid);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-sans">
@@ -243,28 +245,32 @@ export default function StaffPortal() {
                     transition={ { type: 'spring', stiffness: 300, damping: 30 } }
                     className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all flex items-center gap-3 group"
                   >
-                    <div className={`w-1 h-10 rounded-full ${
-                      task.priority === 'urgent' ? 'bg-red-500' : 'bg-blue-500'
-                    }`} />
-                    
-                    <div className="w-10 h-10 bg-slate-900 dark:bg-white rounded-lg flex-shrink-0 flex items-center justify-center shadow-sm">
-                      <span className="text-sm font-black text-white dark:text-slate-900">#{task.guestRoom}</span>
-                    </div>
+                            <div className={`w-1 h-10 rounded-full ${
+                              (task.priority || '').toLowerCase() === 'urgent' || (task.priority || '').toLowerCase() === 'high' ? 'bg-red-500' : 
+                              (task.priority || '').toLowerCase() === 'normal' ? 'bg-blue-500' : 
+                              'bg-slate-300'
+                            }`} />
+                            
+                            <div className="w-10 h-10 bg-slate-900 dark:bg-white rounded-lg flex-shrink-0 flex items-center justify-center shadow-sm">
+                              <span className="text-sm font-black text-white dark:text-slate-900">#{task.guestRoom || '??'}</span>
+                            </div>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded tracking-tighter ${
-                          task.priority === 'urgent' ? 'bg-red-500/10 text-red-600' : 'bg-blue-500/10 text-blue-600'
-                        }`}>
-                          {task.priority}
-                        </span>
-                        <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded tracking-tighter text-white ${statusColors[task.status]}`}>
-                          {statusLabels[task.status]}
-                        </span>
-                      </div>
-                      <p className="text-slate-900 dark:text-white font-bold text-sm truncate">
-                        {task.requestText}
-                      </p>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-0.5">
+                                <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded tracking-tighter ${
+                                  (task.priority || '').toLowerCase() === 'urgent' || (task.priority || '').toLowerCase() === 'high' ? 'bg-red-500/10 text-red-600' : 
+                                  (task.priority || '').toLowerCase() === 'normal' ? 'bg-blue-500/10 text-blue-600' : 
+                                  'bg-slate-100 text-slate-500'
+                                }`}>
+                                  {task.priority || 'normal'}
+                                </span>
+                                <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded tracking-tighter text-white ${statusColors[(task.status || 'created')]}`}>
+                                  {statusLabels[(task.status || 'created')]}
+                                </span>
+                              </div>
+                              <p className="text-slate-900 dark:text-white font-bold text-sm truncate">
+                                {(task as any).issue_summary || task.requestText || 'No description'}
+                              </p>
                       {task.assignedByName && (
                         <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                           Assigned by <span className="font-bold text-blue-600 dark:text-blue-400">{task.assignedByName}</span>
@@ -316,10 +322,10 @@ export default function StaffPortal() {
                 >
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 bg-white dark:bg-slate-700 rounded-xl flex items-center justify-center border border-emerald-200 dark:border-slate-600 shrink-0 shadow-sm">
-                      <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">#{task.guestRoom}</span>
+                      <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">#{task.guestRoom || '??'}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-slate-900 dark:text-white font-bold text-sm mb-1">{task.requestText}</p>
+                      <p className="text-slate-900 dark:text-white font-bold text-sm mb-1">{(task as any).issue_summary || task.requestText || 'No description'}</p>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-[9px] font-black uppercase px-2.5 py-1 rounded-lg tracking-wider text-white bg-emerald-500 shadow-md">Completed</span>
                       </div>
