@@ -332,10 +332,10 @@ export default function ManagerPortal() {
                             <div className="flex flex-col items-end gap-2 pr-2">
                               <span className={`text-[9px] font-black uppercase px-2 py-1 rounded-full border ${
                                 (ticket.status || '').toLowerCase() === 'completed' ? 'border-emerald-100 text-emerald-600 bg-emerald-50' : 
-                                (ticket.status || '').toLowerCase() === 'in-progress' || (ticket.status || '').toLowerCase() === 'assigned' ? 'border-amber-100 text-amber-600 bg-amber-50' : 
+                                (ticket.status || '').toLowerCase() === 'in-progress' || (ticket.status || '').toLowerCase() === 'assigned' || (ticket.status || '').toLowerCase() === 'open' ? 'border-amber-100 text-amber-600 bg-amber-50' : 
                                 'border-slate-100 text-slate-500 bg-slate-50'
                               }`}>
-                                {(ticket.status || 'created').replace('-', ' ')}
+                                {['created', 'assigned', 'open'].includes((ticket.status || '').toLowerCase()) ? 'New' : (ticket.status || '').replace('-', ' ')}
                               </span>
                               
                               <div className="flex items-center gap-2">

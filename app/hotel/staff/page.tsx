@@ -46,6 +46,8 @@ const statusBorderColors: Record<string, string> = {
 
 const statusLabels: Record<string, string> = {
   created: 'New',
+  assigned: 'New',
+  open: 'New',
   'in-progress': 'In Progress',
   completed: 'Completed',
 };
@@ -279,7 +281,7 @@ export default function StaffPortal() {
                     </div>
 
                     <div className="flex items-center gap-1.5 flex-shrink-0">
-                      {((task.status || '').toLowerCase() === 'created' || (task.status || '').toLowerCase() === 'assigned') && (
+                      {((task.status || '').toLowerCase() === 'created' || (task.status || '').toLowerCase() === 'assigned' || (task.status || '').toLowerCase() === 'open') && (
                         <button
                           onClick={() => handleUpdateStatus(task.id, 'in-progress')}
                           className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs py-1.5 px-2.5 rounded-lg transition-all active:scale-95 shadow-sm"
