@@ -73,6 +73,8 @@ export async function GET(request: NextRequest) {
         assignedStaffName: assigned?.fullName || assigned?.email || ticketData.assignedStaffName,
         createdAt: ticketData.createdAt?.toDate?.().toISOString() || ticketData.createdAt,
         updatedAt: ticketData.updatedAt?.toDate?.().toISOString() || ticketData.updatedAt,
+        // Map new schema fields for consistency if needed, though client-side fix handles it
+        requestText: ticketData.issue_summary || ticketData.requestText || '',
       };
     });
 

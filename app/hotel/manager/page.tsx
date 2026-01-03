@@ -279,7 +279,7 @@ export default function ManagerPortal() {
                 <div className="space-y-8">
                   {Object.entries(
                     tickets.reduce((acc, ticket) => {
-                      const dept = ticket.department.toLowerCase();
+                      const dept = (ticket.department || 'unassigned').toLowerCase().trim();
                       if (!acc[dept]) acc[dept] = [];
                       acc[dept].push(ticket);
                       return acc;
@@ -301,41 +301,41 @@ export default function ManagerPortal() {
                             onClick={() => setSelectedTicket(ticket)}
                             className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all cursor-pointer group flex items-center gap-4"
                           >
-                            <div className={`w-1 h-10 rounded-full ${
-                              ticket.priority === 'urgent' ? 'bg-red-500' : 
-                              ticket.priority === 'normal' ? 'bg-blue-500' : 
+                          <div className={`w-1 h-10 rounded-full ${
+                              (ticket.priority || '').toLowerCase() === 'urgent' || (ticket.priority || '').toLowerCase() === 'high' ? 'bg-red-500' : 
+                              (ticket.priority || '').toLowerCase() === 'normal' ? 'bg-blue-500' : 
                               'bg-slate-300'
                             }`} />
                             
                             <div className="w-12 h-12 bg-slate-900 dark:bg-white rounded-xl flex-shrink-0 flex items-center justify-center shadow-sm">
-                              <span className="text-lg font-black text-white dark:text-slate-900">#{ticket.guestRoom}</span>
+                              <span className="text-lg font-black text-white dark:text-slate-900">#{ticket.guestRoom || '??'}</span>
                             </div>
 
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-0.5">
                                 <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded tracking-tighter ${
-                                  ticket.priority === 'urgent' ? 'bg-red-500/10 text-red-600' : 
-                                  ticket.priority === 'normal' ? 'bg-blue-500/10 text-blue-600' : 
+                                  (ticket.priority || '').toLowerCase() === 'urgent' || (ticket.priority || '').toLowerCase() === 'high' ? 'bg-red-500/10 text-red-600' : 
+                                  (ticket.priority || '').toLowerCase() === 'normal' ? 'bg-blue-500/10 text-blue-600' : 
                                   'bg-slate-100 text-slate-500'
                                 }`}>
-                                  {ticket.priority}
+                                  {ticket.priority || 'normal'}
                                 </span>
                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                                  <FiClock className="w-3 h-3" /> {new Date(ticket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  <FiClock className="w-3 h-3" /> {ticket.createdAt ? new Date(ticket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
                                 </span>
                               </div>
                               <p className="text-slate-900 dark:text-white font-bold text-sm truncate">
-                                {ticket.requestText}
+                                {(ticket as any).issue_summary || ticket.requestText || 'No description'}
                               </p>
                             </div>
 
                             <div className="flex flex-col items-end gap-2 pr-2">
                               <span className={`text-[9px] font-black uppercase px-2 py-1 rounded-full border ${
-                                ticket.status === 'completed' ? 'border-emerald-100 text-emerald-600 bg-emerald-50' : 
-                                ticket.status === 'in-progress' ? 'border-amber-100 text-amber-600 bg-amber-50' : 
+                                (ticket.status || '').toLowerCase() === 'completed' ? 'border-emerald-100 text-emerald-600 bg-emerald-50' : 
+                                (ticket.status || '').toLowerCase() === 'in-progress' || (ticket.status || '').toLowerCase() === 'assigned' ? 'border-amber-100 text-amber-600 bg-amber-50' : 
                                 'border-slate-100 text-slate-500 bg-slate-50'
                               }`}>
-                                {ticket.status.replace('-', ' ')}
+                                {(ticket.status || 'created').replace('-', ' ')}
                               </span>
                               
                               <div className="flex items-center gap-2">
