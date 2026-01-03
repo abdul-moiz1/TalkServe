@@ -101,9 +101,9 @@ export default function ManagerPortal() {
           localStorage.setItem('userDepartment', userDept);
         }
         
-        // Filter team by department
+        // Filter team by department and exclude current user (the manager)
         const filteredTeam = (teamData.members || []).filter((m: TeamMember) => 
-          m.department?.toLowerCase() === userDept?.toLowerCase()
+          m.department?.toLowerCase() === userDept?.toLowerCase() && (m as any).userId !== user?.uid
         );
         setTeamMembers(filteredTeam);
       }
