@@ -1,5 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminDb, verifyAuthToken } from '@/lib/firebase-admin';
+import { GoogleGenerativeAI } from '@google/generativeai';
+
+async function translateText(text: string, targetLanguages: string[]): Promise<Record<string, string>> {
+  if (!process.env.GEMINI_API_KEY || targetLanguages.length === 0) return {};
+  
+  try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    
+    const prompt = `Translate the following hotel guest request into these languages: ${targetLanguages.join(', ')}. 
+    Return ONLY a JSON object where keys are the language codes and values are the translations.
+    Request: "${text}"`;
+    
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
+    // Clean JSON from potential markdown blocks
+    const jsonStr = responseText.replace(/```json|```/g, '').trim();
+    return JSON.parse(jsonStr);
+  } catch (error) {
+    console.error('Gemini translation error:', error);
+    return {};
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -147,6 +170,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Not a member of this business' }, { status: 403 });
     }
 
+    // Get all unique preferred languages of the team in this business
+    const languagesSnapshot = await db
+      .collection('businesses')
+      .doc(businessId)
+      .collection('members')
+      .get();
+    
+    const targetLanguages = Array.from(new Set(
+      languagesSnapshot.docs
+        .map(doc => doc.data().preferredLanguage)
+        .filter(lang => lang && lang !== 'en')
+    )) as string[];
+
+    const translations = await translateText(requestText, targetLanguages);
+
     const ticketData = {
       businessId,
       guestRoom,
@@ -159,7 +197,7 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date(),
       createdBy: userId,
       notes: [],
-      translations: {},
+      translations: translations || {},
     };
 
     const ticketRef = await db
