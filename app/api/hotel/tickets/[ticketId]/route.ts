@@ -62,6 +62,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
     if (priority) updateData.priority = priority;
     if (notes) updateData.notes = notes;
+    if (body.translations) updateData.translations = body.translations;
 
     await ticketRef.update(updateData);
 
