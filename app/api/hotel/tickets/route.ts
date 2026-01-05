@@ -33,6 +33,8 @@ async function translateText(text: string, targetLanguages: string[]): Promise<R
     const responseText = result.response.text();
     // Clean JSON from potential markdown blocks
     const jsonStr = responseText.replace(/```json|```/g, '').trim();
+    console.log('Gemini raw response:', responseText);
+    console.log('Gemini cleaned JSON:', jsonStr);
     return JSON.parse(jsonStr);
   } catch (error) {
     console.error('Gemini translation error:', error);

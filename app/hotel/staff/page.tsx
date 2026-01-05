@@ -297,7 +297,7 @@ export default function StaffPortal() {
                                 </span>
                               </div>
                               <p className="text-slate-900 dark:text-white font-bold text-sm truncate">
-                                {task.translations?.[staffInfo?.preferredLanguage || 'en'] || (task as any).issue_summary || task.requestText || 'No description'}
+                                {task.translations?.[staffInfo?.preferredLanguage || localStorage.getItem('userLanguage') || 'en'] || task.requestText || 'No description'}
                               </p>
                       {task.assignedByName && (
                         <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
