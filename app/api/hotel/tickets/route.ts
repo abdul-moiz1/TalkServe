@@ -116,29 +116,40 @@ export async function GET(request: NextRequest) {
 
     const snapshot = await ticketsRef.get();
     
-    let tickets = snapshot.docs.map((doc: any) => {
+    // Get translations for existing tickets that don't have them
+    const tickets = await Promise.all(snapshot.docs.map(async (doc: any) => {
       const ticketData = doc.data();
       const assigned = ticketData.assignedTo ? memberMap[ticketData.assignedTo] : null;
+      let translations = ticketData.translations || {};
+
+      // If missing translations for 'es' or 'ar', try to generate them on the fly
+      if (Object.keys(translations).length === 0 && (ticketData.issue_summary || ticketData.requestText)) {
+        console.log('Generating missing translations for ticket:', doc.id);
+        translations = await translateText(ticketData.issue_summary || ticketData.requestText, ['es', 'ar']);
+        // Update the ticket in background
+        db.collection('businesses').doc(businessId).collection('tickets').doc(doc.id).update({ translations }).catch(err => console.error('Background update failed:', err));
+      }
       
       return {
         id: doc.id,
         ...ticketData,
+        translations,
         assignedStaffName: assigned?.fullName || assigned?.email || ticketData.assignedStaffName,
         createdAt: ticketData.createdAt?.toDate?.().toISOString() || ticketData.createdAt,
         updatedAt: ticketData.updatedAt?.toDate?.().toISOString() || ticketData.updatedAt,
-        // Map new schema fields for consistency if needed, though client-side fix handles it
         requestText: ticketData.issue_summary || ticketData.requestText || '',
       };
-    });
+    }));
 
     // Filter tickets based on role and department
+    let filteredTickets = tickets;
     if (userRole === 'staff') {
       // Staff see only tickets assigned to them
-      tickets = tickets.filter((t: any) => t.assignedTo === userId);
+      filteredTickets = tickets.filter((t: any) => t.assignedTo === userId);
     } else if (userRole === 'manager' || userRole === 'admin') {
       // Managers see all tickets in their department
       if (filterDept) {
-        tickets = tickets.filter((t: any) => {
+        filteredTickets = tickets.filter((t: any) => {
           if (!t.department) return false;
           const ticketDept = t.department.toLowerCase().trim().replace(/[\s-]/g, '');
           return ticketDept === filterDept;
@@ -148,17 +159,17 @@ export async function GET(request: NextRequest) {
 
     // Filter by status if provided
     if (status && status !== 'all') {
-      tickets = tickets.filter((t: any) => t.status === status);
+      filteredTickets = filteredTickets.filter((t: any) => t.status === status);
     }
 
     // Sort by date
-    tickets.sort((a: any, b: any) => {
+    filteredTickets.sort((a: any, b: any) => {
       const dateA = new Date(a.createdAt || 0).getTime();
       const dateB = new Date(b.createdAt || 0).getTime();
       return dateB - dateA;
     });
 
-    return NextResponse.json({ success: true, tickets });
+    return NextResponse.json({ success: true, tickets: filteredTickets });
   } catch (error) {
     console.error('Error fetching tickets:', error);
     return NextResponse.json(
