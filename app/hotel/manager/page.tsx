@@ -491,7 +491,9 @@ export default function ManagerPortal() {
                     </div>
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-slate-500 font-bold uppercase tracking-tighter text-[11px]">Language</span>
-                      <span className="text-blue-600 font-black uppercase tracking-widest text-[10px] bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">English</span>
+                      <span className="text-blue-600 font-black uppercase tracking-widest text-[10px] bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">
+                        {managerInfo?.preferredLanguage || 'English'}
+                      </span>
                     </div>
                   </div>
                 </div>

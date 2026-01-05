@@ -22,7 +22,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { fullName, phone, role, department, status } = body;
+    const { fullName, phone, role, department, status, preferredLanguage } = body;
 
     const db = getAdminDb();
     if (!db) {
@@ -35,6 +35,7 @@ export async function PUT(
     if (role !== undefined) updateData.role = role;
     if (department !== undefined) updateData.department = department;
     if (status !== undefined) updateData.status = status;
+    if (preferredLanguage !== undefined) updateData.preferredLanguage = preferredLanguage;
 
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json({ error: 'No fields to update' }, { status: 400 });

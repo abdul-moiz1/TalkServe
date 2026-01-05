@@ -707,7 +707,7 @@ export default function HotelAdminPage() {
                         </div>
                         <div className="flex items-center gap-2 font-medium ml-4">
                           <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-                          {member.phone || 'No Phone'}
+                          {(member as any).preferredLanguage || 'English'}
                         </div>
                       </div>
                     </div>
@@ -957,6 +957,40 @@ export default function HotelAdminPage() {
                     >
                       <option value="active">Active</option>
                       <option value="inactive">Inactive</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Preferred Language</label>
+                    <select 
+                      value={(selectedMember as any).preferredLanguage || 'en'}
+                      onChange={async (e) => {
+                        const newLang = e.target.value;
+                        if (!selectedMember || !businessId) return;
+                        try {
+                          const idToken = await user?.getIdToken();
+                          const response = await fetch(`/api/hotel/team/${selectedMember.id}?businessId=${businessId}`, {
+                            method: 'PUT',
+                            headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ preferredLanguage: newLang })
+                          });
+                          if (response.ok) {
+                            setSelectedMember({ ...selectedMember, preferredLanguage: newLang } as any);
+                            fetchTeamMembers(businessId);
+                          }
+                        } catch (err) {
+                          console.error(err);
+                        }
+                      }}
+                      className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                    >
+                      <option value="en">English</option>
+                      <option value="es">Spanish</option>
+                      <option value="fr">French</option>
+                      <option value="de">German</option>
+                      <option value="it">Italian</option>
+                      <option value="ur">Urdu</option>
+                      <option value="hi">Hindi</option>
+                      <option value="ar">Arabic</option>
                     </select>
                   </div>
                 </div>
