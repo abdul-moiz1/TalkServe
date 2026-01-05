@@ -7,12 +7,6 @@ try {
   const genai = require('@google/generativeai');
   if (genai && genai.GoogleGenerativeAI) {
     GoogleGenerativeAI = genai.GoogleGenerativeAI;
-  } else {
-    // Try alternative package name if that's what's installed
-    const altGenai = require('@google/genai');
-    if (altGenai && altGenai.GoogleGenerativeAI) {
-      GoogleGenerativeAI = altGenai.GoogleGenerativeAI;
-    }
   }
 } catch (e) {
   console.warn('Gemini AI package not found, translations will be skipped');
