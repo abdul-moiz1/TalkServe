@@ -2,15 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAdminDb, verifyAuthToken } from '@/lib/firebase-admin';
 
 // Check if Gemini is available
-let GoogleGenerativeAI: any;
-try {
-  const genai = require('@google/genai');
-  if (genai && genai.GoogleGenerativeAI) {
-    GoogleGenerativeAI = genai.GoogleGenerativeAI;
-  }
-} catch (e) {
-  console.warn('Gemini AI package not found, translations will be skipped');
-}
+import * as GoogleGenerativeAIModule from '@google/generative-ai';
+const GoogleGenerativeAI = (GoogleGenerativeAIModule as any).GoogleGenerativeAI;
 
 async function translateText(text: string, targetLanguages: string[]): Promise<Record<string, string>> {
   if (!GoogleGenerativeAI || !process.env.GEMINI_API_KEY || targetLanguages.length === 0) {
@@ -123,9 +116,18 @@ export async function GET(request: NextRequest) {
       let translations = ticketData.translations || {};
 
       // If missing translations for 'es' or 'ar', try to generate them on the fly
-      if (Object.keys(translations).length === 0 && (ticketData.issue_summary || ticketData.requestText)) {
+      const hasEs = translations['es'];
+      const hasAr = translations['ar'];
+      
+      if ((!hasEs || !hasAr) && (ticketData.issue_summary || ticketData.requestText)) {
         console.log('Generating missing translations for ticket:', doc.id);
-        translations = await translateText(ticketData.issue_summary || ticketData.requestText, ['es', 'ar']);
+        const missingLangs = [];
+        if (!hasEs) missingLangs.push('es');
+        if (!hasAr) missingLangs.push('ar');
+        
+        const newTranslations = await translateText(ticketData.issue_summary || ticketData.requestText, missingLangs);
+        translations = { ...translations, ...newTranslations };
+        
         // Update the ticket in background
         db.collection('businesses').doc(businessId).collection('tickets').doc(doc.id).update({ translations }).catch(err => console.error('Background update failed:', err));
       }
@@ -221,9 +223,9 @@ export async function POST(request: NextRequest) {
     
     const targetLanguages = Array.from(new Set([
       ...languagesSnapshot.docs
-        .map(doc => doc.data().preferredLanguage)
+        .map(doc => doc.data().preferredLanguage?.toLowerCase())
         .filter(lang => lang && lang !== 'en'),
-      'es' // Always include Spanish as a fallback target if requested
+      'es', 'ar'
     ])) as string[];
 
     // Ensure common languages are included if needed, or just rely on team preferences
