@@ -358,9 +358,16 @@ export default function StaffPortal() {
                     <div className="w-12 h-12 bg-white dark:bg-slate-700 rounded-xl flex items-center justify-center border border-emerald-200 dark:border-slate-600 shrink-0 shadow-sm">
                       <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">#{task.guestRoom || '??'}</span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-slate-900 dark:text-white font-bold text-sm mb-1">{(task as any).issue_summary || task.requestText || 'No description'}</p>
-                      <div className="flex items-center gap-2 mb-1">
+                      <p className="text-slate-900 dark:text-white font-bold text-sm mb-1">
+                        {(task as any).translations?.[(staffInfo?.preferredLanguage || 'en').toLowerCase()] || 
+                         (task as any).translations?.es || 
+                         (task as any).translations?.ar ||
+                         (task as any).translations?.spanish ||
+                         (task as any).translations?.arabic ||
+                         (task as any).issue_summary || 
+                         task.requestText || 
+                         'No description'}
+                      </p>
                         <span className="text-[9px] font-black uppercase px-2.5 py-1 rounded-lg tracking-wider text-white bg-emerald-500 shadow-md">Completed</span>
                       </div>
                       {task.assignedByName && (

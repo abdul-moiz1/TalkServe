@@ -116,14 +116,17 @@ export async function GET(request: NextRequest) {
       let translations = ticketData.translations || {};
 
       // If missing translations for 'es' or 'ar', try to generate them on the fly
+      const prefLang = (memberData?.preferredLanguage || 'en').toLowerCase();
       const hasEs = translations['es'];
       const hasAr = translations['ar'];
+      const hasPref = translations[prefLang];
       
-      if ((!hasEs || !hasAr) && (ticketData.issue_summary || ticketData.requestText)) {
-        console.log('Generating missing translations for ticket:', doc.id);
+      if ((!hasEs || !hasAr || (prefLang !== 'en' && !hasPref)) && (ticketData.issue_summary || ticketData.requestText)) {
+        console.log('Generating missing translations for ticket:', doc.id, 'Targeting:', prefLang);
         const missingLangs = [];
         if (!hasEs) missingLangs.push('es');
         if (!hasAr) missingLangs.push('ar');
+        if (prefLang !== 'en' && !hasPref) missingLangs.push(prefLang);
         
         const newTranslations = await translateText(ticketData.issue_summary || ticketData.requestText, missingLangs);
         translations = { ...translations, ...newTranslations };
