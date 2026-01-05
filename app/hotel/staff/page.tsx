@@ -347,38 +347,34 @@ export default function StaffPortal() {
               className="space-y-3"
             >
               {completedToday.map(task => (
-                <motion.div 
-                  key={task.id}
-                  initial={ { opacity: 0, y: 10 } }
-                  animate={ { opacity: 1, y: 0 } }
-                  transition={ { type: 'spring', stiffness: 300, damping: 30 } }
-                  className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-4 border border-emerald-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-500 hover:shadow-lg transition-all cursor-pointer"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-white dark:bg-slate-700 rounded-xl flex items-center justify-center border border-emerald-200 dark:border-slate-600 shrink-0 shadow-sm">
-                      <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">#{task.guestRoom || '??'}</span>
-                    </div>
-                      <p className="text-slate-900 dark:text-white font-bold text-sm mb-1">
-                        {(task as any).translations?.[(staffInfo?.preferredLanguage || 'en').toLowerCase()] || 
-                         (task as any).translations?.es || 
-                         (task as any).translations?.ar ||
-                         (task as any).translations?.spanish ||
-                         (task as any).translations?.arabic ||
-                         (task as any).issue_summary || 
-                         task.requestText || 
-                         'No description'}
-                      </p>
-                        <span className="text-[9px] font-black uppercase px-2.5 py-1 rounded-lg tracking-wider text-white bg-emerald-500 shadow-md">Completed</span>
+                  <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-4 border border-emerald-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-500 hover:shadow-lg transition-all cursor-pointer">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-white dark:bg-slate-700 rounded-xl flex items-center justify-center border border-emerald-200 dark:border-slate-600 shrink-0 shadow-sm">
+                        <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">#{task.guestRoom || '??'}</span>
                       </div>
-                      {task.assignedByName && (
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                          Assigned by <span className="font-bold text-blue-600 dark:text-blue-400">{task.assignedByName}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-slate-900 dark:text-white font-bold text-sm mb-1">
+                          {(task as any).translations?.[(staffInfo?.preferredLanguage || 'en').toLowerCase()] || 
+                           (task as any).translations?.es || 
+                           (task as any).translations?.ar ||
+                           (task as any).translations?.spanish ||
+                           (task as any).translations?.arabic ||
+                           (task as any).issue_summary || 
+                           task.requestText || 
+                           'No description'}
                         </p>
-                      )}
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[9px] font-black uppercase px-2.5 py-1 rounded-lg tracking-wider text-white bg-emerald-500 shadow-md">Completed</span>
+                        </div>
+                        {task.assignedByName && (
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                            Assigned by <span className="font-bold text-blue-600 dark:text-blue-400">{task.assignedByName}</span>
+                          </p>
+                        )}
+                      </div>
+                      <FiCheckCircle className="text-emerald-500 w-6 h-6 shrink-0 mt-0.5" />
                     </div>
-                    <FiCheckCircle className="text-emerald-500 w-6 h-6 shrink-0 mt-0.5" />
                   </div>
-                </motion.div>
               ))}
               {completedToday.length === 0 && (
                 <div className="text-center py-24">
