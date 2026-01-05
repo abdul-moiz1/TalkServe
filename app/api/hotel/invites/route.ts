@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { businessId, email, fullName, phone, role, department } = body;
+    const { businessId, email, fullName, phone, role, department, preferredLanguage } = body;
 
     if (!businessId || (!email && !phone) || !role || !fullName) {
       return NextResponse.json({ error: 'Missing required fields (Name, Role, and either Email or Phone are mandatory)' }, { status: 400 });
@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
         role,
         department: role === 'staff' || role === 'manager' ? department : null,
         status: 'active',
+        preferredLanguage: preferredLanguage || 'en',
         createdAt: new Date(),
         businessId,
         password: generatedPassword 
