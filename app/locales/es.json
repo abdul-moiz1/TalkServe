@@ -1,0 +1,104 @@
+{
+  "common": {
+    "language": "Idioma",
+    "english": "Inglés",
+    "arabic": "Árabe",
+    "spanish": "Español",
+    "talkToUs": "Hable con nosotros",
+    "learnMore": "Saber más"
+  },
+  "navigation": {
+    "industries": "Industrias",
+    "dentalClinics": "Clínicas dentales",
+    "restaurants": "Restaurantes",
+    "serviceBusinesses": "Empresas de servicios",
+    "features": "Funcionalidades",
+    "pricing": "Precios",
+    "security": "Seguridad",
+    "contact": "Contacto",
+    "login": "Iniciar sesión",
+    "register": "Registrarse",
+    "dashboard": "Panel de control",
+    "logout": "Cerrar sesión",
+    "settings": "Configuración",
+    "poweredBy": "Desarrollado por TalkServe"
+  },
+  "hero": {
+    "title": "No pierda nunca otro cliente —",
+    "highlighted": "Por voz, SMS o WhatsApp",
+    "description": "La recepcionista de IA de TalkServe responde al instante a través de llamadas, mensajes de texto y WhatsApp. Reserva citas o pedidos, responde preguntas y hace el seguimiento — las 24 horas del día, los 7 días de la semana. Con la confianza de clínicas de salud, restaurantes y empresas de servicios en toda América del Norte.",
+    "coverage24": "Cobertura 24/7",
+    "worksSystems": "Funciona con sus sistemas"
+  },
+  "meetTalkServe": {
+    "title": "Conozca a TalkServe",
+    "subtitle": "Su recepcionista de IA para voz, SMS y WhatsApp — disponible 24/7.",
+    "feature1": "Responde al instante — sin música de espera, sin buzón de voz, sin mensajes de texto o WhatsApp perdidos.",
+    "feature2": "Reserva y toma pedidos — se sincroniza con su calendario, aplicación de reservas o TPV en todos los canales.",
+    "feature3": "Gestiona preguntas frecuentes — servicios, horarios, precios, menús, direcciones — por llamada, SMS o WhatsApp.",
+    "feature4": "Confirma y recuerda — los recordatorios automáticos por SMS/WhatsApp reducen el absentismo y las citas perdidas.",
+    "feature5": "Dirige casos prioritarios — las llamadas o mensajes urgentes van directamente a su equipo.",
+    "feature6": "Funciona 24/7/365 — horas punta, fines de semana, festivos y cobertura fuera del horario laboral."
+  },
+  "howItWorks": {
+    "title": "Cómo funciona",
+    "step1Title": "Conecte sus canales",
+    "step1Desc": "Desvíe su número de teléfono y vincule sus cuentas de SMS y WhatsApp Business a TalkServe.",
+    "step2Title": "Entrene a su agente",
+    "step2Desc": "Personalizamos su voz, respuestas, menú y base de conocimientos para llamadas, textos y chats de WhatsApp.",
+    "step3Title": "Puesta en marcha",
+    "step3Desc": "Empiece a gestionar llamadas, SMS y mensajes de WhatsApp reales en un día laborable."
+  },
+  "features": {
+    "title": "Funcionalidades de un vistazo",
+    "voiceConversation": "Voz y conversación",
+    "voiceChannel": "(Canal de voz — opcional)",
+    "callManagement": "Gestión de llamadas",
+    "scheduling": "Programación y reservas",
+    "communication": "Comunicación con el cliente",
+    "textChannel": "(SMS y WhatsApp)",
+    "integrations": "Integraciones"
+  },
+  "contact": {
+    "title": "Hablemos de sus",
+    "highlighted": "llamadas, textos y WhatsApp",
+    "description": "¿Tiene preguntas? ¿Quiere una demostración? Nuestro equipo está aquí para ayudarle a explorar la mejor manera de usar TalkServe para su negocio."
+  },
+  "auth": {
+    "staffLogin": "Inicio de sesión del personal",
+    "managerLogin": "Inicio de sesión del gerente",
+    "phoneNumber": "Número de teléfono",
+    "password": "Contraseña",
+    "signIn": "Iniciar sesión",
+    "forgotPassword": "¿Olvidó su contraseña?",
+    "resetPassword": "Restablecer contraseña",
+    "enterPhone": "Introduzca su número de teléfono",
+    "enterPassword": "Introduzca su contraseña"
+  },
+  "dashboard": {
+    "adminDashboard": "Panel de administración",
+    "teamManagement": "Gestión del equipo",
+    "staffMembers": "Miembros del personal",
+    "addMember": "Añadir miembro del equipo",
+    "editMember": "Editar miembro",
+    "deleteMember": "Eliminar miembro",
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "phone": "Teléfono",
+    "role": "Rol",
+    "department": "Departamento",
+    "actions": "Acciones",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "search": "Buscar"
+  },
+  "messages": {
+    "welcome": "Bienvenido a TalkServe",
+    "loading": "Cargando...",
+    "error": "Algo salió mal",
+    "success": "¡Éxito!",
+    "noResults": "No se encontraron resultados"
+  }
+}
