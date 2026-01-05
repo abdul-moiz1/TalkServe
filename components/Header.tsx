@@ -26,6 +26,7 @@ export default function Header() {
     { 
       name: t('navigation.industries'), 
       items: [
+        { name: t('navigation.hotel'), href: '/hotel-industry' },
         { name: t('navigation.dentalClinics'), href: '/dental' },
         { name: t('navigation.restaurants'), href: '/restaurants' },
         { name: t('navigation.serviceBusinesses'), href: '/services' },
