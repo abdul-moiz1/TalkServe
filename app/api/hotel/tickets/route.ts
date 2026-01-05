@@ -13,7 +13,7 @@ async function translateText(text: string, targetLanguages: string[]): Promise<R
   
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
     const prompt = `Translate the following hotel guest request into these languages: ${targetLanguages.join(', ')}. 
     Return ONLY a raw JSON object where keys are the language codes and values are the translations. No markdown formatting.
