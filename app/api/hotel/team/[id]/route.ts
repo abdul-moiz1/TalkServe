@@ -1,6 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminDb, getAdminAuth, verifyAuthToken } from '@/lib/firebase-admin';
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: memberId } = await params;
+    const authHeader = request.headers.get('Authorization');
+    const userId = await verifyAuthToken(authHeader);
+
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const businessId = searchParams.get('businessId');
+
+    if (!businessId || !memberId) {
+      return NextResponse.json({ error: 'Missing businessId or memberId' }, { status: 400 });
+    }
+
+    const db = getAdminDb();
+    if (!db) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    }
+
+    const memberDoc = await db
+      .collection('businesses')
+      .doc(businessId)
+      .collection('members')
+      .doc(memberId)
+      .get();
+
+    if (!memberDoc.exists) {
+      return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, member: { id: memberDoc.id, ...memberDoc.data() } });
+  } catch (error) {
+    console.error('Error fetching member:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

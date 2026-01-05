@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminDb, verifyAuthToken } from '@/lib/firebase-admin';
-import { GoogleGenerativeAI } from '@google/generativeai';
+
+// Check if Gemini is available
+let GoogleGenerativeAI: any;
+try {
+  const genai = require('@google/generativeai');
+  GoogleGenerativeAI = genai.GoogleGenerativeAI;
+} catch (e) {
+  console.warn('Gemini AI package not found, translations will be skipped');
+}
 
 async function translateText(text: string, targetLanguages: string[]): Promise<Record<string, string>> {
-  if (!process.env.GEMINI_API_KEY || targetLanguages.length === 0) return {};
+  if (!GoogleGenerativeAI || !process.env.GEMINI_API_KEY || targetLanguages.length === 0) return {};
   
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -47,7 +55,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Database not available' }, { status: 500 });
     }
 
-    // Get user's role and department
+    // Verify member exists in business
     const memberDoc = await db
       .collection('businesses')
       .doc(businessId)
@@ -62,6 +70,15 @@ export async function GET(request: NextRequest) {
     const memberData = memberDoc.data();
     const userRole = memberData?.role;
     const userDepartment = memberData?.department;
+
+    // RBAC: Check portal access
+    const pathname = request.nextUrl.pathname;
+    if (pathname.includes('/hotel/staff') && userRole !== 'staff') {
+       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+    if (pathname.includes('/hotel/manager') && userRole !== 'manager') {
+       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     // Determine which department to filter by
     const filterDept = department || userDepartment;
