@@ -60,8 +60,9 @@ export default function StaffPortal() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [syncing, setSyncing] = useState(false);
   const [staffInfo, setStaffInfo] = useState<{ fullName?: string; phone?: string; createdAt?: string; department?: string; status?: string; preferredLanguage?: string } | null>(null);
+  const [isAccountSuspended, setIsAccountSuspended] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
   const businessId = searchParams.get('businessId');
 

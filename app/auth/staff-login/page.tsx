@@ -67,6 +67,7 @@ function StaffLoginForm() {
               if (data.businessId) localStorage.setItem('currentBusinessId', data.businessId);
               if (data.role) localStorage.setItem('userRole', data.role);
               if (data.department) localStorage.setItem('userDepartment', data.department);
+              if (data.language) localStorage.setItem('userLanguage', data.language);
               window.location.href = data.redirect;
             } else {
               window.location.href = '/dashboard';
@@ -101,6 +102,7 @@ function StaffLoginForm() {
           if (data.businessId) localStorage.setItem('currentBusinessId', data.businessId);
           if (data.role) localStorage.setItem('userRole', data.role);
           if (data.department) localStorage.setItem('userDepartment', data.department);
+          if (data.language) localStorage.setItem('userLanguage', data.language);
           window.location.href = data.redirect;
         } else {
           window.location.href = '/dashboard';

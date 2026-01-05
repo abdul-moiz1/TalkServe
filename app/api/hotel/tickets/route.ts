@@ -78,12 +78,13 @@ export async function GET(request: NextRequest) {
 
     // Determine which department to filter by
     const filterDept = department || userDepartment;
+    console.log('Fetching tickets for business:', businessId, 'filterDept:', filterDept, 'userRole:', userRole);
 
     // Get all tickets for this business first
     let ticketsRef = db
       .collection('businesses')
       .doc(businessId)
-      .collection('tickets') as any;
+      .collection('tickets');
 
     // Get all members for name lookup
     const membersSnapshot = await db
@@ -118,12 +119,12 @@ export async function GET(request: NextRequest) {
     if (userRole === 'staff') {
       // Staff see only tickets assigned to them
       tickets = tickets.filter((t: any) => t.assignedTo === userId);
-    } else if (userRole === 'manager') {
+    } else if (userRole === 'manager' || userRole === 'admin') {
       // Managers see all tickets in their department
       if (filterDept) {
-        const deptLower = filterDept.toLowerCase();
+        const deptLower = filterDept.toLowerCase().trim();
         tickets = tickets.filter((t: any) => 
-          t.department && t.department.toLowerCase() === deptLower
+          t.department && t.department.toLowerCase().trim() === deptLower
         );
       }
     }
