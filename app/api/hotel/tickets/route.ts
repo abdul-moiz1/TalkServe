@@ -13,7 +13,7 @@ async function translateText(text: string, targetLanguages: string[]): Promise<R
   
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' }, { apiVersion: 'v1' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
     
     const prompt = `Translate the following hotel guest request into these languages: ${targetLanguages.join(', ')}. 
     Return ONLY a raw JSON object where keys are the language codes and values are the translations. No markdown formatting.
@@ -22,9 +22,9 @@ async function translateText(text: string, targetLanguages: string[]): Promise<R
     console.log('Sending prompt to Gemini:', prompt);
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
-    // Clean JSON from potential markdown blocks
+    // Clean JSON from potential markdown blocks or extra text
     let jsonStr = responseText.replace(/```json|```/g, '').trim();
-    // Sometimes Gemini returns a wrapper object or non-JSON text, try to extract the JSON object
+    // Use regex to extract the JSON object if there's extra text
     const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       jsonStr = jsonMatch[0];
