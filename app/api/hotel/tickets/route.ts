@@ -30,9 +30,20 @@ async function translateText(text: string, targetLanguages: string[]): Promise<R
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
     // Clean JSON from potential markdown blocks
-    const jsonStr = responseText.replace(/```json|```/g, '').trim();
+    let jsonStr = responseText.replace(/```json|```/g, '').trim();
+    // Sometimes Gemini returns a wrapper object or non-JSON text, try to extract the JSON object
+    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      jsonStr = jsonMatch[0];
+    }
     console.log('Gemini raw response:', responseText);
-    return JSON.parse(jsonStr);
+    const parsed = JSON.parse(jsonStr);
+    // Ensure we return exactly what's expected: Record<string, string>
+    const result: Record<string, string> = {};
+    for (const [key, value] of Object.entries(parsed)) {
+      result[key.toLowerCase()] = String(value);
+    }
+    return result;
   } catch (error) {
     console.error('Gemini translation error:', error);
     return {};
