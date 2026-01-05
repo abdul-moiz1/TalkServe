@@ -348,7 +348,7 @@ export default function ManagerPortal() {
                                 </span>
                               </div>
                               <p className="text-slate-900 dark:text-white font-bold text-sm truncate">
-                                {ticket.translations?.[localStorage.getItem('userLanguage') || 'en'] || (ticket as any).issue_summary || ticket.requestText || 'No description'}
+                                {ticket.translations?.[managerInfo?.preferredLanguage || localStorage.getItem('userLanguage') || 'en'] || (ticket as any).issue_summary || ticket.requestText || 'No description'}
                               </p>
                             </div>
 

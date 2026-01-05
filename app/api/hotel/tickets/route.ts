@@ -77,8 +77,8 @@ export async function GET(request: NextRequest) {
     // Ensure the businessId matches (verified via memberDoc check above)
 
     // Determine which department to filter by
-    const filterDept = department || userDepartment;
-    console.log('Fetching tickets for business:', businessId, 'filterDept:', filterDept, 'userRole:', userRole);
+    const filterDept = (department || userDepartment || '').toLowerCase().trim().replace(/[\s-]/g, '');
+    console.log('Fetching tickets for business:', businessId, 'filterDept (normalized):', filterDept, 'userRole:', userRole);
 
     // Get all tickets for this business first
     let ticketsRef = db
@@ -122,10 +122,11 @@ export async function GET(request: NextRequest) {
     } else if (userRole === 'manager' || userRole === 'admin') {
       // Managers see all tickets in their department
       if (filterDept) {
-        const deptLower = filterDept.toLowerCase().trim();
-        tickets = tickets.filter((t: any) => 
-          t.department && t.department.toLowerCase().trim() === deptLower
-        );
+        tickets = tickets.filter((t: any) => {
+          if (!t.department) return false;
+          const ticketDept = t.department.toLowerCase().trim().replace(/[\s-]/g, '');
+          return ticketDept === filterDept;
+        });
       }
     }
 
