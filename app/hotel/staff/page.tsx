@@ -300,6 +300,8 @@ export default function StaffPortal() {
                                 {(task as any).translations?.[(staffInfo?.preferredLanguage || 'en').toLowerCase()] || 
                                  (task as any).translations?.es || 
                                  (task as any).translations?.ar ||
+                                 (task as any).translations?.spanish ||
+                                 (task as any).translations?.arabic ||
                                  task.requestText || 
                                  'No description'}
                               </p>

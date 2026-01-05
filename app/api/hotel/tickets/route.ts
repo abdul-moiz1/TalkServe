@@ -13,10 +13,10 @@ async function translateText(text: string, targetLanguages: string[]): Promise<R
   
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' }, { apiVersion: 'v1' });
     
     const prompt = `Translate the following hotel guest request into these languages: ${targetLanguages.join(', ')}. 
-    Return ONLY a JSON object where keys are the language codes and values are the translations.
+    Return ONLY a raw JSON object where keys are the language codes and values are the translations. No markdown formatting.
     Request: "${text}"`;
     
     console.log('Sending prompt to Gemini:', prompt);
@@ -225,7 +225,7 @@ export async function POST(request: NextRequest) {
       ...languagesSnapshot.docs
         .map(doc => doc.data().preferredLanguage?.toLowerCase())
         .filter(lang => lang && lang !== 'en'),
-      'es', 'ar'
+      'es', 'ar', 'Spanish', 'Arabic'
     ])) as string[];
 
     // Ensure common languages are included if needed, or just rely on team preferences

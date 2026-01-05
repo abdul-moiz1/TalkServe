@@ -362,6 +362,8 @@ export default function ManagerPortal() {
                                 {ticket.translations?.[(managerInfo?.preferredLanguage || 'en').toLowerCase()] || 
                                  ticket.translations?.es || 
                                  ticket.translations?.ar ||
+                                 ticket.translations?.spanish ||
+                                 ticket.translations?.arabic ||
                                  ticket.requestText || 
                                  'No description'}
                               </p>
