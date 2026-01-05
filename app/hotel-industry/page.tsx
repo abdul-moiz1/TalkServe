@@ -61,7 +61,7 @@ export default function HotelIndustryPage() {
         title="The AI Solution for"
         highlightedText="Modern Hospitality"
         description="Transforming operations and guest experience for hotels with a WhatsApp-based AI Digital Butler, addressing core challenges and boosting direct revenue."
-        imagePath="/attached_assets/stock_images/luxury_hotel_lobby_i_9f0374f3.jpg"
+        imagePath="/images/heroes/hotel-hero.jpg"
         imageAlt="Modern hotel lobby"
       >
         <div className="mb-8">
