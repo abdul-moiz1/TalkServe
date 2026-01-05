@@ -4,7 +4,7 @@ import { getAdminDb, verifyAuthToken } from '@/lib/firebase-admin';
 // Check if Gemini is available
 let GoogleGenerativeAI: any;
 try {
-  const genai = require('@google/generativeai');
+  const genai = require('@google/genai');
   if (genai && genai.GoogleGenerativeAI) {
     GoogleGenerativeAI = genai.GoogleGenerativeAI;
   }
@@ -13,7 +13,10 @@ try {
 }
 
 async function translateText(text: string, targetLanguages: string[]): Promise<Record<string, string>> {
-  if (!GoogleGenerativeAI || !process.env.GEMINI_API_KEY || targetLanguages.length === 0) return {};
+  if (!GoogleGenerativeAI || !process.env.GEMINI_API_KEY || targetLanguages.length === 0) {
+    console.log('Skipping translation: AI not loaded or no target languages');
+    return {};
+  }
   
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -23,12 +26,12 @@ async function translateText(text: string, targetLanguages: string[]): Promise<R
     Return ONLY a JSON object where keys are the language codes and values are the translations.
     Request: "${text}"`;
     
+    console.log('Sending prompt to Gemini:', prompt);
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
     // Clean JSON from potential markdown blocks
     const jsonStr = responseText.replace(/```json|```/g, '').trim();
     console.log('Gemini raw response:', responseText);
-    console.log('Gemini cleaned JSON:', jsonStr);
     return JSON.parse(jsonStr);
   } catch (error) {
     console.error('Gemini translation error:', error);
