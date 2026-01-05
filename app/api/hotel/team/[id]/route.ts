@@ -3,9 +3,10 @@ import { getAdminDb, getAdminAuth, verifyAuthToken } from '@/lib/firebase-admin'
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: memberId } = await params;
     const authHeader = request.headers.get('Authorization');
     const userId = await verifyAuthToken(authHeader);
 
@@ -15,7 +16,6 @@ export async function PUT(
 
     const { searchParams } = new URL(request.url);
     const businessId = searchParams.get('businessId');
-    const memberId = params.id;
 
     if (!businessId || !memberId) {
       return NextResponse.json({ error: 'Missing businessId or memberId' }, { status: 400 });
@@ -60,9 +60,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: memberId } = await params;
     const authHeader = request.headers.get('Authorization');
     const userId = await verifyAuthToken(authHeader);
 
@@ -72,7 +73,6 @@ export async function DELETE(
 
     const { searchParams } = new URL(request.url);
     const businessId = searchParams.get('businessId');
-    const memberId = params.id;
 
     if (!businessId || !memberId) {
       return NextResponse.json({ error: 'Missing businessId or memberId' }, { status: 400 });
