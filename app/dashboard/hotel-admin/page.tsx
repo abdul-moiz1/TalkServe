@@ -443,7 +443,6 @@ export default function HotelAdminPage() {
                   onChange={(e) => setInviteRole(e.target.value)}
                   className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                 >
-                  <option value="admin">Admin</option>
                   <option value="manager">Manager</option>
                   <option value="staff">Staff</option>
                 </select>
@@ -927,7 +926,6 @@ export default function HotelAdminPage() {
                       onChange={(e) => setEditingRole(e.target.value)}
                       className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                     >
-                      <option value="admin">Admin</option>
                       <option value="manager">Manager</option>
                       <option value="staff">Staff</option>
                     </select>
