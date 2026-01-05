@@ -5,7 +5,9 @@ import { getAdminDb, verifyAuthToken } from '@/lib/firebase-admin';
 let GoogleGenerativeAI: any;
 try {
   const genai = require('@google/generativeai');
-  GoogleGenerativeAI = genai.GoogleGenerativeAI;
+  if (genai && genai.GoogleGenerativeAI) {
+    GoogleGenerativeAI = genai.GoogleGenerativeAI;
+  }
 } catch (e) {
   console.warn('Gemini AI package not found, translations will be skipped');
 }
