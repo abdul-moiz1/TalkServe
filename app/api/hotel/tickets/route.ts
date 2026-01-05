@@ -7,6 +7,12 @@ try {
   const genai = require('@google/generativeai');
   if (genai && genai.GoogleGenerativeAI) {
     GoogleGenerativeAI = genai.GoogleGenerativeAI;
+  } else {
+    // Try alternative package name if that's what's installed
+    const altGenai = require('@google/genai');
+    if (altGenai && altGenai.GoogleGenerativeAI) {
+      GoogleGenerativeAI = altGenai.GoogleGenerativeAI;
+    }
   }
 } catch (e) {
   console.warn('Gemini AI package not found, translations will be skipped');
@@ -192,11 +198,16 @@ export async function POST(request: NextRequest) {
       .collection('members')
       .get();
     
-    const targetLanguages = Array.from(new Set(
-      languagesSnapshot.docs
+    const targetLanguages = Array.from(new Set([
+      ...languagesSnapshot.docs
         .map(doc => doc.data().preferredLanguage)
-        .filter(lang => lang && lang !== 'en')
-    )) as string[];
+        .filter(lang => lang && lang !== 'en'),
+      'es' // Always include Spanish as a fallback target if requested
+    ])) as string[];
+
+    // Ensure common languages are included if needed, or just rely on team preferences
+    // If the manager is Spanish, 'es' should already be in targetLanguages
+    console.log('Target languages for translation:', targetLanguages);
 
     const translations = await translateText(requestText, targetLanguages);
 

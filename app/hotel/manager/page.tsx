@@ -178,6 +178,17 @@ export default function ManagerPortal() {
     }
   };
 
+  const formatJoinedDate = (dateString?: any) => {
+    if (!dateString) return 'Recently';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Recently';
+      return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch (e) {
+      return 'Recently';
+    }
+  };
+
   if (isAccountSuspended && !loading) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
@@ -504,7 +515,7 @@ export default function ManagerPortal() {
                     </div>
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-slate-500 font-bold uppercase tracking-tighter text-[11px]">Joined</span>
-                      <span className="text-slate-900 dark:text-white font-black">{managerInfo?.createdAt ? new Date(managerInfo.createdAt).toLocaleDateString() : 'N/A'}</span>
+                      <span className="text-slate-900 dark:text-white font-black">{formatJoinedDate(managerInfo?.createdAt)}</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-slate-500 font-bold uppercase tracking-tighter text-[11px]">Language</span>

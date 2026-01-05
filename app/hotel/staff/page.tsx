@@ -170,6 +170,17 @@ export default function StaffPortal() {
     }
   };
 
+  const formatJoinedDate = (dateString?: any) => {
+    if (!dateString) return 'Recently';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Recently';
+      return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch (e) {
+      return 'Recently';
+    }
+  };
+
   if (isAccountSuspended && !loading) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
@@ -391,7 +402,7 @@ export default function StaffPortal() {
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Joined</span>
                     <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
-                      {staffInfo?.createdAt ? new Date(staffInfo.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'Recently'}
+                      {formatJoinedDate(staffInfo?.createdAt)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
