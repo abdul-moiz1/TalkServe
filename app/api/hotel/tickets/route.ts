@@ -39,11 +39,11 @@ async function translateText(text: string, targetLanguages: string[]): Promise<R
     console.log('Gemini raw response:', responseText);
     const parsed = JSON.parse(jsonStr);
     // Ensure we return exactly what's expected: Record<string, string>
-    const result: Record<string, string> = {};
+    const translationsResult: Record<string, string> = {};
     for (const [key, value] of Object.entries(parsed)) {
-      result[key.toLowerCase()] = String(value);
+      translationsResult[key.toLowerCase()] = String(value);
     }
-    return result;
+    return translationsResult;
   } catch (error) {
     console.error('Gemini translation error:', error);
     return {};
