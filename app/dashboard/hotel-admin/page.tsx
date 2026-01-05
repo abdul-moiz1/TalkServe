@@ -431,7 +431,7 @@ export default function HotelAdminPage() {
                   type="tel"
                   value={invitePhone}
                   onChange={(e) => setInvitePhone(e.target.value)}
-                  placeholder="+92 3107320707"
+                  placeholder="+966 50 123 4567"
                   className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400"
                   required={!inviteEmail}
                 />
