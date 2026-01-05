@@ -130,10 +130,6 @@ export async function DELETE(
     // 1. Delete from Firestore
     await db.collection('businesses').doc(businessId).collection('members').doc(memberId).delete();
 
-    // 2. Delete from Firebase Auth (Optional: keep auth user but remove business link)
-    // For a cleaner "hotel management" experience, we usually just remove the link in Firestore
-    // unless you want to fully delete the account. Let's stick to Firestore deletion for now.
-
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error removing member:', error);

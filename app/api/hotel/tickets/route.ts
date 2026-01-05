@@ -73,14 +73,8 @@ export async function GET(request: NextRequest) {
     const userRole = memberData?.role;
     const userDepartment = memberData?.department;
 
-    // RBAC: Check portal access
-    const pathname = request.nextUrl.pathname;
-    if (pathname.includes('/hotel/staff') && userRole !== 'staff') {
-       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-    if (pathname.includes('/hotel/manager') && userRole !== 'manager') {
-       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    // RBAC: Staff and Managers only access their own business
+    // Ensure the businessId matches (verified via memberDoc check above)
 
     // Determine which department to filter by
     const filterDept = department || userDepartment;

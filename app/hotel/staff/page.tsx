@@ -61,10 +61,7 @@ export default function StaffPortal() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
-  const [staffInfo, setStaffInfo] = useState<{ fullName: string; phone?: string; createdAt: string; department?: string; status?: string } | null>(null);
-  const [isAccountSuspended, setIsAccountSuspended] = useState(false);
-
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [staffInfo, setStaffInfo] = useState<{ fullName?: string; phone?: string; createdAt?: string; department?: string; status?: string; preferredLanguage?: string } | null>(null);
 
   const businessId = searchParams.get('businessId');
 
@@ -82,14 +79,30 @@ export default function StaffPortal() {
     }
 
     fetchData();
+    fetchStaffData();
   }, [user, authLoading, businessId]);
+
+  const fetchStaffData = async () => {
+    try {
+      const idToken = await user?.getIdToken();
+      const response = await fetch(`/api/hotel/team/${user?.uid}?businessId=${businessId}`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setStaffInfo(data.member);
+      }
+    } catch (err) {
+      console.error('Error fetching staff info:', err);
+    }
+  };
 
   const fetchData = async () => {
     try {
       const idToken = await user?.getIdToken();
       const headers = { Authorization: `Bearer ${idToken}` };
 
-      // First check staff info and status
+      // Get staff info and status
       const teamResponse = await fetch(`/api/hotel/team?businessId=${businessId}`, { headers });
       const teamData = await teamResponse.json();
       
@@ -101,12 +114,9 @@ export default function StaffPortal() {
             router.push('/auth/staff-login');
             return;
           }
-          setStaffInfo(info);
           userDept = info.department || '';
-          console.log('Staff status:', info.status);
           // Check if account is inactive
           if (info.status === 'inactive') {
-            console.log('Account suspended detected');
             setIsAccountSuspended(true);
             setLoading(false);
             return;

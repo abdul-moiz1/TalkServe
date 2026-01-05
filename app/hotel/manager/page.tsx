@@ -56,25 +56,42 @@ export default function ManagerPortal() {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [isAccountSuspended, setIsAccountSuspended] = useState(false);
 
-  const businessId = searchParams.get('businessId');
-  const department = searchParams.get('department') || localStorage.getItem('userDepartment') || '';
+    const [managerInfo, setManagerInfo] = useState<{ fullName?: string; phone?: string; createdAt?: string; department?: string; status?: string; preferredLanguage?: string } | null>(null);
 
-  useEffect(() => {
-    if (authLoading) return;
-    if (!user) {
-      router.push('/auth/staff-login');
-      return;
-    }
+    const businessId = searchParams.get('businessId');
+    const department = searchParams.get('department') || localStorage.getItem('userDepartment') || '';
 
-    if (!businessId) {
-      setError('No business selected. Please use the direct link provided by your administrator.');
-      setLoading(false);
-      return;
-    }
+    useEffect(() => {
+      if (authLoading) return;
+      if (!user) {
+        router.push('/auth/staff-login');
+        return;
+      }
 
-    console.log('Current Business ID:', businessId);
-    fetchData();
-  }, [user, authLoading, businessId, department]);
+      if (!businessId) {
+        setError('No business selected. Please use the direct link provided by your administrator.');
+        setLoading(false);
+        return;
+      }
+
+      fetchData();
+      fetchManagerData();
+    }, [user, authLoading, businessId, department]);
+
+    const fetchManagerData = async () => {
+      try {
+        const idToken = await user?.getIdToken();
+        const response = await fetch(`/api/hotel/team/${user?.uid}?businessId=${businessId}`, {
+          headers: { Authorization: `Bearer ${idToken}` },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setManagerInfo(data.member);
+        }
+      } catch (err) {
+        console.error('Error fetching manager info:', err);
+      }
+    };
 
   const fetchData = async () => {
     try {
@@ -477,17 +494,17 @@ export default function ManagerPortal() {
                   <div className="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center mx-auto mb-4 shadow-xl shadow-blue-200 dark:shadow-none">
                     <span className="text-white text-3xl font-black">{user?.displayName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}</span>
                   </div>
-                  <h2 className="text-xl font-black text-slate-900 dark:text-white">{user?.displayName || 'Manager'}</h2>
-                  <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">{department} Manager</p>
+                  <h2 className="text-xl font-black text-slate-900 dark:text-white">{managerInfo?.fullName || user?.displayName || 'Manager'}</h2>
+                  <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">{managerInfo?.department || department} Manager</p>
                   
                   <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700 space-y-4 max-w-sm mx-auto">
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-slate-500 font-bold uppercase tracking-tighter text-[11px]">Phone</span>
-                      <span className="text-slate-900 dark:text-white font-black">{user?.phoneNumber || 'N/A'}</span>
+                      <span className="text-slate-900 dark:text-white font-black">{managerInfo?.phone || 'N/A'}</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-slate-500 font-bold uppercase tracking-tighter text-[11px]">Joined</span>
-                      <span className="text-slate-900 dark:text-white font-black">{user?.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : 'N/A'}</span>
+                      <span className="text-slate-900 dark:text-white font-black">{managerInfo?.createdAt ? new Date(managerInfo.createdAt).toLocaleDateString() : 'N/A'}</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-slate-500 font-bold uppercase tracking-tighter text-[11px]">Language</span>
