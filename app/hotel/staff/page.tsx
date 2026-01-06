@@ -142,7 +142,10 @@ export default function StaffPortal() {
     }
   };
 
+  const [syncing, setSyncing] = useState(false);
+
   const handleUpdateStatus = async (ticketId: string, status: string) => {
+    if (syncing) return;
     setSyncing(true);
     try {
       // Optimistic update
@@ -298,6 +301,7 @@ export default function StaffPortal() {
                               </div>
                               <p className="text-slate-900 dark:text-white font-bold text-sm truncate">
                                 {(task as any).translations?.[(staffInfo?.preferredLanguage || 'en').toLowerCase()] || 
+                                 (task as any).translations?.[(staffInfo?.preferredLanguage || 'en')] ||
                                  (task as any).translations?.es || 
                                  (task as any).translations?.ar ||
                                  (task as any).translations?.spanish ||

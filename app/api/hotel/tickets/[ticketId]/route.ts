@@ -14,6 +14,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const body = await request.json();
     const { businessId, status, assignedTo, priority, notes } = body;
 
+    console.log('Update Ticket API:', { ticketId, businessId, status });
+
     if (!businessId || !ticketId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
